@@ -1,19 +1,22 @@
 {
   "expo": {
-    "name": "tenaly-mobile-app",
-    "slug": "tenaly-mobile-app",
+    "name": "Tenaly",
+    "slug": "Tenaly",
+    "description": "A mobile app for Tenaly",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/tenalySplash.svg",
+    "backgroundColor": "#FFFFFF",
     "scheme": "tenalymobileapp",
     "userInterfaceStyle": "automatic",
+    
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/tenalySplash.svg",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
@@ -28,10 +31,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/tenalySplash.svg",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#FFFFFF"
         }
       ]
     ],

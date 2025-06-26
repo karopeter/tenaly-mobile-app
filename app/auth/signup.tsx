@@ -11,73 +11,52 @@ import {
   } from 'react-native';
   import Input from '../components/Input';
   import { useRouter } from 'expo-router';
+  import { Formik } from 'formik';
   import Icon from 'react-native-vector-icons/Ionicons';
   import GradientButton from '../components/GradientButton/GradientButton';
   import DividerWithText from '../components/DividerLine/DividerWithText';
+import { signUpSchema } from '../utils/validation';
 
   const { width } = Dimensions.get('window');
 
+  interface SignUpFormValues {
+    email: string;
+    fullName: string;
+    phoneNumber: string;
+    password: string;
+  }
+
+  const initialValues: SignUpFormValues = {
+    email: '',
+    fullName: '',
+    phoneNumber: '',
+    password: ''
+  };
+
 const SignUp: React.FC = () => {
-  const router = useRouter();
-   const [email, setEmail] = useState<string>('');
-   const [fullName, setFullName] = useState<string>('');
-   const [phoneNumber, setPhoneNumber] = useState<string>('');
-   const [password, setPassword] = useState<string>('');
-   const [showPassword, setShowPassword] = useState<boolean>(false);
-   const [loading, setLoading] = useState<boolean>(false);
-   const [errors, setErrors] = useState({
-     fullName: '',
-     email: '',
-     phoneNumber: '',
-     password: ''
-   })
+     const router = useRouter();
+     const [email, setEmail] = useState<string>('');
+     const [fullName, setFullName] = useState<string>('');
+     const [phoneNumber, setPhoneNumber] = useState<string>('');
+     const [password, setPassword] = useState<string>('');
+     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
-   const handleSignUp = () => {
-    let valid = true;
-    const newErrors = {
-      fullName: '',
-      email: '',
-      phoneNumber: '',
-      password: '',
-    };
 
-    if (!fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
-      valid = false;
-    }
-
-    if (!email.trim()) {
-       newErrors.email = 'Email is required';
-       valid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-      valid = false;
-    }
-
-    if (!phoneNumber.trim()) {
-       newErrors.phoneNumber = 'Phone number is required';
-       valid = false;
-    } else if (!/^\d{10,15}$/.test(phoneNumber)) {
-      newErrors.phoneNumber = 'Phone number is invalid';
-      valid = false;
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required';
-      valid = false;
-    }
-
-    setErrors(newErrors);
-
-    if (valid) {
+   const handleSignUp = async (values: SignUpFormValues) => {
       setLoading(true);
-      // Simulate API Call or replace with real signup logic
 
-      setTimeout(() => {
-        alert('Sign up successful');
-        setLoading(false);
-      }, 1500);
-    }
+      try {
+         console.log('Submitted values:', values);
+         // Simulate API call
+         setTimeout(() => {
+          alert('Sign up successful');
+          router.push('/auth/login');
+         }, 1500);
+      } catch (err) {
+         alert('Something went wrong');
+         setLoading(false)
+      }
    };
 
     return (
@@ -104,11 +83,17 @@ const SignUp: React.FC = () => {
       
       <ScrollView
          keyboardShouldPersistTaps="handled"
-         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center'}}
-         className="flex-1"
-         >
-        <View 
-          className="bg-white rounded-t-lg px-4 pt-6 pb-8 mx-auto"
+         contentContainerStyle={{ 
+            flexGrow: 1, 
+            justifyContent: 'center'
+          }}>
+         <Formik
+           initialValues={initialValues}
+           validationSchema={signUpSchema}
+           onSubmit={handleSignUp}>
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+           <View 
+          className="bg-white rounded-t-lg px-4 pt-6 pb-8 mx-auto mt-2"
            style={{
              width: '90%',
              maxWidth: 400,
@@ -126,36 +111,44 @@ const SignUp: React.FC = () => {
               <Input 
                label="Full Name"
               placeholder="Enter your first and last name"
-              value={fullName}
-              onChangeText={setFullName}
+              value={values.fullName}
+              onChangeText={handleChange('fullName')}
+              onBlur={() => handleBlur('fullName')}
               error={errors.fullName}
+              touched={touched.fullName}
              />
 
              <Input 
                label="Email"
                placeholder="Enter your email"
-               value={email}
-               onChangeText={setEmail}
+               value={values.email}
+               onChangeText={handleChange('email')}
+               onBlur={() => handleBlur('email')}
                keyboardType="email-address"
                autoCapitalize="none"
                error={errors.email}
+               touched={touched.email}
              />
 
             <Input 
               label="Phone Number"
               placeholder="+234 | Enter your phone number"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              value={values.phoneNumber}
+              onChangeText={handleChange('phoneNumber')}
+              onBlur={() => handleBlur('phoneNumber')}
               error={errors.phoneNumber}
+              touched={touched.phoneNumber}
             />
 
             <Input 
               label="Password"
               placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
+              value={values.password}
+              onChangeText={handleChange('password')}
+              onBlur={() => handleBlur('password')}
               secureTextEntry={!showPassword}
               error={errors.password}
+              touched={touched.password}
               rightIcon={
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                    <Icon 
@@ -166,11 +159,14 @@ const SignUp: React.FC = () => {
                 </TouchableOpacity>
               }
             />
+
+
+            {/* {touched && errors && <Text className="text-red-500 text-sm mt-1">{errors}</Text>} */}
            
            <GradientButton 
             title={loading ? 'Signing Up...' : 'Sign Up'}
-            onPress={handleSignUp}
-            disabled={loading || !email || !fullName || !phoneNumber || !password}
+            disabled={loading || (!values.email) || (!values.fullName) || (!values.phoneNumber) || (!values.password)}
+            onPress={handleSubmit}
            />
           <View className="mt-2">
             <Text className="text-[#868686] text-center text-[12px] font-[400]">
@@ -199,7 +195,9 @@ const SignUp: React.FC = () => {
               </TouchableOpacity>
             </View>
          </View>
-        </View>
+          </View>
+          )}
+         </Formik>
           <View 
               className="bg-[#DFDFF9] rounded-b-lg px-4 py-3 mx-auto"
               style={{

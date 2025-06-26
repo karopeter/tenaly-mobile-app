@@ -4,6 +4,7 @@ export interface InputProps {
     placeholder: string;
     value: string;
     onChangeText: (text: string) => void;
+    onBlur: () => void;
     error?: string;
     secureTextEntry?: boolean;
     keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
@@ -11,4 +12,5 @@ export interface InputProps {
     containerClassName?: string;
     inputClassName?: string;
     rightIcon?: React.ReactNode;
+    touched?: boolean;
 }

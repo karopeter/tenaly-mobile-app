@@ -12,6 +12,7 @@ const Input: React.FC<InputProps> = ({
   placeholder,
   value,
   onChangeText,
+  onBlur,
   error,
   secureTextEntry = false,
   keyboardType = 'default',
@@ -19,6 +20,7 @@ const Input: React.FC<InputProps> = ({
   containerClassName = '',
   inputClassName = '',
   rightIcon,
+  touched = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -30,21 +32,23 @@ const Input: React.FC<InputProps> = ({
         {/* Floating Label */}
         {label && (
           <Text
-  className={`
-    absolute z-10 left-3 px-1 bg-[#F8F8F8] 
-    ${
-      isFocused || hasValue
-        ? 'top-[10px] text-[11px] text-blue-600'
-        : 'top-[5px] text-[14px] text-gray-500'
-    }
-  `}
->
-  {label}
-</Text>
-        )}
+           className={`
+          absolute z-10 left-3 px-1 bg-[#F8F8F8] 
+           ${
+             isFocused || hasValue
+           ? 'top-[10px] text-[11px] text-blue-600'
+           : 'top-[5px] text-[14px] text-gray-500'
+          }
+       `}>
+       {label}
+      </Text>
+      )}
 
         {/* Input Field Container */}
-        <View className="flex-row items-center border border-[#CDCDD7] rounded-[4px] w-full bg-white">
+        <View 
+          className="flex-row items-center border 
+          border-[#CDCDD7] 
+          rounded-[4px] w-full bg-transparent">
           <TextInput
             placeholder={(isFocused || hasValue) ? '' : placeholder} // Prevents overlap
             placeholderTextColor="#CDCDD7"
@@ -54,7 +58,7 @@ const Input: React.FC<InputProps> = ({
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onBlur={onBlur}
             className={`
               flex-1 pt-4 pb-2 px-4 text-[14px] h-[52px] rounded-[4px]
               ${error ? 'border-red-500' : ''}
@@ -70,7 +74,9 @@ const Input: React.FC<InputProps> = ({
       </View>
 
       {/* Error Message */}
-      {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
+      {touched && error && (
+        <Text className="text-red-500 text-sm mt-1">{error}</Text>
+      )}
     </View>
   );
 };

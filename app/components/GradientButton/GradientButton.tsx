@@ -2,7 +2,6 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
 interface GradientButtonProps {
     title: string;
     onPress: () => void;
@@ -42,8 +41,8 @@ const GradientButton: React.FC<GradientButtonProps> = ({
                     }}
                 />
                )}
-            <Text className={`font-bold text-center text-white font-[400] text-[12px] ${
-               disabled ? 'text-[#CDCDD7]' :  ''
+            <Text className={`font-bold text-center font-[400] text-[12px] ${
+               disabled ? 'text-[#CDCDD7]' :  'text-white'
             }`}>
             {title}</Text>
         </View>

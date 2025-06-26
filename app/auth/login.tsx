@@ -8,14 +8,17 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
-
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 import Input from '../components/Input';
 import Icon from 'react-native-vector-icons/Ionicons';
 import GradientButton from '../components/GradientButton/GradientButton';
 import { useRouter } from 'expo-router';
 import TabButtons, { TabButtonType } from '../components/TabButton';
 import DividerWithText from '../components/DividerLine/DividerWithText';
+import { loginSchema } from '../utils/validation';
 
 const { width } = Dimensions.get('window');
 
@@ -25,12 +28,26 @@ export enum CustomTab {
   Phone,
 }
 
+interface LoginFormValues {
+  email: string;
+  phoneNumber: string;
+  password: string;
+  selectedTab?: number; 
+}
+
+const initialValues: LoginFormValues = {
+  email: '',
+  phoneNumber: '',
+  password: '',
+  selectedTab: CustomTab.Email
+};
+
+
+
 const Login = () => {
   const [selectedTab, setSelectedTab] = useState<CustomTab>(CustomTab.Email);
-  const [email, setEmail] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const buttons: TabButtonType[] = [
@@ -38,12 +55,49 @@ const Login = () => {
     { title: 'Phone Number' },
   ];
 
-  const handleLogin = () => {
-    if (selectedTab === CustomTab.Email && email && password) {
-      alert('Logging in with Email');
-    } else if (selectedTab === CustomTab.Phone && phoneNumber && password) {
-      alert('Logging in with Phone');
-    }
+  const handleLogin = async (values: LoginFormValues) => {
+     try {
+      // set loading state 
+      setLoading(true);
+       
+      const { email, phoneNumber, password, selectedTab } = values;
+
+      // Prepare request body based on tab 
+      const isEmaillogin = selectedTab === CustomTab.Email;
+      const payload = { 
+        [isEmaillogin ? 'email' : 'phoneNumber']: isEmaillogin ? email : phoneNumber,
+        password
+      };
+
+      console.log('Submitting:', payload);
+
+      // URL endpoints 
+       const response = await fetch('',  {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    // Simulate network delay 
+    setTimeout(async () => {
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
+      }
+
+      // Login successful 
+      console.log('Login Success:', result);
+      setLoading(false);
+      // router.push('/');
+    }, 1000);
+     } catch (err: any) {
+        setLoading(false);
+        Alert.alert('Login failed', err.message || 'Invalid credentials. Please try again.');
+        console.error('Login Error:', err.message);
+     }
   };
 
   return (
@@ -70,8 +124,15 @@ const Login = () => {
         </View>
       </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1 }}>
-        <View
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+        <Formik
+           initialValues={initialValues}
+           validationSchema={loginSchema}
+           onSubmit={handleLogin}
+         >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <>
+         <View
           className="bg-white rounded-t-lg px-4 pt-6 pb-8 mx-auto mt-2"
           style={{
             width: '90%',
@@ -102,18 +163,23 @@ const Login = () => {
               <Input
                 label="Email"
                 placeholder="Enter your email"
-                value={email}
-                onChangeText={setEmail}
+                value={values.email}
+                onChangeText={handleChange('email')}
+                onBlur={() => handleBlur('email')}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                error={touched.email ? errors.email : undefined}
+                touched={touched.email}
               />
 
               <Input
                 label="Password"
                 placeholder="Enter your password"
-                value={password}
-                onChangeText={setPassword}
+                value={values.password}
+                onChangeText={handleChange('password')}
+                onBlur={() => handleBlur('password')}
                 secureTextEntry={!showPassword}
+                touched={touched.password}
                 rightIcon={
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                     <Icon
@@ -128,7 +194,9 @@ const Login = () => {
              {/* Forgot Password Text */}
             <View className="ml-1 flex-row flex-wrap">
               <Text className="text-[#868686] text-sm">Forgot Password?</Text>
-               <TouchableOpacity className="ml-1 rounded-full" activeOpacity={0.7}>
+               <TouchableOpacity 
+                onPress={() => router.push('/auth/forgot-password')}
+                 className="ml-1 rounded-full" activeOpacity={0.7}>
                 <Text className="text-[#00A8DF] text-sm font-medium underline">Reset</Text>
              </TouchableOpacity>
             </View>
@@ -140,16 +208,22 @@ const Login = () => {
               <Input
                 label="Phone Number"
                 placeholder="+234 | Enter your phone number"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                value={values.phoneNumber}
+                onChangeText={handleChange('phoneNumber')}
+                onBlur={() => handleBlur('phoneNumber')}
+                error={touched.phoneNumber ? errors.phoneNumber : undefined}
+                touched={touched.phoneNumber}
               />
 
               <Input
                 label="Password"
                 placeholder="Enter your password"
-                value={password}
-                onChangeText={setPassword}
+                value={values.password}
+                onChangeText={handleChange('password')}
+                onBlur={() => handleBlur('password')}
                 secureTextEntry={!showPassword}
+                error={touched.password ? errors.password : undefined}
+                touched={touched.password}
                 rightIcon={
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                     <Icon
@@ -164,7 +238,9 @@ const Login = () => {
              {/* Forgot Password Text */}
             <View className="ml-1 flex-row flex-wrap">
               <Text className="text-[#868686] text-sm">Forgot Password?</Text>
-               <TouchableOpacity className="ml-1 rounded-full" activeOpacity={0.7}>
+               <TouchableOpacity 
+                onPress={() => router.push('/auth/forgot-password')}
+                className="ml-1 rounded-full" activeOpacity={0.7}>
                 <Text className="text-[#00A8DF] text-sm font-medium underline">Reset</Text>
              </TouchableOpacity>
             </View>
@@ -177,9 +253,9 @@ const Login = () => {
             title="Sign In"
             onPress={handleLogin}
             disabled={
-              (selectedTab === CustomTab.Email && !email) ||
-              (selectedTab === CustomTab.Phone && !phoneNumber) ||
-              !password
+              (selectedTab === CustomTab.Email && (!values.email || !values.password)) ||
+              (selectedTab === CustomTab.Phone && (!values.phoneNumber)) ||
+              (!values.password)
             }
           />
 
@@ -202,8 +278,11 @@ const Login = () => {
                 />
                  <Text className="text-[#525252] text-[16px] font-[500]">Google</Text>
             </TouchableOpacity>
+            </View>
           </View>
-        </View>
+            </>
+          )}
+        </Formik>
          {/* Bottom Sign Up Link */}
       <View
         className="bg-[#DFDFF9] rounded-b-lg px-4 py-3 mx-auto"

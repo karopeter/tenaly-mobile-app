@@ -14,6 +14,10 @@ export const signUpSchema = Yup.object().shape({
     password: Yup.string()
       .min(6, 'Password must be at least 6 characters')
       .required('Password is required'),
+    passwordConfirm: Yup.string()
+        .oneOf([Yup.ref('password')], 'Passwords must match')
+        .required('Please confirm your password'),
+    roleSelection: Yup.string().oneOf(['customer', 'seller']).required('Please select an option'),
 });
 
 

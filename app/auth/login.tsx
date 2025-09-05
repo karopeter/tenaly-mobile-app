@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,13 @@ import Input from '../components/Input';
 import Icon from 'react-native-vector-icons/Ionicons';
 import GradientButton from '../components/GradientButton/GradientButton';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../context/AuthContext';
+import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
+import { showErrorToast, showSuccessToast } from '../utils/toast';
+import apiClient from '../utils/apiClient';
+import { AuthResponse } from '../types/auth.d';
+import { loginInitialValues } from '../types/formHelper';
 import TabButtons, { TabButtonType } from '../components/TabButton';
 import DividerWithText from '../components/DividerLine/DividerWithText';
 import { loginSchema } from '../utils/validation';
@@ -28,77 +35,115 @@ export enum CustomTab {
   Phone,
 }
 
-interface LoginFormValues {
-  email: string;
-  phoneNumber: string;
-  password: string;
-  selectedTab?: number; 
-}
-
-const initialValues: LoginFormValues = {
-  email: '',
-  phoneNumber: '',
-  password: '',
-  selectedTab: CustomTab.Email
-};
-
-
 
 const Login = () => {
-  const [selectedTab, setSelectedTab] = useState<CustomTab>(CustomTab.Email);
+  //const [selectedTab, setSelectedTab] = useState<CustomTab>(CustomTab.Email);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const { signIn } = useAuth();
 
   const buttons: TabButtonType[] = [
     { title: 'Email' },
     { title: 'Phone Number' },
   ];
 
-  const handleLogin = async (values: LoginFormValues) => {
+    // Google Auth Setup
+  const redirectUri = makeRedirectUri({
+    native: 'https://auth.expo.io/@karopeter/tenaly-mobile',
+  });
+
+
+
+    const [request, response, promptAsync] = Google.useAuthRequest(
+    {
+       androidClientId: '1002797729859-3a0ldqk5j14ugthoga4esjinnh4u3g00.apps.googleusercontent.com',
+       iosClientId: '1002797729859-s2nujipbjpve2eg857leinnoe33aisqo.apps.googleusercontent.com',
+      webClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
+      scopes: ['profile', 'email'],
+    },
+    { redirectUri }
+  );
+
+  // Handle Google response 
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      if (id_token) handleGoogleAuth(id_token);
+    } else if (response?.type === 'error') {
+      showErrorToast("Google login failed:" + (response.error ?? 'Unknown error'));
+    }
+  }, [response]);
+
+  const handleGoogleAuth = async (googleToken: string) => {
+     setLoading(true);
+
      try {
-      // set loading state 
-      setLoading(true);
-       
-      const { email, phoneNumber, password, selectedTab } = values;
-
-      // Prepare request body based on tab 
-      const isEmaillogin = selectedTab === CustomTab.Email;
-      const payload = { 
-        [isEmaillogin ? 'email' : 'phoneNumber']: isEmaillogin ? email : phoneNumber,
-        password
-      };
-
-      console.log('Submitting:', payload);
-
-      // URL endpoints 
-       const response = await fetch('',  {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await response.json();
-
-    // Simulate network delay 
-    setTimeout(async () => {
-      if (!response.ok) {
-        throw new Error(result.message || 'Login failed');
+      if(!apiClient) {
+        showErrorToast('API client is not initialized. Please try again later.');
+        return;
       }
 
-      // Login successful 
-      console.log('Login Success:', result);
+      const res = await apiClient.post('/api/auth/google', { token: googleToken });
+        const { data }: { data: AuthResponse } = res;
+        await signIn(data);
+        showSuccessToast('Google Authentication logged in successfully!');
+
+        // Redirect based on role 
+        if (data.isNewGoogleUser || !data.profileComplete) {
+          // router.push('/auth/complete-profile')
+        } else {
+          if (data.user.role === 'seller') {
+            router.replace('/protected/settings')   
+          } else {
+            router.replace('/protected/home');
+          }
+        }
+     } catch(err: any) {
+       const errorMessage =
+              err.response?.data?.message ||
+              err.message ||
+              'An unknown error occurred';
+      
+            console.error('Google Signup error:', errorMessage);
+            showErrorToast(errorMessage);
+     } finally {
       setLoading(false);
-      // router.push('/');
-    }, 1000);
-     } catch (err: any) {
-        setLoading(false);
-        Alert.alert('Login failed', err.message || 'Invalid credentials. Please try again.');
-        console.error('Login Error:', err.message);
      }
-  };
+  }
+  
+
+  const handleLogin = async (values: any) => {
+  setLoading(true);
+  try {
+    if (!apiClient) {
+      showErrorToast('API client not initialized.');
+      return;
+    }
+
+    const res = await apiClient.post('/api/auth/login', {
+      login: values.login.trim(),
+      password: values.password,
+    });
+
+    const { data }: { data: AuthResponse } = res;
+    await signIn(data);
+    showSuccessToast('Login successful! 🎉 Welcome back!');
+
+    // Redirect based on role 
+    if (data.user.role === 'seller') {
+      router.replace('/protected/settings');
+    } else {
+      router.replace('/protected/home');
+    }
+  } catch (err: any) {
+    const msg = err.response?.data?.message || err.message || 'Invalid credentials';
+    showErrorToast(msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView
@@ -126,11 +171,11 @@ const Login = () => {
 
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
         <Formik
-           initialValues={initialValues}
+           initialValues={loginInitialValues}
            validationSchema={loginSchema}
            onSubmit={handleLogin}
          >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
             <>
          <View
           className="bg-white rounded-t-lg px-4 pt-6 pb-8 mx-auto mt-2"
@@ -151,25 +196,32 @@ const Login = () => {
           {/* Tabs */}
            <TabButtons
              buttons={buttons}
-             selectedTab={selectedTab}
-             setSelectedTab={setSelectedTab}
+             selectedTab={values.selectedTab}
+             setSelectedTab={(index) => {
+               setFieldValue('selectedTab', index);
+               setFieldValue('login', '');
+             }}
             />
 
           <View className="mt-2" />
 
           {/* Conditional Inputs */}
-          {selectedTab === CustomTab.Email && (
+          {values.selectedTab === CustomTab.Email && (
             <>
-              <Input
-                label="Email"
-                placeholder="Enter your email"
-                value={values.email}
-                onChangeText={handleChange('email')}
-                onBlur={() => handleBlur('email')}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                error={touched.email ? errors.email : undefined}
-                touched={touched.email}
+             <Input
+               label={values.selectedTab === CustomTab.Email ? 'Email' : 'Phone Number'}
+                placeholder={
+                values.selectedTab === CustomTab.Email
+                 ? 'Enter your email'
+                 : '+234 | Enter your phone number'
+               }
+               value={values.login}
+               onChangeText={handleChange('login')}
+               onBlur={() => handleBlur('login')}
+               keyboardType={values.selectedTab === CustomTab.Email ? 'email-address' : 'phone-pad'}
+               autoCapitalize="none"
+               error={touched.login ? errors.login : undefined}
+              touched={touched.login}
               />
 
               <Input
@@ -203,16 +255,16 @@ const Login = () => {
             </>
             )}
 
-          {selectedTab === CustomTab.Phone && (
+          {values.selectedTab === CustomTab.Phone && (
             <>
               <Input
                 label="Phone Number"
                 placeholder="+234 | Enter your phone number"
-                value={values.phoneNumber}
-                onChangeText={handleChange('phoneNumber')}
-                onBlur={() => handleBlur('phoneNumber')}
-                error={touched.phoneNumber ? errors.phoneNumber : undefined}
-                touched={touched.phoneNumber}
+                value={values.login}
+                onChangeText={handleChange('login')}
+                onBlur={() => handleBlur('login')}
+                error={touched.login ? errors.login : undefined}
+                touched={touched.login}
               />
 
               <Input
@@ -250,13 +302,11 @@ const Login = () => {
           {/* Sign In Button */}
           <View className="mt-5" />
           <GradientButton
-            title="Sign In"
-            onPress={handleLogin}
-            disabled={
-              (selectedTab === CustomTab.Email && (!values.email || !values.password)) ||
-              (selectedTab === CustomTab.Phone && (!values.phoneNumber)) ||
-              (!values.password)
-            }
+            title={loading ? 'Signing In...' : 'Sign In'}
+            onPress={async () => {
+              await handleLogin(values);
+            }}
+            disabled={loading || (!values.login) || (!values.password)}
           />
 
           {/* Divider and Social Buttons */}
@@ -267,7 +317,10 @@ const Login = () => {
           <View className="items-center mt-4">
             <TouchableOpacity
               className="bg-transparent border-[1px] border-[#CDCDD7]
-               rounded-[8px] px-4 py-3 flex-row items-center w-full max-w-ws justify-center">
+               rounded-[8px] px-4 py-3 flex-row items-center w-full max-w-ws justify-center"
+                onPress={() => promptAsync()}
+                  disabled={!request || loading}
+               >
                 <Image 
                   source={require('../../assets/images/google-img.png')}
                   style={{

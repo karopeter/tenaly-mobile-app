@@ -1,25 +1,31 @@
 {
   "expo": {
     "name": "Tenaly",
-    "slug": "Tenaly",
+    "slug": "tenaly-mobile",
     "description": "A mobile app for Tenaly",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/tenalySplash.svg",
+    "icon": "./assets/images/tenalySplash.png",
+    "platforms": ["android", "ios"],
     "backgroundColor": "#FFFFFF",
-    "scheme": "tenalymobileapp",
+    "scheme": "tenaly",
     "userInterfaceStyle": "automatic",
-    
+    "assetBundlePatterns": ["**/*"],
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.karopeter531.tenaly"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/tenalySplash.svg",
+        "foregroundImage": "./assets/images/tenalySplash.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.karopeter531.tenaly"
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +37,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/tenalySplash.svg",
+          "image": "./assets/images/tenalySplash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#FFFFFF"
@@ -40,6 +46,13 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "EXPO_PUBLIC_API_URL": "https://api.tenaly.com"
     }
   }
 }
+
+
+
+

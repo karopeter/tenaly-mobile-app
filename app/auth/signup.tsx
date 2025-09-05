@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     View, 
     Text, 
@@ -9,55 +9,175 @@ import {
     ScrollView,
     TouchableOpacity
   } from 'react-native';
+  import * as WebBrowser from 'expo-web-browser';
   import Input from '../components/Input';
   import { useRouter } from 'expo-router';
   import { Formik } from 'formik';
+  import { makeRedirectUri } from 'expo-auth-session';
   import Icon from 'react-native-vector-icons/Ionicons';
   import GradientButton from '../components/GradientButton/GradientButton';
   import DividerWithText from '../components/DividerLine/DividerWithText';
-import { signUpSchema } from '../utils/validation';
+   import { signUpSchema } from '../utils/validation';
+   import apiClient from '../utils/apiClient';
+   import { Dropdown } from '../components/Dropdown/dropdown';
+   import AsyncStorage from '@react-native-async-storage/async-storage';
+   import { AuthResponse } from '../types/auth.d';
+   import { signUpInitialValues } from '../types/formHelper';
+   import { showErrorToast, showSuccessToast } from '../utils/toast';
+   import * as Google from 'expo-auth-session/providers/google';
+   import { useAuth } from '../context/AuthContext';
+
+   WebBrowser.maybeCompleteAuthSession();  // Required for web 
 
   const { width } = Dimensions.get('window');
 
-  interface SignUpFormValues {
-    email: string;
-    fullName: string;
-    phoneNumber: string;
-    password: string;
-  }
-
-  const initialValues: SignUpFormValues = {
-    email: '',
-    fullName: '',
-    phoneNumber: '',
-    password: ''
-  };
-
 const SignUp: React.FC = () => {
      const router = useRouter();
-     const [email, setEmail] = useState<string>('');
-     const [fullName, setFullName] = useState<string>('');
-     const [phoneNumber, setPhoneNumber] = useState<string>('');
-     const [password, setPassword] = useState<string>('');
+     const { signIn } = useAuth();
      const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
+     const [loading, setLoading] = useState<boolean>(false);
 
+   // Dropdown options 
+   const roleOptions = [
+     { label: 'I am Buying', value: 'customer'},
+     { label: 'I am Selling', value: 'seller'}
+   ];
 
-   const handleSignUp = async (values: SignUpFormValues) => {
-      setLoading(true);
+   // Force use of Expo proxy 
+   const redirectUri = makeRedirectUri({
+     native: 'https://auth.expo.io/@karopeter/tenaly-mobile'
+   });
 
-      try {
-         console.log('Submitted values:', values);
-         // Simulate API call
-         setTimeout(() => {
-          alert('Sign up successful');
-          router.push('/auth/login');
-         }, 1500);
-      } catch (err) {
-         alert('Something went wrong');
-         setLoading(false)
+   // Google Auth Setup 
+   const [request, response, promptAsync] = Google.useAuthRequest({
+       androidClientId: '1002797729859-3a0ldqk5j14ugthoga4esjinnh4u3g00.apps.googleusercontent.com',
+     iosClientId: '1002797729859-s2nujipbjpve2eg857leinnoe33aisqo.apps.googleusercontent.com',
+     webClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
+     scopes: ['profile', 'email'],
+     selectAccount: true,
+   },
+   {
+    redirectUri,
+   }
+  );
+
+   // Handle Google response with better error handling
+   useEffect(() => {
+     if (response?.type === 'success') {
+       const { id_token } = response.params;
+       if (id_token) {
+         handleGoogleAuth(id_token);
+       }
+     } else if (response?.type === 'error') {
+       console.error('Google Auth Error:', response);
+       showErrorToast('Google authentication failed. Please try again.');
+       setLoading(false);
+     } else if (response?.type === 'cancel') {
+       console.log('Google Auth Cancelled by user');
+       setLoading(false);
+     }
+   }, [response]);
+
+   const handleGoogleAuth = async (googleToken: string) => {
+     setLoading(true);
+     try {
+       if (!apiClient) {
+        showErrorToast('API client is not initialized. Please try again later.');
+        return;
+       }
+
+       const res = await apiClient.post('/api/auth/google', {
+        token: googleToken,
+       });
+
+      const { data }: { data: AuthResponse } = res;
+
+       await signIn(data);
+      showSuccessToast('Google sign-up successful! Please complete your profile.');
+     
+      // Redirect based on role 
+      if (data.isNewGoogleUser || !data.profileComplete) {
+       // router.push('/auth/complete-profile')
+      } else {
+        if (data.user.role === 'seller') {
+          router.replace('/protected/settings');
+        } else {
+          router.replace('/protected/home');
+        }
       }
+     } catch(err: any) {
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
+
+      console.error('Google Signup error:', errorMessage);
+      showErrorToast(errorMessage);
+     } finally {
+      setLoading(false);
+     }
+   }
+
+   // Google Sign In Handler
+   const handleGoogleSignIn = async () => {
+     try {
+       if (!request) {
+         showErrorToast('Google authentication is not ready. Please try again.');
+         return;
+       }
+       
+       setLoading(true);
+       await promptAsync();
+       // The useEffect will handle the response
+     } catch (error) {
+       console.error('Error initiating Google sign in:', error);
+       showErrorToast('Failed to start Google authentication.');
+       setLoading(false);
+     }
    };
+
+ const handleSignUp = async (values: any) => {
+  if (!apiClient) {
+    showErrorToast('API client is not initialized. Please try again later.');
+    return;
+  }
+   setLoading(true);
+   try {
+    const response = await apiClient.post('/api/auth/signup', {
+      fullName: values.fullName,
+      email: values.email,
+      phoneNumber: values.phoneNumber,
+      password: values.password,
+      passwordConfirm: values.passwordConfirm,
+      role: values.roleSelection,
+    });
+
+    const { data }: { data: AuthResponse } = response;
+
+    await AsyncStorage.setItem('auth_token', data.token);
+    showSuccessToast("Signup successful! 🎉 Welcome to Tenaly!");
+    
+    // Redirect based on role 
+    if (data.user.role === 'seller') {
+      router.replace('/protected/settings');
+    } else {
+      router.replace('/protected/home');
+    }
+   } catch(err: any) {
+      const errorMessage = 
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occured';
+        console.error('Error signing up:', {
+          message: err.message,
+          response: err.response?.data,
+          stack: err.stack
+        });
+        showErrorToast(errorMessage);
+   } finally {
+    setLoading(false);
+   }
+ }
 
     return (
     <KeyboardAvoidingView
@@ -88,18 +208,18 @@ const SignUp: React.FC = () => {
             justifyContent: 'center'
           }}>
          <Formik
-           initialValues={initialValues}
+           initialValues={signUpInitialValues}
            validationSchema={signUpSchema}
            onSubmit={handleSignUp}>
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => 
            <View 
-          className="bg-white rounded-t-lg px-4 pt-6 pb-8 mx-auto mt-2"
-           style={{
-             width: '90%',
-             maxWidth: 400,
-             borderTopLeftRadius: 24,
-             borderTopRightRadius: 24,
-           }}>
+             className="bg-white rounded-t-lg px-4 pt-6 pb-8 mx-auto mt-2"
+             style={{
+               width: '90%',
+               maxWidth: 400,
+               borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+             }}>
             <Text className="text-[#525252] text-center font-[500] text-[18px] mb-5">Welcome to Tenaly</Text> 
             <Text 
               className="text-[#868686] text-[14px] font-normal mb-2"
@@ -160,8 +280,32 @@ const SignUp: React.FC = () => {
               }
             />
 
+            <Input 
+              label="Confirm Password"
+              placeholder="Re-enter your password"
+              value={values.passwordConfirm}
+              onChangeText={handleChange('passwordConfirm')}
+               onBlur={() => handleBlur('passwordConfirm')}
+              secureTextEntry={!showPassword}
+              error={errors.passwordConfirm}
+              touched={touched.passwordConfirm}
+              rightIcon={
+                <TouchableOpacity  onPress={() => setShowPassword(!showPassword)}>
+                   <Icon  name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#6B7280" />
+                </TouchableOpacity>
+              }
+            />
 
-            {/* {touched && errors && <Text className="text-red-500 text-sm mt-1">{errors}</Text>} */}
+            {/* Role Selection Dropdown */}
+            <View className="mb-4">
+              <Dropdown 
+                 label="What would you like to do?"
+                 options={roleOptions}
+                 selectedValue={values.roleSelection}
+                 onValueChange={(value) => setFieldValue('roleSelection', value)}
+                 error={touched.roleSelection && errors.roleSelection ? errors.roleSelection : undefined}
+              />
+            </View>
            
            <GradientButton 
             title={loading ? 'Signing Up...' : 'Sign Up'}
@@ -182,7 +326,10 @@ const SignUp: React.FC = () => {
             <View className="items-center mt-4">
               <TouchableOpacity 
                 className="bg-transparent border-[1px] border-[#CDCDD7]
-                 rounded-[8px] px-4 py-3 flex-row items-center w-full max-w-ws justify-center">
+                 rounded-[8px] px-4 py-3 flex-row items-center w-full max-w-ws justify-center"
+                onPress={handleGoogleSignIn}
+                disabled={!request || loading}
+                >
                  <Image 
                      source={require('../../assets/images/google-img.png')}
                      style={{
@@ -191,12 +338,14 @@ const SignUp: React.FC = () => {
                         marginRight: 8
                      }}
                  />
-                  <Text className="text-[#525252] text-[16px] font-[500]">Google</Text>
+                  <Text className="text-[#525252] text-[16px] font-[500]">
+                    {loading ? 'Connecting...' : 'Google'}
+                  </Text>
               </TouchableOpacity>
             </View>
          </View>
           </View>
-          )}
+          }
          </Formik>
           <View 
               className="bg-[#DFDFF9] rounded-b-lg px-4 py-3 mx-auto"

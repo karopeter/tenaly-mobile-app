@@ -101,7 +101,10 @@ const SplashScreen = () => {
     >
       {currentSlideIndex === slides.length - 1 ? (
         <View style={{ height: 50, flexDirection: 'row' }}>
-          <TouchableOpacity style={[styles.btn]}>
+          <TouchableOpacity 
+            style={[styles.btn]}
+            onPress={() => router.push('/auth/login')}
+            >
             <LinearGradient
               colors={['#00A8DF', '#1031AA']}
               start={{ x: 0, y: 0 }}

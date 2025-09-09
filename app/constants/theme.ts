@@ -29,6 +29,6 @@ export const colors = {
     repRed: '#D7B3B3',
     red: '#CB0D0D',
     blueGrey: '#F7F7FF',
-    greenSuccess: '#E9F4E8'
-
+    greenSuccess: '#E9F4E8',
+    overlayBackground:  'rgba(0,0,0,0.5)'
 }

@@ -17,7 +17,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import apiClient from '@/app/utils/apiClient';
 import { CombinedAd, SellerProfile } from '@/app/types/marketplace';
-import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
+import { showErrorToast } from '@/app/utils/toast';
+import ReportModal from '@/app/reusables/ReportModal';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -29,6 +30,7 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<string>('details');
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [reportVisible, setReportVisible] = useState(false);
 
   // Fetch marketplace ad data
   const fetchAdData = async () => {
@@ -282,10 +284,19 @@ const fetchSellerData = async (sellerId: string) => {
                     <Text style={styles.tipText}>{tip}</Text>
                   </View>
                 ))}
-                <TouchableOpacity style={styles.reportButton}>
+                <TouchableOpacity 
+                  style={styles.reportButton}
+                  onPress={() => setReportVisible(true)}>
                   <Feather name="flag" size={16} color="#DC2626" />
                   <Text style={styles.reportButtonText}>Report this listing</Text>
                 </TouchableOpacity>
+
+                <ReportModal
+                 visible={reportVisible}
+                 onClose={() => setReportVisible(false)}
+                 productId={adId}
+                 onSuccess={() => console.log("Report submitted successfully")}
+                />
               </View>
             </View>
           </View>

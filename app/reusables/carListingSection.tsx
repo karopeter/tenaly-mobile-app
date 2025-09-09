@@ -1,213 +1,183 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  Text,
-  ActivityIndicator,
-  Dimensions,
-} from 'react-native';
+import React from 'react';
+import { View, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import CarCard from './CarCard';
-import { CarListing } from '../types/car';
-import Car1 from "../../assets/images/benz.png";
-
-const { width: screenWidth } = Dimensions.get('window');
-
+import { CombinedAd } from '../types/marketplace';
+import { colors } from '../constants/theme';
 
 const PADDING = 16;
-const ITEM_SPACE = 16;
-const CARD_WIDTH = (screenWidth - PADDING * 2 - ITEM_SPACE) / 2;
+const ITEM_SPACE = 12;
+const screenWidth = 375;
 
 interface CarListingSectionProps {
-  onCarPress?: (car: CarListing) => void;
+  title: string;
+  ads: CombinedAd[];
+  onAdPress: (ad: CombinedAd) => void;
+  onViewAll?: () => void;
+  showViewAll?: boolean;
 }
 
-const CarListingSection: React.FC<CarListingSectionProps> = ({ onCarPress }) => {
-  const [cars, setCars] = useState<CarListing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const CarListingSection: React.FC<CarListingSectionProps> = ({ 
+  title, 
+  ads, 
+  onAdPress, 
+  onViewAll,
+  showViewAll = true 
+}) => {
+  if (ads.length === 0) return null;
 
-  // Mock API fetch - replace with real endpoint
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        setLoading(true);
+  // Helper function to format price
+  const formatPrice = (amount: number | string): string => {
+    const numAmount = typeof amount === 'string' ? parseInt(amount) : amount;
+    if (numAmount >= 1000000) {
+      return `₦${(numAmount / 1000000).toFixed(1)}M`;
+    } else if (numAmount >= 1000) {
+      return `₦${(numAmount / 1000).toFixed(0)}K`;
+    }
+    return `₦${numAmount.toLocaleString()}`;
+  };
 
-        // Mock data for now
-        const mockData: CarListing[] = [
-          {
-            id: '1',
-            price: '₦8,000,000',
-            title: 'Toyota Camry 2.4 XLE',
-            year: 2008,
-            color: 'Blue',
-            description: 'Very clean and sound Toyota, excellent condition. You can co...',
-            location: 'Abule-Egba, Lagos',
-            tags: ['Local Used', 'Automatic'],
-            image: Car1,
-          },
-          {
-            id: '2',
-            price: '₦12,500,000',
-            title: 'Honda Accord 3.5 V6',
-            year: 2015,
-            color: 'White',
-            description: 'Well maintained Honda with low mileage. Excellent interior...',
-            location: 'Ikoyi, Lagos',
-            tags: ['Foreign Used', 'Automatic'],
-            image: Car1,
-          },
-          {
-            id: '3',
-            price: '₦6,200,000',
-            title: 'Nissan Sentra SV',
-            year: 2012,
-            color: 'Silver',
-            description: 'Good condition Nissan with recent service history...',
-            location: 'Surulere, Lagos',
-            tags: ['Local Used', 'Manual'],
-            image: Car1,
-          },
-          {
-            id: '4',
-            price: '₦15,000,000',
-            title: 'Mercedes-Benz C300',
-            year: 2018,
-            color: 'Black',
-            description: 'Luxury sedan in pristine condition. Full service history...',
-            location: 'Victoria Island, Lagos',
-            tags: ['Brand New', 'Automatic'],
-            image: Car1,
-          },
-          {
-            id: '5',
-            price: '₦10,500,000',
-            title: 'Ford Explorer XLT',
-            year: 2019,
-            color: 'Silver',
-            description: 'Spacious and powerful SUV, great for families.',
-            location: 'Lekki, Lagos',
-            tags: ['Foreign Used', 'Automatic'],
-            image: Car1,
-          },
-          {
-            id: '6',
-            price: '₦9,800,000',
-            title: 'Kia Sportage LX',
-            year: 2017,
-            color: 'Gray',
-            description: 'Compact SUV with modern features and fuel efficiency.',
-            location: 'Ikeja, Lagos',
-            tags: ['Local Used', 'Automatic'],
-            image: Car1,
-          },
-        ];
+  // Helper function to get the correct title
+  const getTitle = (ad: CombinedAd): string => {
+    if (ad.vehicleAd) {
+      return `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model}`.trim();
+    }
+    if (ad.propertyAd) {
+      return ad.propertyAd.propertyName || 'Property';
+    }
+    return 'Ad';
+  };
 
-        // Simulate network delay
-        setTimeout(() => {
-          setCars(mockData);
-          setLoading(false);
-        }, 1000);
-      } catch (e) {
-        setError('Failed to load cars');
-        setLoading(false);
-      }
-    };
+  // Helper function to get the correct price
+  const getPrice = (ad: CombinedAd): string => {
+    if (ad.vehicleAd?.amount) {
+      return formatPrice(ad.vehicleAd.amount);
+    }
+    if (ad.propertyAd?.amount) {
+      return formatPrice(ad.propertyAd.amount);
+    }
+    return 'Price on request';
+  };
 
-    fetchCars();
-  }, []);
+  // Helper function to get the correct plan
+  const getPlan = (ad: CombinedAd): string => {
+    if (ad.vehicleAd?.plan) {
+      return ad.vehicleAd.plan;
+    }
+    if (ad.propertyAd?.plan) {
+      return ad.propertyAd.plan;
+    }
+    return 'free';
+  };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
-        <Text style={styles.loadingText}>Loading cars...</Text>
-      </View>
-    );
-  }
+  // Helper function to get the correct description
+  const getDescription = (ad: CombinedAd): string => {
+    if (ad.vehicleAd?.description) {
+      return ad.vehicleAd.description;
+    }
+    if (ad.propertyAd?.description) {
+      return ad.propertyAd.description;
+    }
+    return 'No description available';
+  };
 
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
-
-  const pairedCars = [];
-  for (let i = 0; i < cars.length; i += 2) {
-    pairedCars.push(cars.slice(i, i + 2));
+  // Take only first 4 items for display (2 rows of 2)
+  const displayAds = ads.slice(0, 4);
+  const pairedAds = [];
+  for (let i = 0; i < displayAds.length; i += 2) {
+    pairedAds.push(displayAds.slice(i, i + 2));
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Trending</Text>
-
-      <ScrollView horizontal={false} showsVerticalScrollIndicator={false}>
-        {pairedCars.map((row, rowIndex) => (
+      {/* Section Header */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {showViewAll && (
+          <TouchableOpacity onPress={onViewAll}>
+            <Text style={styles.viewAllText}>View all</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      
+      {/* Cards Grid */}
+      <View style={styles.gridContainer}>
+        {pairedAds.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.rowContainer}>
-            {row.map((car, cardIndex) => (
-              <View
-                key={car.id}
+            {row.map((ad, index) => (
+              <View 
+                key={ad.adId} 
                 style={[
-                  styles.cardWrapper,
-                  cardIndex === 0 ? { marginRight: ITEM_SPACE } : null,
+                  styles.cardWrapper, 
+                  { marginRight: index === 0 ? ITEM_SPACE : 0 }
                 ]}
               >
-                <CarCard {...car} onPress={() => onCarPress?.(car)} />
+                <CarCard
+                  id={ad.adId}
+                  title={getTitle(ad)}
+                  price={getPrice(ad)}
+                  year={ad.vehicleAd?.year}
+                  color={ad.vehicleAd?.color}
+                  description={getDescription(ad)}
+                  location={ad.carAd.location}
+                  tags={[ad.carAd.category]}
+                  image={ad.carAd.vehicleImage?.[0] || ad.carAd.propertyImage?.[0]}
+                  businessName={ad.business.businessName}
+                  profileImage={ad.business.profileImage}
+                  isVerified={ad.business.isVerified}
+                  plan={getPlan(ad) as 'enterprise' | 'diamond' | 'vip' | 'premium' | 'basic' | 'free'}
+                  transmission={ad.vehicleAd?.transmission}
+                  carKeyFeatures={ad.vehicleAd?.carKeyFeatures}
+                  carType={ad.vehicleAd?.carType}
+                   propertyFacilities={ad.propertyAd?.propertyFacilities}
+                    propertyType={ad.propertyAd?.propertyType}
+                   propertyDuration={ad.propertyAd?.propertyDuration}
+                  ownershipStatus={ad.propertyAd?.ownershipStatus}
+                    adType={ad.vehicleAd ? 'vehicle' : 'property'}
+                  onPress={() => onAdPress(ad)}
+                />
               </View>
             ))}
           </View>
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 };
 
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.bg,
     paddingHorizontal: PADDING,
-    paddingTop: 5
+    paddingVertical: 16,
+    marginBottom: 8,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#525252',
+    color: colors.darkGray,
     marginBottom: 16,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.darkBlue,
+  },
+  gridContainer: {
+    gap: ITEM_SPACE,
   },
   rowContainer: {
     flexDirection: 'row',
-    marginBottom: ITEM_SPACE,
+    justifyContent: 'space-between',
   },
   cardWrapper: {
-    width: CARD_WIDTH,
-  },
-  loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#6b7280',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#ef4444',
-    textAlign: 'center',
   },
 });
 

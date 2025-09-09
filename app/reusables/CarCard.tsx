@@ -7,22 +7,37 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
+import { colors } from '../constants/theme';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface CarCardProps {
+  id: string;
   price: string;
   title: string;
-  year: number;
-  color: string;
+  year?: number;
+  color?: string;
   description: string;
   location: string;
+  carKeyFeatures?: string;
+  carType?: string;
+  propertyType?: string;
+  transmission?: string;
+  propertyFacilities?: string;
+  ownershipStatus?: string;
+  propertyDuration?: string;
+  squareMeter?: string;
   tags: string[];
-  image: string;
+  image?: string | null;
+  businessName?: string;
+  profileImage?: string | null;
+  isVerified?: boolean;
+  plan?: 'enterprise' | 'diamond' | 'vip' | 'premium' | 'basic' | 'free';
   onPress?: () => void;
 }
 
 const CarCard: React.FC<CarCardProps> = ({
+  id,
   price,
   title,
   year,
@@ -31,41 +46,107 @@ const CarCard: React.FC<CarCardProps> = ({
   location,
   tags,
   image,
+  carKeyFeatures,
+  carType,
+  propertyType,
+   transmission,
+  propertyFacilities,
+  ownershipStatus,
+  propertyDuration,
+  businessName,
+  squareMeter,
+  profileImage,
+  isVerified = false,
+  plan = 'free',
   onPress,
 }) => {
-  // Calculate responsive width for each card (2 cards per row with gap)
-  const cardWidth = (screenWidth - 32 - 16) / 2; // screenWidth - paddingHorizontal(32) - gap(16)
+  const cardWidth = (screenWidth - 44) / 2; 
+
+  const imageUri = image && typeof image === 'string' && image.trim() !== ''
+    ? { uri: image.trim() }
+    : require('../../assets/images/benz.png'); 
 
   return (
-    <TouchableOpacity 
-      style={[styles.cardContainer, { width: cardWidth }]} 
-      onPress={onPress}
-    >
+    <TouchableOpacity
+       style={[styles.cardContainer, { width: cardWidth }]} 
+       onPress={onPress}>
+      {/* Image & Badges */}
       <View style={styles.imageContainer}>
-        <Image source={typeof image === 'string' ? { uri: image } : image} style={styles.carImage} />
-        <View style={styles.basicBadge}>
-          <Text style={styles.badgeIcon}>⚡</Text>
-          <Text style={styles.badgeText}>Basic</Text>
-        </View>
+        <Image 
+          source={imageUri} 
+          style={styles.carImage}
+           resizeMode="cover"
+         />
+         <View style={styles.basicBadge}>
+              <Image 
+                source={require('../../assets/images/prem.png')}
+                style={styles.badgeIcon}
+              />
+              <Text style={styles.badgeText}>{plan.toUpperCase()}</Text>
+         </View>
       </View>
-      
+
+      {/* Content */}
       <View style={styles.contentContainer}>
+           {/* Price */}
         <Text style={styles.price}>{price}</Text>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.yearColor}>{year} {color}</Text>
-        <Text style={styles.description}>{description}</Text>
-        
+
+         {/* Title */}
+        <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+          {title}
+        </Text>
+
+        {/* Year & Color */}
+        {(year || color) && (
+          <Text style={styles.subtitle}>
+            {year && color ? `${year} • ${color}` : year || color}
+          </Text>
+        )}
+
+        {/* Description */}
+        <Text style={styles.description} numberOfLines={2}>
+          {description}
+        </Text>
+
+        {/* Location */}
         <View style={styles.locationContainer}>
-          <Text style={styles.locationIcon}>📍</Text>
-          <Text style={styles.location}>{location}</Text>
+          <Image 
+            source={require('../../assets/images/location.png')}
+            style={{
+              width: 9.33,
+              height:13.33
+            }}
+          />
+          <Text style={styles.location} numberOfLines={1}>
+            {location}
+          </Text>
         </View>
         
-        <View style={styles.tagsContainer}>
-          {tags.map((tag, index) => (
-            <View key={index} style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
+        {/* Fix this style */}
+        <View style={styles.boxContainer}>
+          {carType ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{carType}</Text>
             </View>
-          ))}
+          ): null}
+
+          {propertyType ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{propertyType}</Text>
+            </View>
+          ): null}
+
+          {transmission ? (
+            <View style={styles.localBox}>
+               <Text style={styles.localText}>{transmission}</Text>
+            </View>
+          ): null}
+
+          {propertyDuration ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{propertyDuration}</Text>
+            </View>
+          ): null}
         </View>
       </View>
     </TouchableOpacity>
@@ -74,34 +155,33 @@ const CarCard: React.FC<CarCardProps> = ({
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.bg,
     borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    marginBottom: 12,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.limWhite
   },
   imageContainer: {
     position: 'relative',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     overflow: 'hidden',
+    height: 140,
   },
   carImage: {
     width: '100%',
-    height: 120,
-    resizeMode: 'cover',
+    height: '100%',
   },
-  basicBadge: {
+   basicBadge: {
     position: 'absolute',
-    bottom: 8,
-    left: 8,
-    backgroundColor: '#6366f1',
+    bottom: 0,
+    left: 0,
+    backgroundColor: colors.lightBlue,
     borderRadius: 6,
     paddingVertical: 4,
     paddingHorizontal: 8,
@@ -109,12 +189,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeIcon: {
-    color: '#fff',
+    color: colors.bg,
     fontSize: 12,
-    marginRight: 4,
+    marginRight: 1,
   },
   badgeText: {
-    color: '#fff',
+    color: colors.bg,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  planBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: colors.shadePurple,
+    borderRadius: 4,
+    height: 35,
+    width: 99,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+  },
+  verifiedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: colors.green,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifiedText: {
+    color: colors.bg,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -122,32 +229,33 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   price: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 4,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.blue,
+    marginBottom: 8,
   },
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
-    marginBottom: 2,
+    color: colors.darkGray,
+    marginBottom: 5,
   },
-  yearColor: {
+  localText: {
+     color: colors.darkGray,
+     fontWeight: '500',
+     fontSize: 10,
+     textAlign: "center"
+  },
+  subtitle: {
     fontSize: 12,
-    color: '#6b7280',
+    color: colors.darkShadeGray,
     marginBottom: 6,
-  },
-  description: {
-    fontSize: 11,
-    color: '#6b7280',
-    lineHeight: 16,
-    marginBottom: 8,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
+    gap: 4,
   },
   locationIcon: {
     fontSize: 12,
@@ -155,23 +263,56 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 12,
-    color: '#6b7280',
+    color:  colors.lightShadeGray,
+    flex: 1,
+    fontWeight: '400'
   },
-  tagsContainer: {
+  description: {
+    fontSize: 11,
+    color:  colors.lightShadeGray,
+    lineHeight: 15,
+    textAlign: "left",
+    marginBottom: 12,
+  },
+  businessContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  businessInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  boxContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 6,
+    marginTop: 6,
   },
-  tag: {
-    backgroundColor: '#e5e7eb',
-    borderRadius: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+  contactButton: {
+    backgroundColor: colors.shadePurple,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  tagText: {
+  localBox: {
+   backgroundColor: colors.lightWhite,
+   borderRadius: 6,
+   paddingVertical: 4,
+   paddingHorizontal: 10,
+   alignItems: "center",
+   justifyContent: "center"
+  },
+  localType: {
     fontSize: 10,
-    color: '#6b7280',
+    color: colors.darkShadeGray,
     fontWeight: '500',
+  },
+  contactButtonText: {
+    color: colors.bg,
+    fontSize: 11,
+    fontWeight: '600',
   },
 });
 

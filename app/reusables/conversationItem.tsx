@@ -3,6 +3,8 @@ import {
   View, 
   Text,
   TouchableOpacity,
+  Image,
+  SafeAreaView,
   StyleSheet
 } from 'react-native';
 import { Conversation } from '../types/message';
@@ -17,31 +19,67 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
     conversation,
     onPress,
 }) => {
+  const formatTime = (dateString?: string) => {
+     if (!dateString) return '';
+
+     const date = new Date(dateString);
+     const now = new Date();
+     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+     if (diffInHours < 24) {
+      return date.toLocaleDateString([], { hour: '2-digit', minute: '2-digit' });
+     } else { 
+       return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+     }
+  };
+
+  // Get user display name 
+  const getUserDisplayName = () => {
+     return conversation.otherUser?.fullName || 'Unknown User';
+  };
+
+  // Get User avatar initial
+  const getUserAvatar = () => {
+    return conversation.otherUser?.fullName?.charAt(0)?.toUpperCase() || '?';
+  }
     return (
       <TouchableOpacity
        style={styles.container}
        onPress={() => onPress(conversation)}
       >
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatar}>{conversation.user.avatar}</Text>
-          {conversation.user.online && <View style={styles.onlineIndicator} />}
+         {conversation.otherUser?.image ? (
+            <Image
+              source={{ uri: conversation.otherUser.image }}
+              style={styles.avatarImage}
+            />
+         ): (
+          <View style={styles.avatarPlaceholder}>
+            <Text style={styles.avatarText}>{getUserAvatar()}</Text>
+          </View>
+         )}
+         {/* You can add online indicator based on user status if needed */}
         </View>
 
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.name}>{conversation.user.name}</Text>
-            <Text style={styles.time}>{conversation.time}</Text>
+            <Text style={styles.name}>{getUserDisplayName()}</Text>
+            <Text style={styles.time}>
+              {formatTime(conversation.lastMessageAt)}
+            </Text>
           </View>
           <Text style={styles.message} numberOfLines={1}>
-            {conversation.lastMessage}
+             {conversation.adTitle || 'No messages yet'}
           </Text>
         </View>
 
-        {conversation.unread > 0 && (
+        {/* You can add unread badge if the backend provides  unread count */}
+
+        {/* {conversation.unread > 0 && (
           <View style={styles.unreadBadge}>
              <Text style={styles.unreadText}>{conversation.unread}</Text>
           </View>
-        )}
+        )} */}
       </TouchableOpacity>
     );
 };
@@ -53,20 +91,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     alignItems: 'center',
-    backgroundColor: colors.bg,
+    backgroundColor: colors.offWhite,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.blueRomance
   },
   avatarContainer: {
     position: 'relative',
     marginRight: 15,
   },
-  avatar: {
+  avatarImage: {
+   width: 50,
+   height: 50,
+   borderRadius: 25,
+   backgroundColor: colors.blueRomance
+  },
+  avatarPlaceholder: {
     width: 50,
     height: 50,
-    fontSize: 24,
-    textAlign: 'center',
-    lineHeight: 50,
     borderRadius: 25,
     backgroundColor: colors.blueRomance,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.blackGrey
   },
   onlineIndicator: {
     position: 'absolute',
@@ -90,15 +140,15 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.blackGrey,
+    color: colors.darkGray
   },
   time: {
     fontSize: 12,
-    color: colors.ashGrey,
+    color: colors.darkGray,
   },
   message: {
     fontSize: 14,
-    color: colors.attachBlack,
+    color: colors.darkGray,
   },
   unreadBadge: {
     backgroundColor: colors.skyBlue,

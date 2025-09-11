@@ -5,31 +5,98 @@ import {
      TouchableOpacity,
      StyleSheet,
      Image,
-     Alert
+     Alert,
+     KeyboardAvoidingView,
+     Platform
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { colors } from '../constants/theme';
+import { FileAttachment } from '../types/message';
+import { showErrorToast } from '../utils/toast';
 
 interface MessageInputProps {
-  onSendMessage:  (message: string | { type: 'image' | 'file'; uri: string; name?: string;}) => void,
+  onSendMessage:  (message: string) => void;
+  onSendFile?: (file: FileAttachment) => void;
   placeholder?: string;
   disabled?: boolean;
+  onTyping?: () => void;
+  onStopTyping?: () => void;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
   onSendMessage,
+  onSendFile,
   placeholder = "Type your message",
   disabled = false,
+  onTyping,
+  onStopTyping,
 }) => {
    const [message, setMessage] = useState<string>("");
+   const [typingTimer, setTypingTimer] = useState<NodeJS.Timeout | null>(null);
+   //const [typingTimer, setTypingTimer] = useState<NodeJS.Timeout | null>(null);
 
    const handleSend = () => {
      if (message.trim()) {
         onSendMessage(message.trim());
         setMessage("");
+        onStopTyping?.();
      }
    };
+
+   const handleTextChange = (text: string) => {
+     setMessage(text);
+
+     if (text.length > 0 && onTyping) {
+       onTyping();
+
+
+       if (typingTimer) {
+         clearTimeout(typingTimer);
+       }
+
+       const newTimer = setTimeout(() => {
+         onStopTyping?.();
+       }, 3000);
+
+       //setTypingTimer(newTimer);
+        setTypingTimer(newTimer as unknown as NodeJS.Timeout);
+     } else if (text.length ===  0) {
+        onStopTyping?.();
+     }
+   };
+
+  //  const handlePickImage = async () => {
+  //    try {
+  //      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //      if (status !==  'granted') {
+  //       showErrorToast('Permission required, Camera roll permission is needed to select images.');
+  //       return;
+  //      }
+
+  //      const result = await ImagePicker.launchImageLibraryAsync({
+  //        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //        allowsEditing: true,
+  //        aspect: [4, 3],
+  //        quality: 0.8,
+  //      });
+
+  //      if (!result.canceled && result.assets?.[0] && onSendFile) {
+  //       const asset = result.assets[0];
+  //       onSendFile({
+  //         type: 'image',
+  //         uri: asset.uri,
+  //         name: `image_${Date.now()}.jpg`,
+  //         size: asset.fileSize,
+  //         mimeType: asset.type || 'image/jpeg',
+  //       });
+  //      }
+  //    } catch (error) {
+  //      console.error('Error picking image:', error);
+  //      showErrorToast('Error, Failed to select image');
+  //    }
+  //  };
+
 
    const handlePickImage = async () => {
   try {
@@ -40,14 +107,19 @@ const MessageInput: React.FC<MessageInputProps> = ({
       quality: 1,
     });
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const pickedImage = result.assets[0];
-      console.log("Picked image:", pickedImage.uri);
-    } else {
-      console.log("Image picking cancelled.");
-    }
+    if (!result.canceled && result.assets?.[0] && onSendFile) {
+      const asset = result.assets[0];
+      onSendFile({
+        type: 'image',
+        uri: asset.uri,
+        name: `image_${Date.now()}.jpg`,
+        size: asset.fileSize,
+        mimeType: asset.type || 'image/jpeg',
+      });
+    } 
   } catch (error) {
     console.error("Error picking image:", error);
+    showErrorToast('Failed to select image');
   }
 };
 
@@ -61,17 +133,19 @@ const handlePickDocument = async () => {
     });
 
    
-    if (result.canceled) {
-      console.log("Document picking cancelled.");
-      return;
+    if (!result.canceled && result.assets?.[0] && onSendFile) {
+      const doc = result.assets[0];
+      onSendFile({
+        type: 'file',
+        uri: doc.uri,
+        name: doc.name,
+        size: doc.size,
+        mimeType: doc.mimeType
+      });
     }
-
-    const doc = result.assets[0];
-    console.log("Picked document:", doc.uri);
-    console.log("Document name:", doc.name);
-    console.log("Document size:", doc.size);
   } catch (error) {
     console.error("Error picking document:", error);
+    showErrorToast('Failed to select document');
   }
 };
 
@@ -90,7 +164,11 @@ const handlePickDocument = async () => {
   };
 
    return (
-    <View style={styles.container}>
+     <KeyboardAvoidingView 
+       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+       keyboardVerticalOffset={Platform.OS  === 'ios' ? 90 : 0}
+     >
+       <View style={styles.container}>
       <TouchableOpacity 
          style={styles.attachButton} 
          onPress={handleAttachPress}
@@ -108,14 +186,17 @@ const handlePickDocument = async () => {
          placeholder={placeholder}
          placeholderTextColor="#8C8C8C"
          multiline
-         maxLength={200}
+         maxLength={500}
          editable={!disabled}
          onSubmitEditing={handleSend}
          returnKeyType="send"
        />
 
        <TouchableOpacity
-          style={[styles.sendButton, (!message.trim() || disabled) && styles.sendButtonDisabled]}
+          style={[
+             styles.sendButton, 
+             (!message.trim() || disabled) && styles.sendButtonDisabled
+          ]}
           onPress={handleSend}
           disabled={!message.trim() || disabled}
         >
@@ -125,6 +206,7 @@ const handlePickDocument = async () => {
           />
        </TouchableOpacity>
     </View>
+     </KeyboardAvoidingView>
    );
 };
 

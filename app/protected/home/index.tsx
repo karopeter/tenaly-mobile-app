@@ -178,8 +178,8 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <KeyboardAvoidingView className="flex-1 bg-[#F8F8F8] mt-10 justify-center items-center">
-        <ActivityIndicator size="small" />
-        <Text style={{ marginTop: 8 }}>Loading marketplace...</Text>
+        <ActivityIndicator size="small" color="#1031AA" />
+        <Text style={styles.loadingText}>Loading marketplace...</Text>
       </KeyboardAvoidingView>
     );
   }
@@ -297,6 +297,11 @@ const styles = StyleSheet.create({
     borderColor: colors.shadeWhite, 
     borderTopLeftRadius: 8, 
     borderBottomLeftRadius: 8
+  },
+  loadingText: {
+     marginTop: 10,
+     fontSize: 16,
+     color: colors.darkGray,
   },
   dropdownImage: {
     position: 'absolute', 

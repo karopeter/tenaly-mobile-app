@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import apiClient from "../../utils/apiClient";
 import { useAuth } from "../../context/AuthContext";
 import { showErrorToast } from '@/app/utils/toast';
+import { colors } from '@/app/constants/theme';
 
 const menuItems = [
   { title: "Profile", icon: <Ionicons name="person-outline" size={20} color="#525252" />, route: "/protected/profile" },
@@ -129,14 +130,14 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F8F8",
+    backgroundColor: colors.setGrey,
     padding: 16,
   },
   header: {
     fontSize: 24,
     fontWeight: "500",
     marginBottom: 16,
-    color: "#525252",
+    color: colors.darkGray,
     marginTop: 40,
   },
   loadingContainer: {
@@ -147,10 +148,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#525252'
+    color: colors.darkGray
   },
   profileCard: {
-    backgroundColor: "#E8E8FF",
+    backgroundColor: colors.greyBlue,
     borderRadius: 8,
     padding: 16,
     marginBottom: 20,
@@ -173,16 +174,16 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#525252",
+    color: colors.darkGray,
   },
   profileEmail: {
     fontSize: 14,
-    color: "#868686",
+    color: colors.lightGrey,
     fontWeight: "400",
   },
   separator: {
     borderBottomWidth: 1,
-    borderBottomColor: "#BABAF2",
+    borderBottomColor: colors.greyBlue300,
     marginVertical: 8,
   },
   freePlanContainer: {
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   },
   freePlanText: {
     fontSize: 12,
-    color: "#525252",
+    color: colors.darkGray,
     fontWeight: "500",
     marginLeft: 6,
   },
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: colors.blueRomance,
   },
   menuLeft: {
     flexDirection: "row",
@@ -215,6 +216,6 @@ const styles = StyleSheet.create({
   menuText: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#525252",
+    color: colors.darkGray,
   },
 });

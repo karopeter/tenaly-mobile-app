@@ -11,7 +11,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ActivityIndicator
   } from 'react-native';
 import MessageInput from '@/app/reusables/MessageInput';

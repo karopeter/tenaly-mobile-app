@@ -43,5 +43,10 @@ export const colors = {
     dimGrey: '#ccc',
     darkShadeBlack: '#434854',
     offWhite: '#DDDDDD',
-    bgColor: '#FCFCFC'
+    bgColor: '#FCFCFC',
+    setGrey: '#F8F8F8',
+    greyBlue300: '#BABAF2',
+    blurGrey: '#4D485F1A',
+    grey300: '#8C8C8C',
+    grey600: '#4C4C4C',
 }

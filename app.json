@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.karopeter531.tenaly"
-    },
+    },  
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/tenalySplash.png",

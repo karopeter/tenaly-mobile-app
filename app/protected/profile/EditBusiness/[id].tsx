@@ -177,9 +177,9 @@ export default function EditBusiness() {
 
       console.log('Updating business with data:', requestData);
 
-      const response = await apiClient.put(`/api/business/editBusiness${id}`, requestData);
+      const response = await apiClient.put(`/api/business/editBusiness/${id}`, requestData);
 
-      console.log("Business updated successfully!:", response.data);
+      //console.log("Business updated successfully!:", response.data);
 
       showSuccessToast("Business updated successfully!");
 

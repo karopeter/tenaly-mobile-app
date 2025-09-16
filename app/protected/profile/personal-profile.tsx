@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import apiClient from '@/app/utils/apiClient';
 import { colors } from '@/app/constants/theme';
+import { useRouter } from 'expo-router';
 
 type SelectedImageFile = {
   uri: string;
@@ -30,6 +31,7 @@ type ProfileData = {
 }
 
 const PersonalProfileScreen = () => {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -191,6 +193,7 @@ const PersonalProfileScreen = () => {
   const handleCancel = () => {
     setEditData({ ...profileData });
     setTempProfileImage(null);
+    //router.back();
     setSelectedImageFile(null);
     setIsEditing(false);
   };
@@ -255,7 +258,8 @@ const PersonalProfileScreen = () => {
     return (
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleCancel} disabled={saving}>
+          <TouchableOpacity 
+            onPress={handleCancel} disabled={saving}>
             <Text style={styles.backButton}>←</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Personal profile</Text>
@@ -359,7 +363,7 @@ const PersonalProfileScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/protected/profile')}>
           <Text style={styles.backButton}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Personal profile</Text>

@@ -7,6 +7,8 @@ export const showSuccessToast = (message: string) => {
         text1: 'Success',
         text2: message,
         visibilityTime: 3000,
+        autoHide: true,
+        position: 'top'
     });
 };
 
@@ -16,5 +18,7 @@ export const showErrorToast = (message: string) => {
       text1: 'Error',
       text2: message,
       visibilityTime: 4000,
+      autoHide: true,   
+      position: 'top'
     });
 };

@@ -7,11 +7,9 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
-  ScrollView,
-  Alert,
+  ScrollView
 } from 'react-native';
 import { Formik } from 'formik';
-import * as Yup from 'yup';
 import Input from '../components/Input';
 import Icon from 'react-native-vector-icons/Ionicons';
 import GradientButton from '../components/GradientButton/GradientButton';
@@ -29,7 +27,6 @@ import { loginSchema } from '../utils/validation';
 
 const { width } = Dimensions.get('window');
 
-// 🔁 Define tab types
 export enum CustomTab {
   Email,
   Phone,
@@ -53,6 +50,8 @@ const Login = () => {
     native: 'https://auth.expo.io/@karopeter/tenaly-mobile',
   });
 
+  //const redirectUri = makeRedirectUri({ useProxy: true });
+
 
 
     const [request, response, promptAsync] = Google.useAuthRequest(
@@ -64,6 +63,8 @@ const Login = () => {
     },
     { redirectUri }
   );
+
+   // const redirectUri = promptAsync({ useProxy: true });
 
   // Handle Google response 
 
@@ -129,7 +130,7 @@ const Login = () => {
 
     const { data }: { data: AuthResponse } = res;
     await signIn(data);
-    showSuccessToast('Login successful! 🎉 Welcome back!');
+    //showSuccessToast('Login successful! 🎉 Welcome back!');
 
     // Redirect based on role 
     if (data.user.role === 'seller') {

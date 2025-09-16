@@ -3,7 +3,6 @@ import {
   View, 
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   Image,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import {
   Platform,
   ActivityIndicator
   } from 'react-native';
+  import { SafeAreaView } from 'react-native-safe-area-context';
 import MessageInput from '@/app/reusables/MessageInput';
 import ConversationItem from '@/app/reusables/conversationItem';
 import MessageBubble from '@/app/components/MessageBubble';

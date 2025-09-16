@@ -6,26 +6,29 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-  ScrollView
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/app/constants/theme';
 import { useRouter } from 'expo-router';
-import BusinessHours from './BusinessHours';
+import { showErrorToast } from '@/app/utils/toast';
+import apiClient from '@/app/utils/apiClient';
 
 interface Business {
-  id: string;
-  name: string;
-  description: string;
-  addresses: Address[];
-  createdAt: string;
+  _id: string;
+  businessName: string;
+ aboutBusiness: string;
+ location: string;
+ addresses: Address[];
+ created: string;
 }
 
 interface Address {
-  id: string;
-  location: string;
+  _id: string;
   address: string;
+  deliveryAvailable: boolean;
 }
 
 interface BusinessProfileProps {
@@ -43,12 +46,26 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
 
 
   useEffect(() => {
-    // Simute API call to fetch business when ready 
-    setTimeout(() => {
-      setBusinesses([]);
-      setLoading(false);
-    }, 1000);
+    fetchBusinesses();
   }, []);
+
+  const fetchBusinesses = async () => {
+     try {
+       if (!apiClient) {
+        showErrorToast('API client not initialized.');
+        return;
+      }
+      setLoading(true);
+      const response = await apiClient.get('/api/business/my-businesses');
+      setBusinesses(response.data || []);
+     } catch (error: any) {
+      console.error('Error fetching businesses:', error);
+      showErrorToast(error?.response?.data?.message || 'Failed to fetch businesses');
+      setBusinesses([]);
+     } finally {
+      setLoading(false);
+     }
+  }
 
   const handleTabPress = (tab: TabType) => {
     setActiveTab(tab);
@@ -84,7 +101,68 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
         {title}
       </Text>
     </TouchableOpacity>
-  )
+  );
+
+  const BusinessList = () => (
+    <ScrollView 
+      showsVerticalScrollIndicator={false} 
+      style={styles.businessListContainer}>
+          <TouchableOpacity
+       style={styles.addAddressButton}
+       onPress={() => router.push('/protected/profile/AddBusiness')}
+     >
+       <View style={styles.addAddressIconContainer}>
+         <Text style={styles.addAddressIcon}>+</Text>
+       </View>
+       <Text style={styles.addAnotherText}>Add another business</Text>
+     </TouchableOpacity>
+     {businesses.map((business, index) => (
+       <View key={business._id} style={styles.businessCard}>
+           <View style={styles.businessHeader}>
+              <Text style={styles.businessTitle}>Business {index + 1}</Text>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => router.push(`/protected/profile/EditBusiness/${business._id}`)}
+              >
+                <Image 
+                   source={require('../../../assets/images/editIcon.png')}
+                   style={styles.editIcon}
+                />
+                <Text style={styles.editText}>Edit</Text>
+              </TouchableOpacity>
+           </View>
+
+           <View style={styles.businessInfo}>
+            <View style={styles.businessNameRow}>
+              <Image 
+               source={require('../../../assets/images/brifecase-tick.png')}
+               style={styles.businessIcon}
+              />
+              <Text style={styles.businessName}>{business.businessName}</Text>
+            </View>
+
+            <Text style={styles.businessDescription}>{business.aboutBusiness}</Text>
+
+            {business.addresses.map((address, addressIndex) => (
+              <View key={address._id} style={styles.addressContainer}>
+                <Text style={styles.addressNumText}>Address {addressIndex + 1}</Text>
+                <View style={styles.addressRow}>
+                   <Image 
+                     source={require('../../../assets/images/location.png')}
+                     style={styles.locationIcon}
+                   />
+                   <View style={styles.addressDetails}>
+                    <Text style={styles.locationText}>{business.location}</Text>
+                    <Text style={styles.addressText}>{address.address}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+           </View>
+       </View>
+     ))}
+    </ScrollView>
+  );
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>
@@ -122,14 +200,13 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
       case 'details':
          return loading ? (
            <View style={styles.loadContainer}>
-             {/* Add loading spinner here if needed */ }
+             <ActivityIndicator size="large" color="#1031AA" />
+             <Text style={styles.loadingText}>Loading businesses...</Text>
            </View>
          ): businesses.length === 0 ? (
           <EmptyState />
          ): (
-          <View>
-            {/* Business list will go here when implemented */ }
-          </View>
+           <BusinessList />
          );
          case 'hours': 
          return (
@@ -158,7 +235,7 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
              style={styles.backButton}>
                  <Text style={styles.backIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.detailsText}>Business Profile</Text>
+          <Text style={styles.detailsText}>Business Details</Text>
         </View>
 
        {/* Tab Navigation */ }
@@ -185,7 +262,7 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.setGrey
+    backgroundColor: colors.bgTheme
   },
   header: {
     flexDirection: 'row',
@@ -212,7 +289,13 @@ const styles = StyleSheet.create({
   tabScrollContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
+    marginRight: 16,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.mdLight
   },
+
   tabButton: {
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -221,7 +304,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   activeTabButton: {
-    backgroundColor: '#000087',
+    backgroundColor: colors.blue
   },
   tabText: {
     fontSize: 14,
@@ -260,6 +343,145 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: colors.lightGray,
+    fontWeight: '500'
+  },
+  businessListContainer: {
+    flex: 1,
+    paddingTop: 20,
+  },
+  businessCard: {
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: colors.blurGrey,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    elevation: 3,
+  },
+  businessHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6
+  },
+  businessTitle: {
+   fontSize: 14,
+   fontWeight: '500',
+   color: colors.blue
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    gap: 8,
+    paddingVertical: 6,
+  },
+  editIcon: {
+   width: 16,
+   height: 16
+  },
+  editText: {
+     fontSize: 14,
+     color: colors.viewGray,
+     fontWeight: '500'
+  },
+  businessInfo: {
+     gap: 12,
+  },
+  businessNameRow: {
+   flexDirection: 'row',
+   alignItems: 'center'
+  },
+  businessIcon: {
+      width: 20,
+      height: 20,
+      marginRight: 10,
+  }, 
+  businessName: {
+     fontSize: 18,
+     fontWeight: '500',
+     color: colors.darkGray,
+  },
+  businessDescription: {
+   fontSize: 14,
+   color: colors.lightGrey,
+   fontWeight: '400',
+   lineHeight: 20,
+  },
+  addressContainer: {
+    marginTop: 8,
+  },
+  addressTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.lightGrey,
+    marginBottom: 8,
+  },
+  addressNumText: {
+   color: colors.darkGray,
+   fontWeight: '500',
+   fontSize: 14,
+   marginBottom: 10,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start'
+  },
+  locationIcon: {
+    //  width: 16,
+ //   height: 16,
+    marginRight: 8,
+    marginTop: 12,
+  },
+  addressDetails: {
+   flex: 1,
+  },
+  locationText: {
+     fontSize: 14,
+     fontWeight: '500',
+     color: colors.darkGray
+  },
+  addressText: {
+     fontSize: 14,
+     color: colors.lightGrey,
+     opacity: 0.7,
+     marginTop: 2,
+  },
+  addAddressButton: {
+     flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    borderStyle: 'dashed',
+    marginBottom: 20,
+    gap: 5,
+  },
+  addAddressIconContainer: {
+   marginRight: 12,
+  },
+   addAddressIcon: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.blue,
+    width: 24,
+    borderWidth: 1.5,
+    borderColor: colors.blue,
+    height: 24,
+    textAlign: 'center',
+    borderRadius: 12,
+  },
+  addAnotherText: {
+    fontSize: 16,
+    color: colors.blue,
+    fontWeight: '600',
+    textAlign: 'left'
   },
   emptyContainer: {
     flex: 1,

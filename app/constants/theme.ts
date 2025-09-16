@@ -49,4 +49,6 @@ export const colors = {
     blurGrey: '#4D485F1A',
     grey300: '#8C8C8C',
     grey600: '#4C4C4C',
+    mdLight: '#E5E5E5',
+    grey700: '#3C3C3C'
 }

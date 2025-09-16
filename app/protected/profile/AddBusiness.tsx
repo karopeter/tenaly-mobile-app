@@ -9,7 +9,8 @@ import {
  ActivityIndicator,
  KeyboardAvoidingView,
  Platform,
- Image
+ Image,
+ Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,6 +18,7 @@ import { useRouter } from 'expo-router';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { colors } from '@/app/constants/theme';
 import LocationDropdown from '@/app/reusables/locationDropdown';
+import apiClient from '@/app/utils/apiClient';
 
 interface AddressInput {
   id: string;
@@ -89,31 +91,64 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
         return;
        }
 
+       // Get the location from the first address (state)
+       const location = validAddresses[0].state;
+
        setLoading(true);
 
-       try {
-         await new Promise(resolve => setTimeout(resolve, 2000));
+      try {
+        const requestData = {
+          businessName: businessName.trim(),
+          aboutBusiness: aboutBusiness.trim(),
+          location: location,
+          addresses: validAddresses.map(addr => ({
+            address: addr.address.trim(),
+            deliveryAvailable: false
+          }))
+        };
+        console.log('Sending request data:', requestData);
 
-         const newBusiness = {
-            id: Date.now().toString(),
-            name: businessName,
-            description: aboutBusiness,
-            addresses: validAddresses,
-            createdAt: new Date().toISOString(),
-         };
+        const response = await apiClient?.post('/api/business/add-business', requestData);
 
-         showSuccessToast('Business added successfully!');
-         onBusinessAdded?.(newBusiness);
-         
-         setTimeout(() => {
-           onBack();
-         }, 1000);
+       // console.log('Business created successfully:', response?.data);
 
-       } catch (error) {
-         showErrorToast('Failed to add business. Please try again.');
-       } finally {
+        showSuccessToast('Business added successfully!');
+
+        // Call back if provided 
+        onBusinessAdded?.(response?.data);
+
+        // Navigate back after a short delay 
+        setTimeout(() => {
+           router.push('/protected/profile/business-profile');
+        }, 1500);
+      } catch (error: any) {
+         console.error('Error creating business:', error);
+
+         let errorMessage = 'Failed to add business. Please try again.';
+
+         if (error.response?.data?.message) {
+           errorMessage = error.response.data.message;
+         } else if (error.response?.status === 409) {
+          errorMessage = 'Business with this name already exists';
+         } else if (error.response?.status === 400) {
+          errorMessage = 'Please fill in all required fields';
+         } else if (error.message) {
+          errorMessage = error.message;
+         }
+
+         showErrorToast(errorMessage);
+
+         // Show alert for ciritical errors 
+         if (error.response?.status >= 500) {
+          Alert.alert(
+            'Sever Error',
+            'There was a problem with the server. Please try again later.',
+            [{ text: 'OK' }]
+          );
+         }
+      } finally {
         setLoading(false);
-       }
+      }
     };
 
 
@@ -155,6 +190,8 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
               style={[styles.input, styles.addressInput]}
               placeholder="Enter your business address"
               placeholderTextColor={colors.border}
+              value={address.address}
+              //onChangeText={(value) => updateAddress(address.id, "address", value)}
              />
           </View>
        </View>
@@ -194,6 +231,7 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
                   placeholderTextColor={colors.border}
                   value={businessName}
                   onChangeText={setBusinessName}
+                  editable={!loading}
                 />
               </View>
 
@@ -210,6 +248,7 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
                   textAlignVertical="top"
                   blurOnSubmit={false}
                   returnKeyType="done"
+                  editable={!loading}
                 />
               </View>
 
@@ -222,7 +261,8 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
 
                  <TouchableOpacity
                    onPress={addNewAddress}
-                   style={styles.addAddressButton}>
+                   style={styles.addAddressButton}
+                   disabled={loading}>
                     <View style={styles.addAddressIconContainer}>
                       <Text style={styles.addAddressIcon}>+</Text>
                     </View>
@@ -241,7 +281,7 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
                 style={[styles.submitButton, loading && styles.disabledButton]}
               >
                 {loading ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={colors.bg} size="small" />
                 ) : (
                  <View style={styles.btnRow}>
                   <Image 
@@ -283,7 +323,7 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     fontSize: 24,
-    color: '#666',
+    color: colors.grey700,
   },
   headerTitle: {
     fontSize: 18,
@@ -345,7 +385,7 @@ const styles = StyleSheet.create({
   },
   dropdownIcon: {
     fontSize: 12,
-    color: '#666',
+    color: colors.attachBlack,
   },
   sectionTitle: {
     fontSize: 14,
@@ -378,7 +418,7 @@ const styles = StyleSheet.create({
     color: colors.darkGray,
   },
   cancelButton: {
-    backgroundColor: '#FF4757',
+    backgroundColor: colors.red,
     borderRadius: 12,
     width: 24,
     height: 24,
@@ -386,7 +426,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelIcon: {
-    color: '#fff',
+    color: colors.bg,
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -404,17 +444,17 @@ const styles = StyleSheet.create({
   addAddressIcon: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000087',
+    color: colors.blue,
     width: 24,
     borderWidth: 1.5,
-    borderColor: '#000087',
+    borderColor: colors.blue,
     height: 24,
     textAlign: 'center',
     borderRadius: 12,
   },
   addAddressText: {
     fontSize: 16,
-    color: '#000087',
+    color: colors.blue,
     fontWeight: '500',
   },
   footer: {
@@ -438,6 +478,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: colors.bg,
   },
 })

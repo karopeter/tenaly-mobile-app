@@ -122,7 +122,7 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
               <Text style={styles.businessTitle}>Business {index + 1}</Text>
               <TouchableOpacity
                 style={styles.editButton}
-                onPress={() => router.push(`/protected/profile/EditBusiness/${business._id}`)}
+                onPress={() => router.push(`/protected/profile/EditBusiness/${business._id}` as any)}
               >
                 <Image 
                    source={require('../../../assets/images/editIcon.png')}

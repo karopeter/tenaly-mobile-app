@@ -9,7 +9,7 @@
     "platforms": ["android", "ios"],
     "backgroundColor": "#FFFFFF",
     "scheme": "tenaly",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "assetBundlePatterns": ["**/*"],
     "newArchEnabled": true,
     "runtimeVersion": {

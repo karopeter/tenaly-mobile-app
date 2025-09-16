@@ -6,13 +6,13 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   Dimensions,
   StatusBar,
   ActivityIndicator
 } from 'react-native';
 import { AntDesign, Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { colors } from '@/app/constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import apiClient from '@/app/utils/apiClient';

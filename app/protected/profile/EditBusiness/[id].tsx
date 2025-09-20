@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Image, 
   Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -85,17 +84,20 @@ export default function EditBusiness() {
 
          // Converting addresses to form format 
        const formattedAddresses = business.addresses.map((addr, index) => ({
-          id: addr._id || `addr_${index}`,
-          state: business.location,
-          lga: '',
-          address: addr.address,
-          deliveryAvailable: addr.deliveryAvailable,
-          _id: addr._id
-       }));
+  id: addr._id || `addr_${index}`,   // always stable
+  state: business.location,
+  lga: '',
+  address: addr.address,
+  deliveryAvailable: addr.deliveryAvailable,
+  _id: addr._id,
+}));
 
-       setAddresses(formattedAddresses.length > 0 ? formattedAddresses: [
-         { id: '1', state: business.lotion, lga: '', address: '' }
-       ]);
+setAddresses(
+  formattedAddresses.length > 0
+    ? formattedAddresses
+    : [{ id: `local_${Date.now()}`, state: business.location, lga: '', address: '' }]
+);
+
 
      } catch (error: any) {
        console.error('Error fetching business data:', error);
@@ -106,15 +108,16 @@ export default function EditBusiness() {
      }
   };
 
-  const addNewAddress = () => {
-    const newAddress: AddressInput = {
-        id: Date.now().toString(),
-        state: '',
-        lga: '',
-        address: '',
-    };
-    setAddresses([...addresses, newAddress]);
+const addNewAddress = () => {
+  const newAddress: AddressInput = {
+    id: `local_${Date.now()}`,  // unique + stable
+    state: '',
+    lga: '',
+    address: '',
   };
+  setAddresses((prev) => [...prev, newAddress]);
+};
+
 
   const removeAddress = (addressId: string) => {
     if (addresses.length > 1) {
@@ -122,18 +125,38 @@ export default function EditBusiness() {
     }
   };
 
-  const updateAddress = (addressId: string, field: keyof AddressInput, value: string) => {
-    setAddresses(addresses.map(addr => {
+  // const updateAddress = (addressId: string, field: keyof AddressInput, value: string) => {
+  //   setAddresses(addresses.map(addr => {
+  //     if (addr.id === addressId) {
+  //       // If updating state, reset LGA
+  //       if (field === 'state') {
+  //         return { ...addr, [field]: value, lga: ""};
+  //       }
+  //       return { ...addr, [field]: value };
+  //     }
+  //     return addr;
+  //   }));
+  // };
+
+
+  const updateAddress = (
+  addressId: string,
+  field: keyof AddressInput,
+  value: string
+) => {
+  setAddresses((prevAddresses) =>
+    prevAddresses.map((addr) => {
       if (addr.id === addressId) {
-        // If updating state, reset LGA
-        if (field === 'state') {
-          return { ...addr, [field]: value, lga: '' };
+        if (field === "state") {
+          return { ...addr, [field]: value, lga: "" };
         }
         return { ...addr, [field]: value };
       }
       return addr;
-    }));
-  };
+    })
+  );
+};
+
 
   const handleSubmit  = async () => {
     if (!businessName.trim()) {
@@ -220,53 +243,52 @@ export default function EditBusiness() {
     }
   };
 
+ const AddressCard = ({ address, index }: { address: AddressInput; index: number }) => (
+  <View style={styles.addressCard}>
+    <View style={styles.addressHeader}>
+      <Text style={styles.addressTitle}>Address {index + 1}</Text>
+      {addresses.length > 1 && (
+        <TouchableOpacity
+          onPress={() => removeAddress(address.id)}
+          style={styles.cancelButton}
+        >
+          <Text style={styles.cancelIcon}>×</Text>
+        </TouchableOpacity>
+      )}
+    </View>
 
-  
-  const AddressCard = ({ address, index}: { address: AddressInput; index: number}) => (
-    <View style={styles.addressCard}>
-        <View style={styles.addressHeader}>
-          <Text style={styles.addressTitle}>Address {index + 1}</Text>
-          {addresses.length > 1 && (
-              <TouchableOpacity
-               onPress={() => removeAddress(address.id)}
-               style={styles.cancelButton}>
-                <Text style={styles.cancelIcon}>×</Text>
-              </TouchableOpacity>
-          )}
-        </View>
+    <View style={styles.inputGroup}>
+      <LocationDropdown
+        label="State"
+        type="state"
+        selectedValue={address.state}
+        onSelect={(value) => updateAddress(address.id, "state", value)}
+      />
+    </View>
 
-        <View style={styles.inputGroup}>
-          <LocationDropdown
-             label="State"
-             type="state"
-             selectedValue={address.state}
-             onSelect={(value) => updateAddress(address.id, "state", value)}
-          />
-        </View>
+    <View style={styles.inputGroup}>
+      <LocationDropdown
+        label="Local Government Area"
+        type="lga"
+        selectedValue={address.lga}
+        selectedState={address.state}
+        onSelect={(value) => updateAddress(address.id, "lga", value)}
+      />
+    </View>
 
-        <View style={styles.inputGroup}>
-          <LocationDropdown
-             label="Local Government Area"
-             type="lga"
-             selectedValue={address.lga}
-             selectedState={address.state}
-             onSelect={(value) => updateAddress(address.id, "lga", value)}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-           <Text style={styles.label}>Address</Text>
-          <TextInput
-            style={[styles.input, styles.addressInput]}
-            placeholder="Enter your business address"
-            placeholderTextColor={colors.border}
-            value={address.address}
-            onChangeText={(value) => updateAddress(address.id, "address", value)}
-            editable={!loading}
-          />
-        </View>
-     </View>
-  );
+    <View style={styles.inputGroup}>
+      <Text style={styles.label}>Address</Text>
+      <TextInput
+        style={[styles.input, styles.addressInput]}
+        placeholder="Enter your business address"
+        placeholderTextColor={colors.border}
+        value={address.address}
+        onChangeText={(value) => updateAddress(address.id, "address", value)}
+        editable={!loading}
+      />
+    </View>
+  </View>
+);
 
 
   if (initialLoading) {
@@ -349,7 +371,7 @@ export default function EditBusiness() {
                <Text style={styles.sectionTitle}>Address</Text>
 
                {addresses.map((address, index) => (
-                  <AddressCard key={address.id} address={address} index={index} />
+                <AddressCard key={address.id} address={address} index={index} />
                ))}
 
                <TouchableOpacity

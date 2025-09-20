@@ -191,7 +191,7 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
               placeholder="Enter your business address"
               placeholderTextColor={colors.border}
               value={address.address}
-              //onChangeText={(value) => updateAddress(address.id, "address", value)}
+              onChangeText={(value) => updateAddress(address.id, "address", value)}
              />
           </View>
        </View>

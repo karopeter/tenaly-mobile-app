@@ -200,7 +200,7 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
       case 'details':
          return loading ? (
            <View style={styles.loadContainer}>
-             <ActivityIndicator size="large" color="#1031AA" />
+             <ActivityIndicator size="large" color={colors.blue} />
              <Text style={styles.loadingText}>Loading businesses...</Text>
            </View>
          ): businesses.length === 0 ? (
@@ -436,8 +436,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start'
   },
   locationIcon: {
-    //  width: 16,
- //   height: 16,
     marginRight: 8,
     marginTop: 12,
   },

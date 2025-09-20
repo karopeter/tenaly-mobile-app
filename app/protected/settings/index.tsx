@@ -31,7 +31,7 @@ const PLACEHOLDER_IMAGE = require('../../../assets/images/profile-circle.png');
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { user: authUser } = useAuth();
+  const { user: authUser, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -122,6 +122,17 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={18} color="#525252" />
           </TouchableOpacity>
         ))}
+
+        {/* Logout Item */ }
+        <TouchableOpacity
+          style={styles.menuItem}
+          activeOpacity={0.6}
+          onPress={signOut}>
+           <View style={styles.menuLeft}>
+            <Ionicons name="log-out-outline" size={20} color="red" />
+             <Text style={[styles.menuText, { color: "red" }]}>Logout</Text>
+           </View>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

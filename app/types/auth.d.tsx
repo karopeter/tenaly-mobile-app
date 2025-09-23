@@ -18,6 +18,8 @@ export interface AuthUser {
  fullName: string;
  email: string;
  phoneNumber: string | null;
+ isVerified: boolean;
+ hasSubmittedVerification: boolean;
  role: 'customer' | 'seller' | 'admin';
 }
 

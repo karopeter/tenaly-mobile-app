@@ -50,5 +50,7 @@ export const colors = {
     grey300: '#8C8C8C',
     grey600: '#4C4C4C',
     mdLight: '#E5E5E5',
-    grey700: '#3C3C3C'
+    grey700: '#3C3C3C',
+    lightShallow: '#f8f9ff',
+    yellow600: '#CAA416'
 }

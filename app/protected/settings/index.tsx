@@ -25,6 +25,7 @@ const menuItems = [
   { title: "Help", icon: <Ionicons name="help-circle-outline" size={20} color="#525252" />, route: "/protected/help" },
   { title: "Frequently Asked Questions", icon: <MaterialIcons name="question-answer" size={20} color="#525252" />, route: "/protected/faq" },
   { title: "About", icon: <Entypo name="globe" size={20} color="#525252" />, route: "/protected/about" },
+  { title: "Become Verified", icon: <MaterialIcons name="verified" size={20} color="#1031AA" />, route: "/protected/become-verified" },
 ];
 
 const PLACEHOLDER_IMAGE = require('../../../assets/images/profile-circle.png');

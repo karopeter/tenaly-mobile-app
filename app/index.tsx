@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
-import { 
-   SafeAreaView,  
+import {  
    View,
     Text, 
     Image, 
@@ -10,6 +9,7 @@ import {
     FlatList, 
     TouchableOpacity
   } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
  import { LinearGradient } from 'expo-linear-gradient';
  import { useRouter } from 'expo-router';
 
@@ -91,6 +91,30 @@ const SplashScreen = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const ref = useRef<FlatList<any>>(null);
   const router = useRouter();
+
+   const updateCurrentSlideIndex = (e: any) => {
+     const contentOffsetX = e.nativeEvent.contentOffset.x;
+     const currentIndex = Math.round(contentOffsetX / width);
+     setCurrentSlideIndex(currentIndex);
+  };
+
+  const goNextSlide = () => {
+     const nextSlideIndex = currentSlideIndex + 1;
+     if (nextSlideIndex !== slides.length) {
+       const offset = nextSlideIndex * width;
+     ref?.current?.scrollToOffset({offset});
+     setCurrentSlideIndex(nextSlideIndex);
+     }
+  };
+
+
+    const skip = () => {
+     const lastSlideIndex = slides.length - 1;
+     const offset = lastSlideIndex * width;
+     ref?.current?.scrollToOffset({offset});
+     setCurrentSlideIndex(lastSlideIndex);
+  }
+
   const Footer = () => {
   return (
     <View
@@ -156,27 +180,7 @@ const SplashScreen = () => {
   );
 };
 
-  const updateCurrentSlideIndex = (e: any) => {
-     const contentOffsetX = e.nativeEvent.contentOffset.x;
-     const currentIndex = Math.round(contentOffsetX / width);
-     setCurrentSlideIndex(currentIndex);
-  };
-
-  const goNextSlide = () => {
-     const nextSlideIndex = currentSlideIndex + 1;
-     if (nextSlideIndex !== slides.length) {
-       const offset = nextSlideIndex * width;
-     ref?.current?.scrollToOffset({offset});
-     setCurrentSlideIndex(nextSlideIndex);
-     }
-  };
-
-  const skip = () => {
-     const lastSlideIndex = slides.length - 1;
-     const offset = lastSlideIndex * width;
-     ref?.current?.scrollToOffset({offset});
-     setCurrentSlideIndex(lastSlideIndex);
-  }
+ 
 
   return(
     <SafeAreaView 

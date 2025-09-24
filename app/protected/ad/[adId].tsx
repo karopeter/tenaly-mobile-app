@@ -17,7 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import apiClient from '@/app/utils/apiClient';
 import { CombinedAd, SellerProfile } from '@/app/types/marketplace';
-import { showErrorToast } from '@/app/utils/toast';
+import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import ReportModal from '@/app/reusables/ReportModal';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -31,6 +31,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('details');
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [reportVisible, setReportVisible] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState<boolean>(false);
 
   // Fetch marketplace ad data
   const fetchAdData = async () => {
@@ -49,6 +51,9 @@ export default function App() {
       if (response.data.success) {
         const adData = response.data.data;
         setAd(adData);
+
+        // CHeck bookmark status  after ad is set 
+        await checkBookmarkStatus(adData);
         
         if (adData.business?.userId) {
           await fetchSellerData(adData.business.userId);
@@ -68,8 +73,63 @@ export default function App() {
     }
   };
 
+  // Check if ad is bookmarked
+  const checkBookmarkStatus = async (adData?: CombinedAd) => {
+    const currentAd = adData || ad;
+    if (!currentAd) return;
+
+    try {
+      if (!apiClient) {
+        showErrorToast("API client is not initialized");
+        return;
+      }
+
+       const response = await apiClient.get('/api/bookmark/get-all-bookmark');
+       if (response.data.success) {
+        const bookmarks = response.data.data;
+        const isAdBookmarked = bookmarks.some((bookmark: any) => bookmark.adId === adId);
+        setIsBookmarked(isAdBookmarked);
+       }
+    } catch (error) {
+      console.error("Error checking bookmark status:", error);
+    }
+  }
+
+  // Handle bookmark toggle 
+  const handleBookmarkToggle = async () => {
+    if (!adId || bookmarkLoading) return;
+
+    setBookmarkLoading(true);
+
+    try {
+     if (!apiClient) {
+      showErrorToast("API client is not initialized");
+      return;
+     }
+
+     if (isBookmarked) {
+      // unbookmarked 
+      await apiClient.delete(`/api/bookmark/delete-bookmark/${adId}`);
+      setIsBookmarked(false);
+      showSuccessToast("Ad removed from bookmarks");
+     } else {
+      // Bookmark 
+      await apiClient.post(`/api/bookmark/bookmarkAd/${adId}`);
+      setIsBookmarked(true);
+      showSuccessToast("Add Bookmarked successfully");
+     }
+    } catch (error: any) {
+     console.error('Error toggling bookmark:', error);
+     showErrorToast(
+       error.response?.data?.message || 
+       (isBookmarked ? "Failed to remove bookmark" : "Failed to bookmark ad")
+     );
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
+
   // Fetch seller profile data
- // Fetch seller profile data
 const fetchSellerData = async (sellerId: string) => {
   try {
     if (!apiClient) {
@@ -90,6 +150,12 @@ const fetchSellerData = async (sellerId: string) => {
   useEffect(() => {
     fetchAdData();
   }, [adId]);
+
+  useEffect(() => {
+    if (ad) {
+       checkBookmarkStatus();
+    }
+  }, [ad, adId]);
 
   // Get appropriate images based on ad type
   const getImages = () => {
@@ -460,11 +526,21 @@ const fetchSellerData = async (sellerId: string) => {
             <Text style={styles.headerTitle}>Details</Text>
           </View>
           <View style={styles.headerIcons}>
-            <TouchableOpacity>
-              <Image
-                source={require('../../../assets/images/bookmarkedIcon.png')}
-                style={styles.bookIcon}
-              />
+            <TouchableOpacity
+               onPress={handleBookmarkToggle}
+               disabled={bookmarkLoading}
+             >
+              {bookmarkLoading ? (
+                <ActivityIndicator size="small" color={colors.blue} />
+              ): (
+                <Image 
+                   source={isBookmarked
+                    ? require('../../../assets/images/bookmark-fill.png')
+                    : require('../../../assets/images/bookmarkedIcon.png')
+                   }
+                   style={[styles.bookIcon, { resizeMode: 'contain'}]}
+                />
+              )}
             </TouchableOpacity>
             <TouchableOpacity>
               <Image

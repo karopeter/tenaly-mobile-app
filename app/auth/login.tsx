@@ -6,6 +6,7 @@ import {
   Platform,
   Image,
   Dimensions,
+  StyleSheet,
   TouchableOpacity,
   ScrollView
 } from 'react-native';
@@ -24,6 +25,7 @@ import { loginInitialValues } from '../types/formHelper';
 import TabButtons, { TabButtonType } from '../components/TabButton';
 import DividerWithText from '../components/DividerLine/DividerWithText';
 import { loginSchema } from '../utils/validation';
+import { colors } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -187,10 +189,12 @@ const Login = () => {
             borderTopRightRadius: 24,
           }}
         >
-          <Text className="text-[#525252] text-center font-bold text-[18px] mb-5">
+          <Text 
+           style={styles.signUpText}
+          >
             Welcome to Tenaly
           </Text>
-          <Text className="text-[#868686] text-[14px] font-normal mb-6">
+          <Text style={styles.signUpTitle}>
             Sign in with your details to enjoy all the features of Tenaly
           </Text>
 
@@ -246,11 +250,13 @@ const Login = () => {
 
              {/* Forgot Password Text */}
             <View className="ml-1 flex-row flex-wrap">
-              <Text className="text-[#868686] text-sm">Forgot Password?</Text>
+              <Text 
+               style={styles.forgotText}
+                className="text-[#868686] text-sm">Forgot Password?</Text>
                <TouchableOpacity 
                 onPress={() => router.push('/auth/forgot-password')}
                  className="ml-1 rounded-full" activeOpacity={0.7}>
-                <Text className="text-[#00A8DF] text-sm font-medium underline">Reset</Text>
+                <Text style={styles.forgotText} className="text-[#00A8DF] text-sm font-medium underline">Reset</Text>
              </TouchableOpacity>
             </View>
             </>
@@ -290,11 +296,11 @@ const Login = () => {
 
              {/* Forgot Password Text */}
             <View className="ml-1 flex-row flex-wrap">
-              <Text className="text-[#868686] text-sm">Forgot Password?</Text>
+              <Text  style={styles.forgotText} className="text-[#868686] text-sm">Forgot Password?</Text>
                <TouchableOpacity 
                 onPress={() => router.push('/auth/forgot-password')}
                 className="ml-1 rounded-full" activeOpacity={0.7}>
-                <Text className="text-[#00A8DF] text-sm font-medium underline">Reset</Text>
+                <Text style={styles.forgotText} className="text-[#00A8DF] text-sm font-medium underline">Reset</Text>
              </TouchableOpacity>
             </View>
             </>
@@ -330,7 +336,7 @@ const Login = () => {
                     marginRight: 8
                   }}
                 />
-                 <Text className="text-[#525252] text-[16px] font-[500]">Google</Text>
+                 <Text style={styles.forgotText} className="text-[#525252] text-[16px] font-[500]">Google</Text>
             </TouchableOpacity>
             </View>
           </View>
@@ -348,14 +354,18 @@ const Login = () => {
         }}
       >
         <View className="flex-row justify-center">
-          <Text className="text-center text-[#868686] text-[14px] font-normal">
+          <Text
+           style={styles.forgotText}
+          className="text-center text-[#868686] text-[14px] font-normal">
             Don't have an account?
           </Text>
           <TouchableOpacity 
              activeOpacity={0.7}
              onPress={() => router.push('/auth/signup')}
             >
-            <Text className="text-[#000087] text-[14px] font-normal ml-1">Sign Up</Text>
+            <Text 
+             style={styles.forgotText}
+            className="text-[#000087] text-[14px] font-normal ml-1">Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -363,5 +373,26 @@ const Login = () => {
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+   signUpText: {
+     color: colors.darkGray,
+     textAlign: 'center',
+     fontWeight: '500',
+     fontSize: 18,
+     marginBottom: 20,
+     fontFamily: 'WorkSans_600SemiBold'
+   },
+   signUpTitle: {
+    color: colors.lightGrey,
+    fontSize: 14,
+    fontWeight: '400',
+    marginBottom: 20,
+    fontFamily: 'WorkSans_400Regular'
+  },
+  forgotText: {
+    fontFamily: 'WorkSans_400Regular'
+  },
+})
 
 export default Login;

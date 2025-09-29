@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
+import { AntDesign } from '@expo/vector-icons';
 import LocationDropdown from '@/app/reusables/locationDropdown';
 import apiClient from '@/app/utils/apiClient';
 import { useEffect, useState } from 'react';
@@ -298,7 +299,7 @@ const addNewAddress = () => {
           <TouchableOpacity 
             onPress={() => router.back()} 
             style={styles.backButton}>
-              <Text style={styles.backIcon}>←</Text>
+              {/* <Text style={styles.backIcon}>←</Text> */}
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Business</Text>
         </View>
@@ -324,7 +325,8 @@ const addNewAddress = () => {
            <TouchableOpacity 
              onPress={() => router.back()} 
              style={styles.backButton}>
-               <Text style={styles.backIcon}>←</Text>
+              <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
+               {/* <Text style={styles.backIcon}>←</Text> */}
            </TouchableOpacity>
            <Text style={styles.headerTitle}>Edit Business</Text>
         </View>
@@ -448,6 +450,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium'
   },
   loadingContainer: {
     flex: 1,

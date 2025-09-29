@@ -38,7 +38,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <View className="mb-4">
-       <Text className="text-[#525252] text-[14px] font-[500] mb-2">{label}</Text>
+       <Text  
+         style={styles.labelText}
+       className="text-[#525252] text-[14px] font-[500] mb-2">{label}</Text>
 
        {/* Dropdown Trigger */}
        <TouchableOpacity
@@ -100,4 +102,7 @@ const styles = StyleSheet.create({
   inputError: {
     borderColor: '#EF4444'
   },
+  labelText: {
+    fontFamily: 'WorkSans_600SemiBold'
+  }
 });

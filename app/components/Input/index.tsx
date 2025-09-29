@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput
+  TextInput,
+  StyleSheet
 } from 'react-native';
 
 import { InputProps } from './input.types';
@@ -32,6 +33,7 @@ const Input: React.FC<InputProps> = ({
         {/* Floating Label */}
         {label && (
           <Text
+           style={styles.labelText}
            className={`
           absolute z-10 left-3 px-1 bg-[#F8F8F8] 
            ${
@@ -57,6 +59,7 @@ const Input: React.FC<InputProps> = ({
             secureTextEntry={secureTextEntry}
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}
+             style={{ color: '#525252' }} 
             onFocus={() => setIsFocused(true)}
             onBlur={onBlur}
             className={`
@@ -80,5 +83,11 @@ const Input: React.FC<InputProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  labelText: {
+   fontFamily: 'WorkSans_600SemiBold'
+  }
+})
 
 export default Input;

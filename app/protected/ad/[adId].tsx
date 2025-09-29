@@ -32,6 +32,7 @@ export default function App() {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [reportVisible, setReportVisible] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState<boolean>(false);
 
   // Fetch marketplace ad data
@@ -174,9 +175,9 @@ const fetchSellerData = async (sellerId: string) => {
 
     if (ad.vehicleAd) {
       return {
-        'Vehicle Type': ad.vehicleAd.vehicleType || 'N/A',
+        'Make': ad.vehicleAd.vehicleType || 'N/A',
         'Model': ad.vehicleAd.model || 'N/A',
-        'Year': ad.vehicleAd.year?.toString() || 'N/A',
+        'Manufacturing Year': ad.vehicleAd.year?.toString() || 'N/A',
         'Color': ad.vehicleAd.color || 'N/A',
         'Fuel Type': ad.vehicleAd.fuelType || 'N/A',
         'Transmission': ad.vehicleAd.transmission || 'N/A',
@@ -246,23 +247,35 @@ const fetchSellerData = async (sellerId: string) => {
                 <Text style={styles.sectionTitle}>
                   {ad.vehicleAd ? 'Vehicle Details' : 'Property Details'}
                 </Text>
-                <TouchableOpacity>
-                  <Text style={styles.seeAllText}>See all</Text>
+                <TouchableOpacity onPress={() => setShowDetails(!showDetails)}>
+                 <View style={styles.seeRow}>
+                    <Text style={styles.seeAllText}>
+                      {showDetails ? 'Hide' : 'See all'}
+                    </Text>
+                    <AntDesign
+                      name={showDetails ? 'up' : 'down'}
+                      size={14}
+                      color={colors.blue}
+                      style={{ marginLeft: 4 }} />
+                 </View>
                 </TouchableOpacity>
               </View>
-              <View style={styles.detailsGrid}>
-                {Object.entries(details).map(([key, value], index) => (
-                  <View style={styles.detailItem} key={index}>
-                    <Text style={styles.detailKey}>{key}</Text>
-                    <Text style={styles.detailValue}>{value}</Text>
-                  </View>
-                ))}
-              </View>
+
+              {showDetails && (
+                <View style={styles.detailsGrid}>
+                  {Object.entries(details).map(([key, value], index) => (
+                    <View style={styles.detailItem} key={index}>
+                      <Text style={styles.detailKey}>{key}</Text>
+                      <Text style={styles.detailValue}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
 
             {/* More Info Section */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionTitle}>More Info</Text>
               <Text style={styles.moreInfoText}>
                 {ad.vehicleAd?.description || ad.propertyAd?.description || 'No description available'}
               </Text>
@@ -291,7 +304,7 @@ const fetchSellerData = async (sellerId: string) => {
                     ? { uri: seller.image }
                     : ad.business?.profileImage
                     ? { uri: ad.business.profileImage }
-                    : require('../../../assets/images/profile-circle.png')
+                    : require('@/assets/images/profile-circle.png')
                   }
                   style={styles.sellerLogo}
                 />
@@ -380,15 +393,18 @@ const fetchSellerData = async (sellerId: string) => {
     return (
       <View key={address._id}>
         <View style={styles.addressItem}>
-          <AntDesign
-            name="enviromento"
-            size={24}
-            color="#4C4C4C"
-            style={{ marginRight: 8, marginTop: 7 }}
-          />
+          <AntDesign 
+            name="environment" 
+            size={24} 
+            color="#525252"
+            style={{ 
+              marginRight: 8, 
+              marginTop: 7 
+            }}
+          /> 
           <View style={styles.addressTextContainer}>
             <Text style={styles.addressTitle}>
-              {ad.business.location} - Nigeria
+              {ad.business.location} 
             </Text>
             <Text style={styles.addressDetails}>{address.address}</Text>
 
@@ -429,7 +445,9 @@ const fetchSellerData = async (sellerId: string) => {
              {address.deliveryAvailable && deliverySettings ? (
               <Text style={styles.deliveryBadgeTitle}>
                Delivery available
-             <Text style={styles.deliveryBadgeDays}> ({deliverySettings.dayFrom}-{deliverySettings.daysTo} days)</Text>
+             <Text style={styles.deliveryBadgeDays}> 
+              ({deliverySettings.dayFrom}-{deliverySettings.daysTo} days)
+            </Text>
           </Text>
          ) : (
           <Text style={styles.deliveryBadgeTitle}>No delivery</Text>
@@ -521,7 +539,7 @@ const fetchSellerData = async (sellerId: string) => {
         <View style={styles.header}>
           <View style={styles.headerDetails}>
             <TouchableOpacity onPress={() => router.back()}>
-              <AntDesign name="arrowleft" size={24} color="#333" />
+              <AntDesign name="arrow-left" size={18} color={colors.darkGray} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Details</Text>
           </View>
@@ -591,10 +609,10 @@ const fetchSellerData = async (sellerId: string) => {
             {images.length > 1 && (
               <>
                 <TouchableOpacity onPress={prevImage} style={styles.imageOverlayLeft}>
-                  <AntDesign name="arrowleft" size={24} color="#111" />
+                  <AntDesign name="arrow-left" size={24} color="#111" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={nextImage} style={styles.imageOverlayRight}>
-                  <AntDesign name="arrowright" size={24} color="#111" />
+                  <AntDesign name="arrow-right" size={24} color="#111" />
                 </TouchableOpacity>
               </>
             )}
@@ -661,19 +679,19 @@ const fetchSellerData = async (sellerId: string) => {
               paddingVertical: 12,
               marginBottom: 8,
             }}>
-            <FontAwesome name="whatsapp" size={24} color="white" />
+            <FontAwesome name="whatsapp" size={24} color={colors.bg} />
             <Text style={styles.footerButtonText}>Chat on Whatsapp</Text>
           </LinearGradient>
         </TouchableOpacity>
         <View style={styles.footerBottomRow}>
           <TouchableOpacity style={styles.messageButton}>
-            <Feather name="phone" size={24} color="#525252" />
+            <Feather name="phone" size={24} color={colors.darkGray} />
             <Text style={styles.messageButtonText}>
               {seller?.phoneNumber}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.messageButton}>
-            <Feather name="mail" size={24} color="#525252" />
+            <Feather name="mail" size={24} color={colors.darkGray} />
             <Text style={styles.messageButtonText}>Message Seller</Text>
           </TouchableOpacity>
         </View>
@@ -735,7 +753,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.darkGray
+    color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   headerIcons: {
     flexDirection: 'row',
@@ -757,6 +776,7 @@ const styles = StyleSheet.create({
     color: colors.viewGray,
     fontWeight: '400',
     fontSize: 12,
+    fontFamily: 'WorkSans_400Regular'
   },
   infoContainer: {
     padding: 16,
@@ -770,6 +790,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold',
     marginBottom: 4,
   },
   verifiedText: {
@@ -786,7 +807,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.viewGray,
     marginTop: 8,
-    fontWeight: '500'
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium',
   },
   viewsContainer: {
     flexDirection: 'row',
@@ -839,8 +861,8 @@ deliveryBadge: {
   flexDirection: 'row',
   alignItems: 'center',
   borderWidth: 1,
-  borderColor: '#E6E9FF',     // subtle blue border like the mock
-  backgroundColor: '#F6F8FF', // very light blue/purple background
+  borderColor: '#E6E9FF',     
+  backgroundColor: '#F6F8FF', 
   paddingVertical: 10,
   paddingHorizontal: 12,
   borderRadius: 10,
@@ -850,41 +872,45 @@ iconCircle: {
   width: 34,
   height: 34,
   borderRadius: 10,
-  backgroundColor: '#EEF5FF', // soft blue circle behind icon
+  backgroundColor: '#EEF5FF', 
   alignItems: 'center',
   justifyContent: 'center',
   marginRight: 10,
 },
 
 deliveryBadgeTitle: {
-  color: '#1031AA',
+  color: colors.blue,
   fontSize: 14,
-  fontWeight: '600',
+  fontWeight: '400',
+  fontFamily: 'WorkSans_400Regular'
 },
 
 deliveryBadgeDays: {
-  color: '#1031AA',
-  fontWeight: '500',
+  color: colors.blue,
+  fontWeight: '400',
   fontSize: 13,
+  fontFamily: 'WorkSans_400Regular'
 },
 
 deliveryFeeText: {
   marginTop: 4,
-  color: '#1031AA',
+  color: colors.blue,
   fontSize: 13,
-  fontWeight: '700',
+  fontWeight: '400',
+  fontFamily: 'WorkSans_400Regular'
 },
 
 deliveryInfo: {
   marginTop: 8,
   fontSize: 13,
-  color: '#6B7280', // muted grey for the explanation line
+  color: colors.lightGrey, 
 },
 
 deliveryInfoLabel: {
   fontWeight: '700',
-  color: '#374151', // slightly darker for the "Delivery Info:" label
+  color: colors.lightGrey, 
   fontSize: 13,
+   fontFamily: 'WorkSans_700Bold'
 },
   priceRow: {
     flexDirection: 'row',
@@ -896,12 +922,14 @@ deliveryInfoLabel: {
   priceLabel: {
     fontSize: 16,
     color: colors.darkGray,
-    fontWeight: '400'
+    fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular'
   },
   priceValue: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.darkGray
+    color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   offerButton: {
     backgroundColor: colors.prikyBlue,
@@ -913,6 +941,7 @@ deliveryInfoLabel: {
   offerButtonText: {
     color: colors.bg,
     fontSize: 16,
+    fontFamily: 'WorkSans_500Medium',
     fontWeight: 'bold',
   },
   tabContainer: {
@@ -942,7 +971,8 @@ deliveryInfoLabel: {
   },
   tabText: {
     color: colors.darkGray,
-    fontSize: 14,
+    fontSize: 14, 
+    fontFamily: 'WorkSans_600SemiBold',
     fontWeight: '500'
   },
   sectionContainer: {
@@ -960,6 +990,11 @@ deliveryInfoLabel: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
+  },
+  seeRow: {
+   flexDirection: "row",
+   alignItems: 'center'
   },
   seeAllText: {
     color: colors.blue,
@@ -978,15 +1013,19 @@ deliveryInfoLabel: {
   detailKey: {
     fontSize: 14,
     color: colors.lightGrey,
+    fontFamily: 'WorkSans_400Regular',
+    marginBottom: 10,
   },
   detailValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.lightGray,
+    color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium'
   },
   moreInfoText: {
     fontSize: 14,
     lineHeight: 22,
+    fontFamily: 'WorkSans_400Regular',
     color: colors.lightGrey,
     marginTop: 20,
   },
@@ -1006,6 +1045,8 @@ deliveryInfoLabel: {
   facilityText: {
     fontSize: 12,
     color: colors.blue,
+    fontFamily: 'WorkSans_500Medium',
+    fontWeight: '500'
   },
   sellerContainer: {
     flexDirection: 'row',
@@ -1026,6 +1067,7 @@ deliveryInfoLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold',
     marginBottom: 5,
     textDecorationLine: "underline"
   },
@@ -1049,7 +1091,8 @@ deliveryInfoLabel: {
   sellerJoinDate: {
     fontSize: 12,
     color: colors.lightGrey,
-    fontWeight: '400'
+    fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular'
   },
   safetyTipsContainer: {
     backgroundColor: colors.greyBlue,
@@ -1080,6 +1123,7 @@ deliveryInfoLabel: {
   tipText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: 'WorkSans_400Regular',
     color: colors.lightGrey,
   },
   reportButton: {
@@ -1128,6 +1172,7 @@ deliveryInfoLabel: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'WorkSans_500Medium',
   },
   footerBottomRow: {
     flexDirection: 'row',
@@ -1149,6 +1194,7 @@ deliveryInfoLabel: {
     marginLeft: 8,
     color: colors.darkGray,
     fontSize: 16,
+    fontFamily: 'WorkSans_500Medium',
     fontWeight: 'bold',
   },
   addressItem: {
@@ -1165,17 +1211,21 @@ deliveryInfoLabel: {
     fontWeight: '500',
     color: colors.darkGray,
     fontSize: 16,
+    fontFamily: 'WorkSans_500Medium',
     marginBottom: 10,
   },
   addressDetails: {
     color: colors.lightGrey,
     fontSize: 14,
+    fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular'
   },
   addressHoursTitle: {
-    fontWeight: '600',
+    fontWeight: '500',
     color: colors.darkGray,
     marginTop: 10,
     fontSize: 14,
+    fontFamily: 'WorkSans_500Medium'
   },
   addressContainer: {
     flexDirection: "row",
@@ -1188,6 +1238,8 @@ deliveryInfoLabel: {
     color: colors.darkGray,
     fontSize: 14,
     marginTop: 5,
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium',
   },
   workingHoursContainer: {
     flexDirection: 'row',
@@ -1202,6 +1254,7 @@ deliveryInfoLabel: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     fontSize: 12,
+    fontFamily: 'WorkSans_500Medium',
     marginRight: 4,
     marginBottom: 4,
     marginTop: 9,
@@ -1248,12 +1301,6 @@ deliveryInfoLabel: {
     fontSize: 14,
     marginLeft: 4,
   },
-  deliveryInfo: {
-    color: colors.lightGrey,
-    fontSize: 12,
-    marginTop: 10,
-    fontWeight: 'bold',
-  },
   deliverInfoNest: {
     color: colors.lightGrey,
     fontWeight: '400'
@@ -1267,5 +1314,4 @@ deliveryInfoLabel: {
     borderBottomColor: '#e5e7eb',
     marginVertical: 16,
   },
-
 });

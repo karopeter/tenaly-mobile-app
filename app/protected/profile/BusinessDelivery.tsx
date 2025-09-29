@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '@/app/constants/theme';
 import { useRouter } from 'expo-router';
+import { AntDesign } from '@expo/vector-icons';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import apiClient from '@/app/utils/apiClient';
 import DeliveryConfigurationForm from '@/app/reusables/deliveryConfiguration';
@@ -472,7 +473,8 @@ export default function BusinessDelivery() {
             router.back();
           }
         }}>
-          <Text style={styles.backIcon}>←</Text>
+          {/* <Text style={styles.backIcon}>←</Text> */}
+          <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
         </TouchableOpacity>
         <Text style={styles.detailsText}>Business Delivery</Text>
       </View>
@@ -657,6 +659,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   editButton: {
     flexDirection: 'row',
@@ -673,6 +676,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#767676',
     fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium'
   },
   addressContainer: {
     marginBottom: 16,
@@ -698,6 +702,7 @@ const styles = StyleSheet.create({
   deliveryStatus: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium'
   },
   deliveryAvailable: {
     color: colors.blue,
@@ -720,6 +725,7 @@ const styles = StyleSheet.create({
     color: colors.darkGray,
     flex: 1,
     fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular'
   },
   deliveryDetails: {
     marginTop: 3,
@@ -730,6 +736,7 @@ const styles = StyleSheet.create({
     color: colors.lightGrey,
     opacity: 0.8,
     fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular',
     marginBottom: 4,
   },
   deliveryFee: {
@@ -737,6 +744,7 @@ const styles = StyleSheet.create({
     color: colors.lightGrey,
     fontWeight: '400',
     marginTop: 4,
+    fontFamily: 'WorkSans_400Regular'
   },
   addressSelectionRow: {
     flexDirection: 'row',
@@ -776,7 +784,8 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: 14,
     color: colors.darkGray,
-    fontWeight: '400'
+    fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular'
   },
   saveButton:{
     borderRadius: 8,

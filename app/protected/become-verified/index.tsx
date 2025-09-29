@@ -14,7 +14,7 @@ import {
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import RNPickerSelect from 'react-native-picker-select';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import apiClient from '@/app/utils/apiClient';
 import { useAuth } from '@/app/context/AuthContext';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
@@ -126,8 +126,9 @@ const BecomeVerified: React.FC = () => {
       try {
         const verifyResponse = await apiClient.get<VerificationStatus>('/api/verification/status');
         setVerificationStatus(verifyResponse.data);
-      } catch (error) {
+      } catch (error: any) {
         setVerificationStatus(null);
+       console.log("Error verification status", error);
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
@@ -325,7 +326,7 @@ const BecomeVerified: React.FC = () => {
             onPress={() => router.back()}
             style={styles.backButton}
            >
-             <Text style={styles.backIcon}>←</Text>
+             <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
           </TouchableOpacity>
            <Text style={styles.title}>Become a verified user</Text>
         </View>
@@ -366,7 +367,7 @@ const BecomeVerified: React.FC = () => {
            onPress={() => router.back()}
            style={styles.backButton}
           >
-           <Text style={styles.backIcon}>←</Text>
+          <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
          </TouchableOpacity>
            <Text style={styles.title}>Become a verified user</Text>
         </View>
@@ -403,7 +404,7 @@ const BecomeVerified: React.FC = () => {
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
         </TouchableOpacity>
         <Text style={styles.title}>Become a verified user</Text>
       </View>

@@ -163,7 +163,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     marginBottom: 6,
-    color: colors.darkGray
+    color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium'
   },
   input: {
     borderWidth: 1,
@@ -226,7 +227,8 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     color: '#FF4757',
-    flex: 1
+    flex: 1,
+    fontFamily: 'WorkSans_500Medium'
   },
   retryButton: {
     paddingHorizontal: 8,

@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/app/constants/theme';
 import { useRouter } from 'expo-router';
 import { showErrorToast } from '@/app/utils/toast';
+import { AntDesign } from '@expo/vector-icons';
 import apiClient from '@/app/utils/apiClient';
 
 interface Business {
@@ -233,7 +234,8 @@ export default function BusinessProfile({ onNavigateToAddBusiness }: BusinessPro
           <TouchableOpacity 
             onPress={() => router.push('/protected/profile')}
              style={styles.backButton}>
-                 <Text style={styles.backIcon}>←</Text>
+                 {/* <Text style={styles.backIcon}>←</Text> */}
+              <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
           </TouchableOpacity>
           <Text style={styles.detailsText}>Business Details</Text>
         </View>
@@ -280,8 +282,9 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   detailsText: {
-    color: colors.lightGrey, 
+    color: colors.darkGray, 
     fontWeight: '600',
+    fontFamily: 'WorkSans_600SemiBold',
     fontSize: 16,
   },
   tabContainer: {
@@ -309,15 +312,17 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.darkGray
+    color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium',
   },
   activeTabText: {
-     color: colors.bg,
-     fontWeight: '600'
+    color: colors.bg,
+    fontWeight: '600',
+    fontFamily: 'WorkSans_500Medium',
   },
   backIcon: {
     fontSize: 24,
-    color: colors.grey300
+    color: colors.darkGray
   },
   headerTitle: {
     fontSize: 18,
@@ -375,7 +380,8 @@ const styles = StyleSheet.create({
   businessTitle: {
    fontSize: 14,
    fontWeight: '500',
-   color: colors.blue
+   color: colors.blue,
+   fontFamily: 'WorkSans_500Medium'
   },
   editButton: {
     flexDirection: 'row',
@@ -391,7 +397,8 @@ const styles = StyleSheet.create({
   editText: {
      fontSize: 14,
      color: colors.viewGray,
-     fontWeight: '500'
+     fontWeight: '500',
+     fontFamily: 'WorkSans_500Medium'
   },
   businessInfo: {
      gap: 12,
@@ -409,11 +416,13 @@ const styles = StyleSheet.create({
      fontSize: 18,
      fontWeight: '500',
      color: colors.darkGray,
+     fontFamily: 'WorkSans_500Medium'
   },
   businessDescription: {
    fontSize: 14,
    color: colors.lightGrey,
    fontWeight: '400',
+   fontFamily: 'WorkSans_400Regular',
    lineHeight: 20,
   },
   addressContainer: {
@@ -429,6 +438,7 @@ const styles = StyleSheet.create({
    color: colors.darkGray,
    fontWeight: '500',
    fontSize: 14,
+   fontFamily: 'WorkSans_500Medium',
    marginBottom: 10,
   },
   addressRow: {
@@ -445,13 +455,15 @@ const styles = StyleSheet.create({
   locationText: {
      fontSize: 14,
      fontWeight: '500',
-     color: colors.darkGray
+     color: colors.darkGray,
+     fontFamily: 'WorkSans_500Medium'
   },
   addressText: {
      fontSize: 14,
      color: colors.lightGrey,
      opacity: 0.7,
      marginTop: 2,
+     fontFamily: 'WorkSans_400Regular'
   },
   addAddressButton: {
      flexDirection: 'row',
@@ -478,8 +490,9 @@ const styles = StyleSheet.create({
   addAnotherText: {
     fontSize: 16,
     color: colors.blue,
-    fontWeight: '600',
-    textAlign: 'left'
+    fontWeight: '400',
+    textAlign: 'left',
+    fontFamily: 'WorkSans_400Regular',
   },
   emptyContainer: {
     flex: 1,
@@ -498,7 +511,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.lightGrey,
     marginTop: 20,
-    textAlign: 'center'
+    textAlign: 'center',
+    fontFamily: 'WorkSans_500Medium'
   },
   addButton: {
     borderRadius: 12,
@@ -530,5 +544,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.bg,
+    fontFamily: 'WorkSans_500Medium'
   }
 });

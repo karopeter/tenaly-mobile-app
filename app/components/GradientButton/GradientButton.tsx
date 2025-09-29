@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface GradientButtonProps {
@@ -41,13 +41,21 @@ const GradientButton: React.FC<GradientButtonProps> = ({
                     }}
                 />
                )}
-            <Text className={`font-bold text-center font-[400] text-[12px] ${
+            <Text 
+            style={styles.btnText}
+            className={`font-bold text-center font-[400] text-[12px] ${
                disabled ? 'text-[#CDCDD7]' :  'text-white'
             }`}>
             {title}</Text>
         </View>
       </TouchableOpacity>
-    )
+    );
 }
+
+const styles = StyleSheet.create({
+  btnText: {
+    fontFamily: 'WorkSans_400Regular'
+  }
+})
 
 export default GradientButton;

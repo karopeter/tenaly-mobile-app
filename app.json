@@ -5,39 +5,36 @@
     "description": "A mobile app for Tenaly",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/tenalySplash.png",
-    "platforms": ["android", "ios"],
+    "icon": "./assets/images/tenaly-splash.png",
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "backgroundColor": "#FFFFFF",
     "scheme": "tenaly",
-    "userInterfaceStyle": "light",
-    "assetBundlePatterns": ["**/*"],
-    "newArchEnabled": true,
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.karopeter531.tenaly"
-    },  
+      "supportsTablet": true
+    },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/tenalySplash.png",
+        "foregroundImage": "./assets/images/tenaly-splash.png",
         "backgroundColor": "#ffffff"
       },
+      "package": "com.karopeter531.tenaly",
       "edgeToEdgeEnabled": true,
-      "package": "com.karopeter531.tenaly"
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "static"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/tenalySplash.png",
+          "image": "./assets/images/tenaly-splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#FFFFFF"
@@ -48,11 +45,9 @@
       "typedRoutes": true
     },
     "extra": {
-      "EXPO_PUBLIC_API_URL": "https://api.tenaly.com"
+      "eas": {
+        "projectId": "3044a739-d08b-4ff0-a79e-2563f43c6829"
+      }
     }
   }
 }
-
-
-
-

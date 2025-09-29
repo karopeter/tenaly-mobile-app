@@ -13,7 +13,7 @@ export default ({ config } : ConfigContext): ExpoConfig => ({
     ...config.extra,
     EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
     eas: {
-      // Preparing for eas build(apk)
+      projectId: "3044a739-d08b-4ff0-a79e-2563f43c6829"
     }
    }
 });

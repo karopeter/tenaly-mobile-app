@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import {AntDesign} from '@expo/vector-icons';
 import { SelectList } from 'react-native-dropdown-select-list';
 import LocationSelectorModal from '@/app/components/LocationSelectorModal';
 import CarListingSection from '../../reusables/carListingSection';
@@ -22,12 +22,41 @@ import { showErrorToast } from '@/app/utils/toast';
 import { colors } from '@/app/constants/theme';
 import { useRouter } from 'expo-router';
 
+
+export interface UserProfile {
+   _id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  isGoogleUser: boolean;
+  image: string | null;
+  role: string;
+  paidPlans: Array<{
+    planType: string;
+    status: string;
+    reference: string;
+    _id: string;
+  }>;
+  walletBalance: number;
+  walletTransactions: Array<{
+    amount: number;
+    reference: string;
+    status: string;
+    paymentDate: string;
+    _id: string;
+  }>;
+  isVerified: boolean;
+  hasSubmittedVerification: boolean;
+  createdAt: string;
+}
+
 export default function HomeScreen() {
   const [selectedPropertyKey, setSelectedPropertyKey] = useState<string>(''); 
   const [selectedVehicleKey, setSelectedVehicleKey] = useState<string>(''); 
   const [isLocationModalVisible, setIsLocationModalVisible] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<string>('Location');
   const [ads, setAds] = useState<CombinedAd[]>([]);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>('');
   const router = useRouter();
@@ -71,6 +100,23 @@ export default function HomeScreen() {
     if (!label) return '';
     return label.toLowerCase();
   };
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        if (!apiClient) {
+          showErrorToast("API client is not initialized");
+          return;
+        }
+       const res = await apiClient.get('/api/profile');
+       setProfile(res.data);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+        setProfile(null);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     fetchAds();
@@ -144,6 +190,8 @@ export default function HomeScreen() {
     handleSearch({ search: searchText, propertyKey: selectedPropertyKey, vehicleKey: selectedVehicleKey });
   };
 
+  const now = Date.now();
+
  
   const premiumAds = ads.filter(ad => {
     const paidAd = ad.vehicleAd || ad.propertyAd;
@@ -151,14 +199,39 @@ export default function HomeScreen() {
   });
 
   const newVehicles = ads
-    .filter(ad => ad.vehicleAd && String(ad.carAd?.category || '').toLowerCase().includes('car'))
-    .sort((a, b) => new Date(b.carAd?.createdAt || 0).getTime() - new Date(a.carAd?.createdAt || 0).getTime())
-    .slice(0, 6);
+  .filter(ad => {
+    if (!ad.vehicleAd) return false;
+    const createdAt = new Date(ad.carAd?.createdAt).getTime();
+    return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000; // within 7 days
+  })
+  .sort((a, b) => {
+    return new Date(b.carAd?.createdAt).getTime() - new Date(a.carAd?.createdAt).getTime();
+  })
+  .slice(0, 6);
 
+  // const newVehicles = ads
+  //   .filter(ad => ad.vehicleAd && String(ad.carAd?.category || '').toLowerCase().includes('car'))
+  //   .sort((a, b) => new Date(b.carAd?.createdAt || 0).getTime() - new Date(a.carAd?.createdAt || 0).getTime())
+  //   .slice(0, 6);
+
+  // const newProperties = ads
+  //   .filter(ad => ad.propertyAd)
+  //   .sort((a, b) => new Date(b.carAd?.createdAt || 0).getTime() - new Date(a.carAd?.createdAt || 0).getTime())
+  //   .slice(0, 6);
+
+  
   const newProperties = ads
-    .filter(ad => ad.propertyAd)
-    .sort((a, b) => new Date(b.carAd?.createdAt || 0).getTime() - new Date(a.carAd?.createdAt || 0).getTime())
-    .slice(0, 6);
+  .filter(ad => {
+    if (!ad.propertyAd) return false;
+    const createdAt = new Date(ad.propertyAd?.createdAt ?? 0).getTime();
+    return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000; // within 7 days
+  })
+  .sort(
+    (a, b) =>
+      new Date(b.propertyAd?.createdAt ?? 0).getTime() -
+      new Date(a.propertyAd?.createdAt ?? 0).getTime()
+  )
+  .slice(0, 6);
 
   const recommendedAds = ads
     .filter(ad => {
@@ -178,7 +251,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <KeyboardAvoidingView className="flex-1 bg-[#F8F8F8] mt-10 justify-center items-center">
-        <ActivityIndicator size="small" color="#1031AA" />
+        <ActivityIndicator size="small" color={colors.blue} />
         <Text style={styles.loadingText}>Loading marketplace...</Text>
       </KeyboardAvoidingView>
     );
@@ -189,14 +262,34 @@ export default function HomeScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-[#F8F8F8] mt-10">
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           {/* Header (unchanged) */}
-          <View className="flex-row items-center justify-between px-6 py-4 bg-white" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, elevation: 4 }}>
+          <View 
+            className="flex-row items-center justify-between px-6 py-4 bg-white" 
+            style={{ 
+               shadowColor: '#000', 
+               shadowOffset: { width: 0, height: 2 }, 
+               shadowOpacity: 0.1,
+               elevation: 4 
+               }}>
             <View className="flex-row gap-2 items-center">
-              <Image source={require("../../../assets/images/profileRight.png")} className="w-20 h-20 rounded-full" />
+             {profile?.image ? (
+              <Image 
+                source={{ uri: profile.image }}
+                style={styles.profileImage}
+              />
+             ): (
+              <Image 
+                source={require('@/assets/images/profile-circle.png')}
+                style={styles.profileImage}
+              />
+             )}
               <View className="flex-col gap-2">
-                <Text className="text-[#525252] font-[500] text-[14px]">Welcome Golibe</Text>
+                <Text 
+                  style={styles.profileText}>
+                  Welcome {profile?.fullName || "User" }
+                </Text>
                 <TouchableOpacity className="flex-row items-center" onPress={() => setIsLocationModalVisible(true)}>
-                  <Text className="text-sm text-gray-500">{selectedLocation}</Text>
-                  <AntDesign name="caretdown" size={10} color="#8C8C8C" style={{ marginLeft: 4 }} />
+                  <Text style={styles.profileText}>{selectedLocation}</Text>
+                  <AntDesign name="caret-down" size={10} color="#8C8C8C" style={{ marginLeft: 4 }} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -246,11 +339,39 @@ export default function HomeScreen() {
                 setSelected={onSelectVehicle}
                 data={vehicleData}
                 placeholder="Vehicle"
-                boxStyles={{ height: 44, backgroundColor: colors.lightSpot, borderWidth: 0.5, borderColor: colors.border, borderRadius: 8, paddingLeft: 36, paddingRight: 12 }}
-                inputStyles={{ color: '#525252', fontSize: 14 }}
-                dropdownStyles={{ maxHeight: 300, backgroundColor: colors.bg, borderColor: colors.border, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderBottomWidth: 0, shadowColor: colors.black, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, width: '100%', maxWidth: 300 }}
-                dropdownItemStyles={{ borderBottomWidth: 1, borderBottomColor: colors.lightSpot, paddingVertical: 16, paddingHorizontal: 20 }}
-                dropdownTextStyles={{ color: colors.darkGray, fontSize: 14, textAlign: 'center' }}
+                boxStyles={{ 
+                  height: 44, 
+                  backgroundColor: colors.lightSpot, 
+                  borderWidth: 0.5, 
+                  borderColor: colors.border, 
+                  borderRadius: 8, 
+                  paddingLeft: 36, 
+                  paddingRight: 12 
+                }}
+                inputStyles={{ 
+                   color: '#525252', 
+                   fontSize: 14 
+                }}
+                dropdownStyles={{ 
+                  maxHeight: 300,
+                   backgroundColor: colors.bg, 
+                   borderColor: colors.border, 
+                   borderTopLeftRadius: 24, 
+                   borderTopRightRadius: 24, 
+                   borderBottomWidth: 0, 
+                   shadowColor: colors.black, 
+                   shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, width: '100%', maxWidth: 300 }}
+                dropdownItemStyles={{ 
+                   borderBottomWidth: 1,
+                   borderBottomColor: colors.lightSpot, 
+                   paddingVertical: 16, 
+                   paddingHorizontal: 20 
+                }}
+                dropdownTextStyles={{ 
+                  color: colors.darkGray, 
+                  fontSize: 14, 
+                  textAlign: 'center' 
+                }}
               />
               <Image
                source={require('../../../assets/images/vehicleFilter.png')} 
@@ -266,10 +387,26 @@ export default function HomeScreen() {
               </View>
             ) : (
               <>
-                <CarListingSection title="Trending (Premium Ads)" ads={premiumAds} onAdPress={handleAdPress} />
-                <CarListingSection title="Newly Posted Vehicles" ads={newVehicles} onAdPress={handleAdPress} />
-                <CarListingSection title="Newly Posted Properties" ads={newProperties} onAdPress={handleAdPress} />
-                <CarListingSection title="Recommended For You" ads={recommendedAds} onAdPress={handleAdPress} />
+                <CarListingSection 
+                   title="Trending (Premium Ads)" 
+                   ads={premiumAds} 
+                   onAdPress={handleAdPress}
+                   />
+                <CarListingSection 
+                  title="Newly Posted Vehicles" 
+                  ads={newVehicles} 
+                  onAdPress={handleAdPress}
+                 />
+                <CarListingSection 
+                  title="Newly Posted Properties" 
+                  ads={newProperties} 
+                  onAdPress={handleAdPress} 
+                 />
+                <CarListingSection 
+                 title="Recommended For You" 
+                 ads={recommendedAds} 
+                 onAdPress={handleAdPress} 
+                />
               </>
             )}
           </View>
@@ -315,6 +452,18 @@ const styles = StyleSheet.create({
      alignItems: 'center'
   },
   resultText: {
-     color: colors.darkShadeGray
+     color: colors.darkShadeGray,
+     fontFamily: 'WorkSans_500Medium'
+  },
+  profileImage: {
+    width: 40, 
+    height: 40,  
+    borderRadius: 40
+  },
+  profileText: {
+    color: colors.darkGray,
+    fontWeight: '600',
+    fontFamily: 'WorkSans_600SemiBold',
+    fontSize: 14,
   }
 })

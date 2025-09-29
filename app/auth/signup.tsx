@@ -6,6 +6,7 @@ import {
     Platform,
     Image,
     Dimensions,
+    StyleSheet,
     ScrollView,
     TouchableOpacity
   } from 'react-native';
@@ -26,6 +27,7 @@ import {
    import { showErrorToast, showSuccessToast } from '../utils/toast';
    import * as Google from 'expo-auth-session/providers/google';
    import { useAuth } from '../context/AuthContext';
+   import { colors } from '../constants/theme';
 
    WebBrowser.maybeCompleteAuthSession();  // Required for web 
 
@@ -220,9 +222,11 @@ const SignUp: React.FC = () => {
                borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
              }}>
-            <Text className="text-[#525252] text-center font-[500] text-[18px] mb-5">Welcome to Tenaly</Text> 
+            <Text style={styles.signUpText}>
+               Welcome to Tenaly
+            </Text> 
             <Text 
-              className="text-[#868686] text-[14px] font-normal mb-2"
+              style={styles.signUpTitle}
               numberOfLines={1}
               ellipsizeMode='tail'>
                Fill in your details to enjoy all the features of Tenaly
@@ -249,6 +253,17 @@ const SignUp: React.FC = () => {
                error={errors.email}
                touched={touched.email}
              />
+
+               {/* Role Selection Dropdown */}
+            <View className="mb-4">
+              <Dropdown 
+                 label="What would you like to do?"
+                 options={roleOptions}
+                 selectedValue={values.roleSelection}
+                 onValueChange={(value) => setFieldValue('roleSelection', value)}
+                 error={touched.roleSelection && errors.roleSelection ? errors.roleSelection : undefined}
+              />
+            </View>
 
             <Input 
               label="Phone Number"
@@ -295,17 +310,6 @@ const SignUp: React.FC = () => {
                 </TouchableOpacity>
               }
             />
-
-            {/* Role Selection Dropdown */}
-            <View className="mb-4">
-              <Dropdown 
-                 label="What would you like to do?"
-                 options={roleOptions}
-                 selectedValue={values.roleSelection}
-                 onValueChange={(value) => setFieldValue('roleSelection', value)}
-                 error={touched.roleSelection && errors.roleSelection ? errors.roleSelection : undefined}
-              />
-            </View>
            
            <GradientButton 
             title={loading ? 'Signing Up...' : 'Sign Up'}
@@ -313,7 +317,9 @@ const SignUp: React.FC = () => {
             onPress={handleSubmit}
            />
           <View className="mt-2">
-            <Text className="text-[#868686] text-center text-[12px] font-[400]">
+            <Text 
+              style={styles.agreeText}
+              className="text-[#868686] text-center text-[12px] font-[400]">
                By Signing up, you agree to all Terms Of Service and Privacy 
                Policy
               </Text>
@@ -338,7 +344,9 @@ const SignUp: React.FC = () => {
                         marginRight: 8
                      }}
                  />
-                  <Text className="text-[#525252] text-[16px] font-[500]">
+                  <Text 
+                  style={styles.googleText}
+                    className="text-[#525252] text-[16px] font-[500]">
                     {loading ? 'Connecting...' : 'Google'}
                   </Text>
               </TouchableOpacity>
@@ -356,14 +364,21 @@ const SignUp: React.FC = () => {
                 borderBottomRightRadius: 24,
               }}>
                <View className="flex-row justify-center">
-                  <Text className="text-center text-[#868686] text-[14px] font-[400]">
+                  <Text 
+                   style={styles.accountText}
+                   className="text-center text-[#868686] text-[14px] font-[400]">
                       Already have an account? {' '}
                   </Text>
                   <TouchableOpacity 
                      activeOpacity={0.7}
                      onPress={() => router.push('/auth/login')}
                      >
-                     <Text className="text-center text-[14px] text-[#000087] font-[400]">Sign In</Text>
+                     <Text 
+                     style={styles.accountText}
+                      className="text-center text-[14px] 
+                      text-[#000087] font-[400]">
+                      Sign In
+                     </Text>
                   </TouchableOpacity>
                </View>
             </View>
@@ -371,5 +386,33 @@ const SignUp: React.FC = () => {
       </KeyboardAvoidingView>
     );
 }
+
+const styles = StyleSheet.create({
+  signUpText: {
+    color: colors.darkGray,
+    textAlign: 'center',
+    fontWeight: '500',
+    fontSize: 18,
+    marginBottom: 20,
+    fontFamily: 'WorkSans_600SemiBold'
+  },
+  signUpTitle: {
+     color: colors.lightGrey,
+     fontSize: 14,
+     fontWeight: '400',
+     marginBottom: 20,
+     fontFamily: 'WorkSans_400Regular'
+  },
+  agreeText: {
+    fontFamily: 'WorkSans_400Regular',
+    marginTop: 5,
+  },
+  googleText: {
+    fontFamily: 'WorkSans_600SemiBold'
+  },
+  accountText: {
+    fontFamily: 'WorkSans_400Regular'
+  }
+})
 
 export default SignUp;

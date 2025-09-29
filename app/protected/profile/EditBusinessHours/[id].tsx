@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { AntDesign } from '@expo/vector-icons';
 import { colors } from '@/app/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import apiClient from '@/app/utils/apiClient';
@@ -343,7 +344,7 @@ export default function EditBusinessHours() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backIcon}>←</Text>
+            {/* <Text style={styles.backIcon}>←</Text> */}
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Business Hours</Text>
         </View>
@@ -359,7 +360,8 @@ export default function EditBusinessHours() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
+          {/* <Text style={styles.backIcon}>←</Text> */}
+          <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Business hours</Text>
       </View>
@@ -412,6 +414,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
+    gap: 10,
     backgroundColor: colors.bg,
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
@@ -444,6 +447,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium',
     marginVertical: 20,
   },
   multipleAddressForm: {
@@ -505,6 +509,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.darkGray,
     marginBottom: 8,
+    fontFamily: 'WorkSans_500Medium'
   },
   timeSelector: {
     flexDirection: 'row',

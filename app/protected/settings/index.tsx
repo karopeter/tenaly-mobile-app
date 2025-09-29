@@ -120,7 +120,7 @@ export default function SettingsScreen() {
               {item.icon}
               <Text style={styles.menuText}>{item.title}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#525252" />
+            <Ionicons name="chevron-forward" size={18} color={colors.darkGray} />
           </TouchableOpacity>
         ))}
 
@@ -187,11 +187,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   profileEmail: {
     fontSize: 14,
     color: colors.lightGrey,
     fontWeight: "400",
+    fontFamily: 'WorkSans_500Medium'
   },
   separator: {
     borderBottomWidth: 1,
@@ -207,6 +209,7 @@ const styles = StyleSheet.create({
     color: colors.darkGray,
     fontWeight: "500",
     marginLeft: 6,
+    fontFamily: 'WorkSans_500Medium'
   },
   menuContainer: {
   
@@ -226,8 +229,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   menuText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "500",
+    fontFamily: 'WorkSans_500Medium',
     color: colors.darkGray,
   },
 });

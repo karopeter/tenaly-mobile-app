@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '@/app/constants/theme';
 import { useRouter } from 'expo-router';
+import { AntDesign } from '@expo/vector-icons';
 import apiClient from '@/app/utils/apiClient';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 
@@ -456,7 +457,8 @@ const BusinessWithoutHours = ({ business }: { business: BusinessData }) => (
              onPress={() => router.push('/protected/profile')}
              style={styles.backButton}
            >
-              <Text style={styles.backIcon}>←</Text>
+              {/* <Text style={styles.backIcon}>←</Text> */}
+              <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
            </TouchableOpacity>
            <Text style={styles.detailsText}>Business Profile</Text>
         </View>
@@ -504,7 +506,7 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   detailsText: {
-    color: colors.lightGrey, 
+    color: colors.darkGray, 
     fontWeight: '600',
     fontSize: 16,
   },
@@ -527,7 +529,8 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.darkGray
+    color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium'
   },
   activeTabText: {
      color: colors.bg,
@@ -535,7 +538,7 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     fontSize: 24,
-    color: colors.grey300
+    color: colors.darkGray
   },
   headerTitle: {
     fontSize: 18,
@@ -586,6 +589,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.lightGrey,
     marginTop: 20,
+    fontFamily: 'WorkSans_500Medium',
     textAlign: 'center'
   },
   addButton: {
@@ -650,6 +654,7 @@ const styles = StyleSheet.create({
   businessName: {
     color: colors.darkGray,
     fontSize: 14,
+    fontFamily: 'WorkSans_500Medium',
     fontWeight: '500'
   },
   addHourButton: {
@@ -685,7 +690,8 @@ const styles = StyleSheet.create({
   editText: {
     color: colors.viewGray,
     fontSize: 14,
-    fontWeight: '500'
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium'
   },
   hoursList:{
    padding: 15,
@@ -712,6 +718,7 @@ const styles = StyleSheet.create({
      opacity: 0.7,
      marginTop: 2,
      flexShrink: 1,
+     fontFamily: 'WorkSans_400Regular',
      flexWrap: 'wrap'
   },
   timeContainer: {
@@ -764,11 +771,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.blue,
+    fontFamily: 'WorkSans_500Medium'
   },
   timeText: {
     fontSize: 14,
     color: colors.lightGreenShade,
     opacity: 0.8,
+    fontFamily: 'WorkSans_500Medium'
   },
   daysContainer: {
     marginTop: 5,

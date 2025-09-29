@@ -18,6 +18,7 @@ import { useRouter } from 'expo-router';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { colors } from '@/app/constants/theme';
 import LocationDropdown from '@/app/reusables/locationDropdown';
+import { AntDesign } from '@expo/vector-icons';
 import apiClient from '@/app/utils/apiClient';
 
 interface AddressInput {
@@ -209,7 +210,8 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
              <TouchableOpacity 
                onPress={() => router.push('/protected/profile/business-profile')} 
                style={styles.backButton}>
-                 <Text style={styles.backIcon}>←</Text>
+                 {/* <Text style={styles.backIcon}>←</Text> */}
+                 <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
              </TouchableOpacity>
              <Text style={styles.headerTitle}>Add a Business</Text>
           </View>
@@ -327,8 +329,9 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '600',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   content: {
     flex: 1,
@@ -348,6 +351,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.darkGray,
     marginBottom: 8,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   input: {
     borderWidth: 1,
@@ -393,6 +397,7 @@ const styles = StyleSheet.create({
     color: colors.darkGray,
     marginBottom: 16,
     marginTop: 8,
+    fontFamily: 'WorkSans_500Medium'
   },
   addressSection: {
     marginTop: 8,
@@ -416,6 +421,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium'
   },
   cancelButton: {
     backgroundColor: colors.red,
@@ -479,5 +485,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.bg,
+    fontFamily: "WorkSans_500Medium"
   },
 })

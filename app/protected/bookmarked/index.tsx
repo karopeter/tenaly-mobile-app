@@ -12,7 +12,7 @@ import {
  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {  Feather } from '@expo/vector-icons';
+import {  Feather, AntDesign } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '@/app/constants/theme';
 import { useRouter } from 'expo-router';
@@ -400,8 +400,7 @@ export default function Bookmarked() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-           <Text style={styles.backIcon}>←</Text>
-          {/* <AntDesign name="arrowleft" size={24} color={colors.darkGray} /> */}
+          <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Bookmarked Ads</Text>
       </View>

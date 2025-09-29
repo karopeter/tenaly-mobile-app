@@ -19,7 +19,7 @@ import {
 const VerifyCodeScreen: React.FC = () => {
   const router = useRouter();
   const [code, setCode] = useState(['', '', '', '']);
-  const [loading, setLoading] = useState(false);
+  //const [loading, setLoading] = useState(false);
 
   const handleChangeText = (text: string, index: number) => {
     if (text.length > 1) return; // Prevent pasting multiple letters in one fields 

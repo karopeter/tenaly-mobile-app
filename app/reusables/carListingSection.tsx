@@ -1,5 +1,10 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { 
+  View, 
+  StyleSheet, 
+  Text, 
+  TouchableOpacity
+ } from 'react-native';
 import CarCard from './CarCard';
 import { CombinedAd } from '../types/marketplace';
 import { colors } from '../constants/theme';
@@ -162,11 +167,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold',
     marginBottom: 16,
   },
   viewAllText: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium',
     color: colors.darkBlue,
   },
   gridContainer: {

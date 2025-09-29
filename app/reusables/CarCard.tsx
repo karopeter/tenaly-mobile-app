@@ -233,23 +233,27 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.blue,
     marginBottom: 8,
+    fontFamily: 'WorkSans_500Medium',
   },
   title: {
     fontSize: 14,
     fontWeight: '600',
     color: colors.darkGray,
     marginBottom: 5,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   localText: {
      color: colors.darkGray,
      fontWeight: '500',
      fontSize: 10,
+     fontFamily: 'WorkSans_500Medium',
      textAlign: "center"
   },
   subtitle: {
     fontSize: 12,
     color: colors.darkShadeGray,
     marginBottom: 6,
+    fontFamily: 'WorkSans_500Medium',
   },
   locationContainer: {
     flexDirection: 'row',
@@ -265,7 +269,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color:  colors.lightShadeGray,
     flex: 1,
-    fontWeight: '400'
+    fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular',
   },
   description: {
     fontSize: 11,
@@ -273,6 +278,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     textAlign: "left",
     marginBottom: 12,
+      fontFamily: 'WorkSans_500Medium',
   },
   businessContainer: {
     flexDirection: 'row',

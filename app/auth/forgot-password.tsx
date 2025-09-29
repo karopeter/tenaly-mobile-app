@@ -98,6 +98,7 @@ const ForgotPassword: React.FC = () => {
                  setEmail(text);
                  if (error) setError('');
                }}
+               onBlur={() => {}}
                keyboardType="email-address"
                autoCapitalize="none"
              />

@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import apiClient from '@/app/utils/apiClient';
 import { colors } from '@/app/constants/theme';
+import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 type SelectedImageFile = {
@@ -260,7 +261,7 @@ const PersonalProfileScreen = () => {
         <View style={styles.header}>
           <TouchableOpacity 
             onPress={handleCancel} disabled={saving}>
-            <Text style={styles.backButton}>←</Text>
+            {/* <Text style={styles.backButton}>←</Text> */}
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Personal profile</Text>
         </View>
@@ -364,9 +365,10 @@ const PersonalProfileScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/protected/profile')}>
-          <Text style={styles.backButton}>←</Text>
+          {/* <Text style={styles.backButton}>←</Text> */}
+          <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Personal profile</Text>
+        <Text style={styles.headerTitle}>Personal Profile</Text>
       </View>
 
       <View style={styles.content}>
@@ -429,6 +431,7 @@ const styles = StyleSheet.create({
     shadowColor: colors.blurGrey,
      paddingTop: 60,
     paddingBottom: 20,
+    gap: 10,
     shadowOffset: { width: 0, height: 4, },
     shadowOpacity: 0.1,
     elevation: 6,
@@ -444,13 +447,14 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 24,
-    color: colors.grey300,
+    color: colors.darkGray,
     marginRight: 15,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
   },
   content: {
     paddingHorizontal: 20,
@@ -585,6 +589,8 @@ const styles = StyleSheet.create({
     color: colors.darkGray,
     marginBottom: 8,
     textTransform: 'uppercase',
+    fontWeight: '600',
+    fontFamily: 'WorkSans_600SemiBold',
     letterSpacing: 0.5,
   },
   input: {
@@ -593,6 +599,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderWidth: 1,
+    fontFamily: 'WorkSans_500Medium',
     borderColor: colors.border,
     borderRadius: 4,
   },
@@ -612,6 +619,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: colors.bg,
     fontSize: 16,
+    fontFamily: 'WorkSans_500Medium',
     fontWeight: '600',
   },
 });

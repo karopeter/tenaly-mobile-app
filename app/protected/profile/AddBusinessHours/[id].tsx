@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AntDesign } from '@expo/vector-icons';
 import { colors } from '@/app/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -397,12 +398,13 @@ export default function AddBusinessHours() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backIcon}>←</Text>
+            <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
+            {/* <Text style={styles.backIcon}>←</Text> */}
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add Business Hours</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#1031AA" />
+          <ActivityIndicator size="large" color={colors.darkGray} />
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </SafeAreaView>
@@ -414,7 +416,7 @@ export default function AddBusinessHours() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
+          {/* <Text style={styles.backIcon}>←</Text> */}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Business hours</Text>
       </View>

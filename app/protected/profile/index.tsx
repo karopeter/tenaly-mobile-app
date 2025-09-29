@@ -7,7 +7,7 @@ import {
  } from 'react-native';
  import { SafeAreaView } from 'react-native-safe-area-context';
  import { useRouter } from 'expo-router';
- import { Ionicons } from '@expo/vector-icons';
+ import { Ionicons, AntDesign  } from '@expo/vector-icons';
  import { colors } from '@/app/constants/theme';
 
 
@@ -18,11 +18,11 @@ export default function ProfileScreen() {
      <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
          <TouchableOpacity
-           onPress={() => router.back()}
+           onPress={() => router.push('/protected/settings')}
            style={styles.backButton}
            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10}}
          >
-            <Ionicons name="arrow-back" size={22} color={colors.darkGray} />
+            <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
          </TouchableOpacity>
          <Text style={styles.headerTitle}>Profile</Text>
 

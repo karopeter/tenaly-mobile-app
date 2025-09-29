@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
  import { LinearGradient } from 'expo-linear-gradient';
  import { useRouter } from 'expo-router';
+ import { colors } from './constants/theme';
 
 const {width, height} = Dimensions.get('window');
 const COLORS = { primary: "#FFFFFF", white: "#fff", gray: "#CDCDD7", blue: "#5555DD" }
@@ -206,14 +207,15 @@ const SplashScreen = () => {
 
 const styles = StyleSheet.create({
    title: {
-    color: '#525252',
+    color: colors.darkGray,
     fontSize: 22,
     marginTop: 2,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
+    fontFamily: 'WorkSans_500Medium'
    },
    subTitle: {
-    color: '#868686',
+    color: colors.lightGrey,
     fontSize: 14,
     fontWeight: '400',
     marginTop: 10,
@@ -221,7 +223,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
     flexShrink: 1,
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    fontFamily: 'WorkSans_400Regular'
    },
    indicator: {
      height: 2.5,
@@ -243,17 +246,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#CDCDD7',
+    borderColor: colors.border,
     backgroundColor: 'transparent'
    },
    nextText: {
-    color: '#FFFFFF',
+    color: colors.bg,
     fontWeight: '500',
+    fontFamily: 'WorkSans_600SemiBold',
     fontSize: 16,
    },
    skipText: {
-    color: '#525252',
+    color: colors.darkGray,
     fontWeight: '500',
+    fontFamily: 'WorkSans_600SemiBold',
     fontSize: 16,
    }
 });

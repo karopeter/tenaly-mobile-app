@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  ScrollView,
   ActivityIndicator
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5, Entypo } from '@expo/vector-icons';
@@ -59,15 +58,13 @@ export default function SettingsScreen() {
       <View style={styles.container}>
          <Text style={styles.header}>Settings</Text>
          <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#1031AA" />
+          <ActivityIndicator size="large" color={colors.blue} />
           <Text style={styles.loadingText}>Loading profile...</Text>
          </View>
       </View>
     );
   }
 
-
-  // Use full profile data, fallback to authUser
   const fullName = profile?.fullName || authUser?.fullName || 'User';
   const email = profile?.email || authUser?.email || 'No email';
   const imageUri = profile?.image;
@@ -75,7 +72,7 @@ export default function SettingsScreen() {
   const isPremium = planType !== 'free' && planType !== null;
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <Text style={styles.header}>Settings</Text>
 
@@ -99,7 +96,6 @@ export default function SettingsScreen() {
 
         {/* Free Plan Row */}
         <View style={styles.freePlanContainer}>
-          <FontAwesome5 name="" size={14} color="#f5a623" />
           <FontAwesome5 name={isPremium ? "crown" : "user"} size={14} color={isPremium ? "#f5a623" : "#868686"} />
           <Text style={styles.freePlanText}>
             {isPremium ? `You are on ${planType} plan` : 'You are on free plan'}
@@ -124,9 +120,9 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         ))}
 
-        {/* Logout Item */ }
+        {/* Logout Item */}
         <TouchableOpacity
-          style={styles.menuItem}
+          style={styles.logoutItem}
           activeOpacity={0.6}
           onPress={signOut}>
            <View style={styles.menuLeft}>
@@ -135,7 +131,7 @@ export default function SettingsScreen() {
            </View>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -212,7 +208,7 @@ const styles = StyleSheet.create({
     fontFamily: 'WorkSans_500Medium'
   },
   menuContainer: {
-  
+    flexGrow: 1,
   },
   menuItem: {
     flexDirection: "row",
@@ -223,6 +219,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.blueRomance,
   },
+  logoutItem: {
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginBottom: 24,
+  },
   menuLeft: {
     flexDirection: "row",
     alignItems: "center",
@@ -232,6 +233,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     fontFamily: 'WorkSans_500Medium',
-    color: colors.darkGray,
+    color: colors.darkGray
   },
 });

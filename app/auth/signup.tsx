@@ -183,8 +183,10 @@ const SignUp: React.FC = () => {
 
     return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-[#F8F8F8] p-6"
+     style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0 }
+      className="flex-1 bg-[#F8F8F8]"
       >
         <View className="items-center mt-10">
           <View 
@@ -205,10 +207,8 @@ const SignUp: React.FC = () => {
       
       <ScrollView
          keyboardShouldPersistTaps="handled"
-         contentContainerStyle={{ 
-            flexGrow: 1, 
-            justifyContent: 'center'
-          }}>
+         showsVerticalScrollIndicator={false}
+         contentContainerStyle={{ flexGrow: 1 }}>
          <Formik
            initialValues={signUpInitialValues}
            validationSchema={signUpSchema}

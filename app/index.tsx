@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     maxWidth: '85%',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 18,
     flexShrink: 1,
     flexWrap: 'wrap',
     fontFamily: 'WorkSans_400Regular'

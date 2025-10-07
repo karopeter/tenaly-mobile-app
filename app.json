@@ -14,7 +14,15 @@
     "scheme": "tenaly",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.karopeter531.tenaly",
+       "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["tenaly"]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,6 +30,19 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.karopeter531.tenaly",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "tenaly",
+              "host": "wallet"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "edgeToEdgeEnabled": true,
       "versionCode": 1
     },

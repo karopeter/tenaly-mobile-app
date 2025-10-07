@@ -7,6 +7,7 @@ import {
     FlatList,
     StyleSheet
 } from 'react-native';
+import Icon from "react-native-vector-icons/Ionicons";
 
 interface Option {
     label: string;
@@ -44,11 +45,16 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
        {/* Dropdown Trigger */}
        <TouchableOpacity
-         style={[styles.input, error ? styles.inputError : null]}
+         style={[
+          styles.input, 
+          {flexDirection: "row", alignItems: "center", justifyContent: "space-between"},
+          error ? styles.inputError : null
+        ]}
          onPress={() => setIsVisible(true)}
          activeOpacity={0.7}
        >
         <Text className="text-[#1F2937]">{selectedLabel}</Text>
+         <Icon name={isVisible ? "chevron-up" : "chevron-down"} size={20} color="#6B7280" />
        </TouchableOpacity>
        {/* Modal with Options */}
         <Modal visible={isVisible} transparent animationType="fade">

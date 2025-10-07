@@ -151,7 +151,7 @@ const Login = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-[#F8F8F8] p-6"
+      className="flex-1 bg-[#F8F8F8]"
     >
       {/* Logo */}
       <View className="items-center mt-10">

@@ -553,7 +553,7 @@ const fetchSellerData = async (sellerId: string) => {
               ): (
                 <Image 
                    source={isBookmarked
-                    ? require('../../../assets/images/bookmark-fill.png')
+                    ? require('../../../assets/images/bookmark-filled1.png')
                     : require('../../../assets/images/bookmarkedIcon.png')
                    }
                    style={[styles.bookIcon, { resizeMode: 'contain'}]}
@@ -679,19 +679,19 @@ const fetchSellerData = async (sellerId: string) => {
               paddingVertical: 12,
               marginBottom: 8,
             }}>
-            <FontAwesome name="whatsapp" size={24} color={colors.bg} />
+            <FontAwesome name="whatsapp" size={24} color="#25D366" />
             <Text style={styles.footerButtonText}>Chat on Whatsapp</Text>
           </LinearGradient>
         </TouchableOpacity>
         <View style={styles.footerBottomRow}>
           <TouchableOpacity style={styles.messageButton}>
-            <Feather name="phone" size={24} color={colors.darkGray} />
+            <Feather name="phone" size={18} color={colors.darkGray} />
             <Text style={styles.messageButtonText}>
               {seller?.phoneNumber}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.messageButton}>
-            <Feather name="mail" size={24} color={colors.darkGray} />
+            <Feather name="mail" size={18} color={colors.darkGray} />
             <Text style={styles.messageButtonText}>Message Seller</Text>
           </TouchableOpacity>
         </View>
@@ -761,8 +761,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   bookIcon: {
-    width: 36,
-    height: 36
+    width: 24,
+    height: 24
   },
   locationCon: {
     flexDirection: "row",
@@ -1011,14 +1011,15 @@ deliveryInfoLabel: {
     marginBottom: 16,
   },
   detailKey: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.lightGrey,
+    fontWeight: '400',
     fontFamily: 'WorkSans_400Regular',
     marginBottom: 10,
   },
   detailValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '500',
     color: colors.darkGray,
     fontFamily: 'WorkSans_500Medium'
   },
@@ -1170,8 +1171,8 @@ deliveryInfoLabel: {
   footerButtonText: {
     marginLeft: 8,
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '500',
     fontFamily: 'WorkSans_500Medium',
   },
   footerBottomRow: {
@@ -1193,9 +1194,9 @@ deliveryInfoLabel: {
   messageButtonText: {
     marginLeft: 8,
     color: colors.darkGray,
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'WorkSans_500Medium',
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
   addressItem: {
     flexDirection: 'row',

@@ -71,7 +71,7 @@ export default function ProtectedLayout() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View className="flex-1">
+      <View style={{ flex: 1, paddingBottom: 20 }}>
         <Slot />
       </View>
 

@@ -36,10 +36,9 @@ const Input: React.FC<InputProps> = ({
            style={styles.labelText}
            className={`
           absolute z-10 left-3 px-1 bg-[#F8F8F8] 
-           ${
-             isFocused || hasValue
-           ? 'top-[10px] text-[11px] text-blue-600'
-           : 'top-[5px] text-[14px] text-gray-500'
+           ${isFocused || hasValue
+           ? 'top-[4px] text-[11px] text-blue-600'
+           : 'top-[18px] text-[14px] text-gray-500'
           }
        `}>
        {label}

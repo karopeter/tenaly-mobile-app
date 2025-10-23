@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "105186528027",
+    "project_id": "tenaly-mobile",
+    "storage_bucket": "tenaly-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105186528027:android:30555dec1eaed4707021be",
+        "android_client_info": {
+          "package_name": "com.karopeter531.tenaly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "105186528027-63nq3vr25q5gpb97tjflafctnbpfv25f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.karopeter531.tenaly",
+            "certificate_hash": "87aaa43d162ec4be7b6d52e78c1cc353b8c6971e"
+          }
+        },
+        {
+          "client_id": "105186528027-437h4j5j0ga9bvrrsh8sfp40m1rlijs8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgs97p2frtB7XR4wblv6guC3OQM775aFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "105186528027-437h4j5j0ga9bvrrsh8sfp40m1rlijs8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "105186528027-k4q29seva036ka3bmbar19sr5s5i9o51.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.karopeter531.tenaly"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

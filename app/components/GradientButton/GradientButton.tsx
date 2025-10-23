@@ -5,24 +5,34 @@ import { LinearGradient } from 'expo-linear-gradient';
 interface GradientButtonProps {
     title: string;
     onPress: () => void;
-    disabled: boolean;
+    disabled?: boolean;
+    disabledBgColor?: string; 
 }
 
 const GradientButton: React.FC<GradientButtonProps> = ({
     title,
     onPress,
-    disabled = false
+    disabled = false,
+    disabledBgColor,
 }) => {
+  const defaultDisabledColor = '#EDEDED';
+  const disabledTextColor = '#868686';
+
     return (
       <TouchableOpacity
         className="w-full"
-         activeOpacity={0.7} onPress={onPress} disabled={disabled}>
+         activeOpacity={0.7} 
+         onPress={onPress} 
+         disabled={disabled}
+         >
         <View 
           className={`justify-center items-center ${
              disabled ? 'bg-[#EDEDED]' : ''
           }`}
            style={{
-             backgroundColor: disabled ? '#EDEDED' : 'transparent',
+             backgroundColor: disabled 
+             ? disabledBgColor || defaultDisabledColor 
+             : 'transparent',
              height: 52,
              borderRadius: 8,
            }}>
@@ -41,12 +51,16 @@ const GradientButton: React.FC<GradientButtonProps> = ({
                     }}
                 />
                )}
-            <Text 
-            style={styles.btnText}
-            className={`font-bold text-center font-[400] text-[12px] ${
-               disabled ? 'text-[#CDCDD7]' :  'text-white'
-            }`}>
-            {title}</Text>
+               <Text
+                style={[
+                 styles.btnText,
+                {
+                  color: disabled ? disabledTextColor : '#FFFFFF', 
+                },
+               ]}
+             className="font-bold text-center font-[400] text-[12px]">
+             {title}
+        </Text>
         </View>
       </TouchableOpacity>
     );

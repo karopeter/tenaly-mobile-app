@@ -48,9 +48,11 @@ export const colors = {
     greyBlue300: '#BABAF2',
     blurGrey: '#4D485F1A',
     grey300: '#8C8C8C',
+    grey200: '#CACACA',
     grey600: '#4C4C4C',
     mdLight: '#E5E5E5',
     grey700: '#3C3C3C',
     lightShallow: '#f8f9ff',
-    yellow600: '#CAA416'
+    yellow600: '#CAA416',
+    closeDark: '#292D32'
 }

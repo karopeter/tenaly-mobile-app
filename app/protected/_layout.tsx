@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRouter, useSegments, Stack, Slot } from 'expo-router';
@@ -13,7 +12,7 @@ export default function ProtectedLayout() {
 
   const navItems = [
     {
-      label: 'Home',
+      label: 'Home', 
       icon: <AntDesign name="home" size={24} color="#8C8C8C" />,
       activeIcon: <Ionicons name="home" size={24} color="#1031AA" />,
       activeIconText: (
@@ -22,21 +21,13 @@ export default function ProtectedLayout() {
       route: '/protected/home'
     },
     {
-      icon: (
-        <View
-          style={{
-            width: 52.24,
-            height: 52.24,
-            borderRadius: 26.12,
-            backgroundColor: '#CDCDD7',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-        >
-          <MaterialIcons name="menu-book" size={24} color="white" />
-        </View>
+      label: 'My Ads',
+      icon: <Ionicons name="car-outline" size={24} color="#8C8C8C" />,
+      activeIcon: <Ionicons name="car" size={24} color="#1031AA" />,
+      activeIconText: (
+        <Text style={{ color: '#1031AA'}}>My Ads</Text>
       ),
-      route: null 
+      route: '/protected/myads'
     },
     {
       label: 'Message',
@@ -94,9 +85,7 @@ export default function ProtectedLayout() {
               onPress={() => {
                 if (item.route) {
                   router.push(item.route);
-                } else {
-                  console.log('Load More clicked!');
-                }
+                } 
               }}
             >
               <View className="items-center justify-center">

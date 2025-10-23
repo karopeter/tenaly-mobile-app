@@ -9,7 +9,8 @@ import {
  ActivityIndicator,
  ScrollView,
  RefreshControl,
- Alert
+ Alert,
+ Linking
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {  Feather, AntDesign } from '@expo/vector-icons';
@@ -61,6 +62,7 @@ interface BookmarkedAd {
     description: string;
     createdAt: string;
   } | null;
+  isSold: boolean;
 }
 
 interface BookmarkedResponse {
@@ -113,7 +115,7 @@ export default function Bookmarked() {
       'Remove Bookmark',
       'Are you sure you want to remove this ad from your bookmarks?',
       [ 
-        { text: 'Cancel', style: 'Cancel' },
+        { text: 'Cancel', style: 'cancel' },
         {
          text: 'Remove',
          style: 'destructive',
@@ -159,10 +161,6 @@ export default function Bookmarked() {
      }
   }
 
-  // Navigate to ad details 
-  const handleAdPress = (adId: string) => {
-    router.push(`/protected/ad/${adId}`);
-  };
 
   // Formate price 
   const formatPrice = (amount: number) => {
@@ -195,6 +193,67 @@ export default function Bookmarked() {
     return 0;
   };
 
+  const handlePhoneCall = async (phoneNumber: string) => {
+    if (!phoneNumber || phoneNumber === "Loading...") {
+      showErrorToast("Phone number not available");
+      return;
+    } 
+
+     try {
+      const phoneUrl = `tel:${phoneNumber}`;
+      const canOpen = await Linking.canOpenURL(phoneUrl);
+
+      if (canOpen) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        showErrorToast("Unable to make phone call");
+      }
+     } catch (error: any) {
+      console.error("Error making phone call:", error);
+      showErrorToast("Failed to initate call");
+     }
+  };
+
+  // Handle Send message with productive preview 
+  // const handleSendMessage = async (ad: BookmarkedAd) => {
+  //    try {
+  //     if (!apiClient) {
+  //       showErrorToast("API client is not initialized");
+  //       return;
+  //     }
+
+  //     // Get or create conversation with the seller 
+  //     const response = await apiClient.post('/api/conversation/create-conversation', {
+  //      userId: ad.carAd.userId
+  //     });
+
+  //     if (response.data.conversation) {
+  //       const conversationId = response.data.conversation._id;
+
+  //       // Get product details for preview 
+  //       const productTitle = getAdTitle(ad);
+  //       const productImage = getAdImages(ad)[0] || null;
+  //       const productPrice = getAdPrice(ad);
+
+  //       // Navigate to message screen with conversation and product Info
+  //       router.push({
+  //         pathName: '/protected/message',
+  //         params: {
+  //           conversationId,
+  //           sellerId: ad.carAd.userId,
+  //           adId: ad.adId,
+  //           productTitle,
+  //           productImage,
+  //           productPrice: productPrice.toString()
+  //         }
+  //       });
+  //     }
+  //    } catch(error: any) {
+  //      console.error("Error creating conversation:", error);
+  //      showErrorToast(error.response?.data?.error || "Failed to start conversation");
+  //    }
+  // };
+
   // Get ad images 
   const getAdImages = (ad: BookmarkedAd) => {
     const relevantVehicleCategories = ["car", "bus", "tricycle"];
@@ -214,7 +273,6 @@ export default function Bookmarked() {
     return (
       <TouchableOpacity 
         style={styles.adCard}
-       // onPress={() => handleAdPress(item.adId)}
         activeOpacity={0.7}
       >
         <View style={styles.imageContainer}>
@@ -225,7 +283,11 @@ export default function Bookmarked() {
               <Feather name="image" size={32} color={colors.lightGrey} />
             </View>
           )}
-          
+          {item.isSold && (
+            <View style={styles.soldBadge}>
+              <Text style={styles.soldBadgeText}>SOLD</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.adDetails}>
@@ -315,28 +377,41 @@ export default function Bookmarked() {
           </View>
 
           <View style={styles.adFooter}>
-            {/* Message Button and Phone Number */}
-             <View>
-               <TouchableOpacity 
-                  style={[styles.messageBtn, styles.borderBtn]}
-                 >
-                 <Text style={styles.messageText}>Send Message</Text>
-               </TouchableOpacity>
-             </View>
-             <View>
-              <TouchableOpacity>
-                 <LinearGradient
-                 colors={loading ? ['#cccccc', '#999999'] : ['#00A8DF', '#1031AA']}
-                 start={{ x: 0, y: 0 }}
-                 end={{ x: 1, y: 0 }}
-                 style={styles.messageBtn}
+            {/* Conditional rendering based on isSold */}
+            {item.isSold ? (
+              <View style={styles.soldMessageContainer}>
+                <Text style={styles.soldMessageText}>
+                  This bookmarked ad has been sold
+                </Text>
+              </View>
+            ): (
+              <>
+               <View>
+                <TouchableOpacity
+                  style={[styles.messageBtn, styles.borderBtn]}>
+                  <Text style={styles.messageText}>Send Message</Text>
+                </TouchableOpacity>
+               </View>
+               <View>
+                <TouchableOpacity 
+                  onPress={() =>  handlePhoneCall(sellerDetails[item.carAd.userId])}
+                  disabled={!sellerDetails[item.carAd.userId] || sellerDetails[item.carAd.userId] === "Loading..."}
                 >
-                 <Text style={styles.callText}>
-                  {sellerDetails[item.carAd.userId] || "Loading..."}
-                 </Text>
+                   <LinearGradient
+                    colors={!sellerDetails[item.carAd.userId]  || sellerDetails[item.carAd.userId] === "Loading..."
+                      ? ['#cccccc', '#999999'] 
+                      : ['#00A8DF', '#1031AA']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.messageBtn}>
+                  <Text style={styles.callText}>
+                     {sellerDetails[item.carAd.userId] || "Loading..."}
+                  </Text>
                  </LinearGradient>
-              </TouchableOpacity>
-             </View>
+                </TouchableOpacity>
+               </View>
+              </>
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -503,6 +578,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  soldBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: 'rgba(255, 59, 48, 0.9)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  soldBadgeText: {
+    color: colors.bg,
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: 'WorkSans_700Bold',
+    letterSpacing: 1,
+  },
   bookmarkButton: {
     position: 'absolute',
     //top: 12,
@@ -598,6 +694,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 20,
     alignItems: 'center',
+  },
+  soldMessageContainer: {
+   flex: 1,
+   backgroundColor: colors.lightSpot,
+   borderRadius: 4,
+   paddingVertical: 12,
+   paddingHorizontal: 16,
+   alignItems: 'center',
+   justifyContent: 'center',
+  },
+  soldMessageText: {
+    color: colors.grey300,
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium',
+    textAlign: 'center'
   },
   messageBtn: {
     borderRadius: 4,

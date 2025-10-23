@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { 
  View, 
  Text,
@@ -17,9 +17,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { colors } from '@/app/constants/theme';
-import LocationDropdown from '@/app/reusables/locationDropdown';
 import { AntDesign } from '@expo/vector-icons';
 import apiClient from '@/app/utils/apiClient';
+import AddressCard from '@/app/reusables/AddressCard';
 
 interface AddressInput {
   id: string;
@@ -42,34 +42,38 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
     ]);
     const [loading, setLoading] = useState(false);
 
-    const addNewAddress = () => {
-        const newAddress: AddressInput = {
-            id: Date.now().toString(),
-            state: '',
-            lga: '',
-            address: ''
-        };
-        setAddresses([...addresses, newAddress]);
-    };
+    const addNewAddress = useCallback(() => {
+       const newAddress: AddressInput = {
+        id: Date.now().toString(),
+        state: '',
+        lga: '',
+        address: ''
+       };
+       setAddresses(prev => [...prev, newAddress]);
+    }, []);
 
-     const removeAddress = (id: string) => {
-        if (addresses.length > 1) {
-          setAddresses(addresses.filter(addr => addr.id !== id));
+    const removeAddress = useCallback((id: string) => {
+      setAddresses(prev => {
+         if (prev.length > 1) {
+          return prev.filter(addr => addr.id !== id);
+         }
+         return prev;
+      });
+    }, []);
+
+   
+    const updateAddress = useCallback((id: string, field: keyof AddressInput, value: string) => {
+      setAddresses(prev => prev.map(addr => {
+        if (addr.id === id) {
+          // If updating state, reset LGA 
+          if (field === 'state') {
+            return { ...addr, [field]: value, lga: '' };
+          }
+          return { ...addr, [field]: value  };
         }
-    };
-
-    const updateAddress = (id: string, field: keyof AddressInput, value: string) => {
-        setAddresses(addresses.map(addr => {
-            if (addr.id === id) {
-                // If updating state, reset LGA
-                if (field === 'state') {
-                    return { ...addr, [field]: value, lga: '' };
-                }
-                return { ...addr, [field]: value };
-            }
-            return addr;
-        }));
-    };
+        return addr;
+      }));
+    }, []);
 
 
     const handleSubmit = async () => {
@@ -94,7 +98,6 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
 
        // Get the location from the first address (state)
        const location = validAddresses[0].state;
-
        setLoading(true);
 
       try {
@@ -110,12 +113,7 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
         console.log('Sending request data:', requestData);
 
         const response = await apiClient?.post('/api/business/add-business', requestData);
-
-       // console.log('Business created successfully:', response?.data);
-
         showSuccessToast('Business added successfully!');
-
-        // Call back if provided 
         onBusinessAdded?.(response?.data);
 
         // Navigate back after a short delay 
@@ -139,7 +137,6 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
 
          showErrorToast(errorMessage);
 
-         // Show alert for ciritical errors 
          if (error.response?.status >= 500) {
           Alert.alert(
             'Sever Error',
@@ -153,76 +150,26 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
     };
 
 
-    const AddressCard = ({ address, index}: { address: AddressInput; index: number}) => (
-      <View style={styles.addressCard}>
-          <View style={styles.addressHeader}>
-            <Text style={styles.addressTitle}>Address {index + 1}</Text>
-            {addresses.length > 1 && index > 0 && (
-                <TouchableOpacity
-                 onPress={() => removeAddress(address.id)}
-                 style={styles.cancelButton}>
-                  <Text style={styles.cancelIcon}>×</Text>
-                </TouchableOpacity>
-            )}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <LocationDropdown
-               label="State"
-               type="state"
-               selectedValue={address.state}
-               onSelect={(value) => updateAddress(address.id, "state", value)}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <LocationDropdown
-               label="Local Government Area"
-               type="lga"
-               selectedValue={address.lga}
-               selectedState={address.state}
-               onSelect={(value) => updateAddress(address.id, "lga", value)}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-             <Text style={styles.label}>Address</Text>
-            <TextInput
-              style={[styles.input, styles.addressInput]}
-              placeholder="Enter your business address"
-              placeholderTextColor={colors.border}
-              value={address.address}
-              onChangeText={(value) => updateAddress(address.id, "address", value)}
-             />
-          </View>
-       </View>
-    );  
-
   return (
-      <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardAvoid}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-          enabled
-        >
-          <View style={styles.header}>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
              <TouchableOpacity 
                onPress={() => router.push('/protected/profile/business-profile')} 
                style={styles.backButton}>
-                 {/* <Text style={styles.backIcon}>←</Text> */}
                  <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
              </TouchableOpacity>
              <Text style={styles.headerTitle}>Add a Business</Text>
           </View>
 
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.flex}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
           <ScrollView 
             style={styles.content} 
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="none"
-            removeClippedSubviews={false}
           >
             <View style={styles.form}>
               <View style={styles.inputGroup}>
@@ -248,7 +195,6 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
-                  blurOnSubmit={false}
                   returnKeyType="done"
                   editable={!loading}
                 />
@@ -257,10 +203,17 @@ export default function AddBusiness({ onBack, onBusinessAdded}: AddBusinessProps
               <View style={styles.addressSection}>
                  <Text style={styles.sectionTitle}>Address</Text>
 
-                 {addresses.map((address, index) => (
-                    <AddressCard key={address.id} address={address} index={index} />
-                 ))}
-
+                  {addresses.map((address, index) => (
+                    <AddressCard
+                       key={address.id}
+                       address={address}
+                       index={index}
+                       canRemove={addresses.length > 1 && index > 0}
+                       onRemove={removeAddress}
+                       onUpdate={updateAddress}
+                    />
+                  ))}
+                 
                  <TouchableOpacity
                    onPress={addNewAddress}
                    style={styles.addAddressButton}
@@ -305,7 +258,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bgTheme
   },
-  keyboardAvoid: {
+  flex: {
     flex: 1,
   },
   header: {

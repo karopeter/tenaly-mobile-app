@@ -5,7 +5,8 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5, Entypo } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -103,34 +104,40 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      {/* Menu Items */}
-      <View style={styles.menuContainer}>
-        {menuItems.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.menuItem}
-            activeOpacity={0.6}
-            onPress={() => router.push(item.route)}
-          >
-            <View style={styles.menuLeft}>
-              {item.icon}
-              <Text style={styles.menuText}>{item.title}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.darkGray} />
-          </TouchableOpacity>
-        ))}
+      {/* Scrollable Menu Items */}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.menuContainer}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.menuItem}
+              activeOpacity={0.6}
+              onPress={() => router.push(item.route)}
+            >
+              <View style={styles.menuLeft}>
+                {item.icon}
+                <Text style={styles.menuText}>{item.title}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.darkGray} />
+            </TouchableOpacity>
+          ))}
 
-        {/* Logout Item */}
-        <TouchableOpacity
-          style={styles.logoutItem}
-          activeOpacity={0.6}
-          onPress={signOut}>
-           <View style={styles.menuLeft}>
-            <Ionicons name="log-out-outline" size={20} color="red" />
-             <Text style={[styles.menuText, { color: "red" }]}>Logout</Text>
-           </View>
-        </TouchableOpacity>
-      </View>
+          {/* Logout Item */}
+          <TouchableOpacity
+            style={styles.logoutItem}
+            activeOpacity={0.6}
+            onPress={signOut}>
+             <View style={styles.menuLeft}>
+              <Ionicons name="log-out-outline" size={20} color="red" />
+               <Text style={[styles.menuText, { color: "red" }]}>Logout</Text>
+             </View>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -207,6 +214,12 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontFamily: 'WorkSans_500Medium'
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   menuContainer: {
     flexGrow: 1,
   },
@@ -220,9 +233,12 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.blueRomance,
   },
   logoutItem: {
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginBottom: 24,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginTop: 8,
   },
   menuLeft: {
     flexDirection: "row",

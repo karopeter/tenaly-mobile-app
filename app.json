@@ -16,20 +16,34 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.karopeter531.tenaly",
-       "infoPlist": {
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload ad images.",
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["tenaly"]
+            "CFBundleURLSchemes": [
+              "tenaly"
+            ]
+          },
+          {
+            "CFBundleURLSchemes": [
+              "tenaly"
+            ]
           }
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "package": "com.karopeter531.tenaly",
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/tenaly-splash.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.karopeter531.tenaly",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -40,7 +54,10 @@
               "host": "wallet"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "edgeToEdgeEnabled": true,

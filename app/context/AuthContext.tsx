@@ -12,9 +12,11 @@ interface AuthContextType {
     isInitialized: boolean;
     isVerified: boolean;
     hasSubmittedVerification: boolean;
+    needsProfileCompletion: boolean;
     signIn: (data: AuthResponse) => Promise<void>;
     signOut: () => Promise<void>;
     refreshUserProfile: () => Promise<void>; 
+    completeProfile: (role: string, phoneNumber: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [hasSubmittedVerification, setHasSubmittedVerification] = useState(false);
+  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
 
   // Function to fetch and update user profile
   const fetchUserProfile = async (savedToken: string) => {
@@ -44,13 +47,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       role: userData.role,
       isVerified: userData.isVerified || false,
       hasSubmittedVerification: userData.hasSubmittedVerification || false,
+      verificationStatus: userData.verificationStatus || { personal: null, business: null },
     };
 
     setUser(simplifiedUser);
     setToken(savedToken);
     setIsVerified(userData.isVerified || false);
     setHasSubmittedVerification(userData.hasSubmittedVerification || false);
-    
+
+    // Check if profile needs completion (no role set)
+    setNeedsProfileCompletion(!userData.role);
    
     if (!userData.hasSubmittedVerification) {
       const submittedVerification = await AsyncStorage.getItem(`verification_submitted_${userData._id}`);
@@ -90,6 +96,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(data.user);
     setIsVerified(data.user.isVerified || false);
     setHasSubmittedVerification(data.user.hasSubmittedVerification || false);
+
+    // CHeck if profile needs completion
+    setNeedsProfileCompletion(!data.user.role);
   };
 
   const signOut = async () => {
@@ -98,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
      setUser(null);
      setIsVerified(false);
      setHasSubmittedVerification(false);
+     setNeedsProfileCompletion(false);
      router.replace('/auth/login');
   };
 
@@ -111,6 +121,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const completeProfile = async (role: string, phoneNumber: string) => {
+    if (!apiClient || !token) {
+      showErrorToast('Authentication required');
+      return;
+    }
+
+    try {
+      const response = await apiClient.put('/api/auth/complete-firebase-profile', {
+        role,
+        phoneNumber,
+      });
+
+      const { data } = response;
+
+      // Update token if backend sends new one 
+      if (data.token) {
+        await AsyncStorage.setItem('auth_token', data.token);
+        setToken(data.token);
+      }
+
+      // Update user state 
+      setUser(data.user);
+      setNeedsProfileCompletion(false);
+
+      // Navigate based on role 
+      if (data.user.role === 'seller') {
+        router.replace('/protected/settings');
+      } else {
+        router.replace('/protected/home');
+      }
+    } catch (error: any) {
+      console.error('Profile completion error:', error);
+      showErrorToast(error.response?.data?.message || ' Failed to complete profile');
+      throw error;
+    }
+  };
+
   const value = {
     user,
     token,
@@ -118,9 +165,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isInitialized,
     isVerified,
     hasSubmittedVerification,
+    needsProfileCompletion,
     signIn,
     signOut,
     refreshUserProfile,
+    completeProfile
   };
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

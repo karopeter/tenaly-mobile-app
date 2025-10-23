@@ -15,10 +15,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { AntDesign } from '@expo/vector-icons';
-import LocationDropdown from '@/app/reusables/locationDropdown';
 import apiClient from '@/app/utils/apiClient';
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { colors } from '@/app/constants/theme';
+import AddressCard from '@/app/reusables/AddressCard';
 
 
 interface AddressInput {
@@ -84,21 +84,20 @@ export default function EditBusiness() {
          setAboutBusiness(business.aboutBusiness);
 
          // Converting addresses to form format 
-       const formattedAddresses = business.addresses.map((addr, index) => ({
-  id: addr._id || `addr_${index}`,   // always stable
-  state: business.location,
-  lga: '',
-  address: addr.address,
-  deliveryAvailable: addr.deliveryAvailable,
-  _id: addr._id,
-}));
+       const formattedAddresses = business.addresses.map((addr: any, index: any) => ({
+         id: addr._id || `addr_${index}`,  
+         state: business.location,
+         lga: '',
+         address: addr.address,
+         deliveryAvailable: addr.deliveryAvailable,
+        _id: addr._id,
+     }));
 
-setAddresses(
-  formattedAddresses.length > 0
-    ? formattedAddresses
-    : [{ id: `local_${Date.now()}`, state: business.location, lga: '', address: '' }]
-);
-
+    setAddresses(
+      formattedAddresses.length > 0
+      ? formattedAddresses
+      : [{ id: `local_${Date.now()}`, state: business.location, lga: '', address: '' }]
+   );
 
      } catch (error: any) {
        console.error('Error fetching business data:', error);
@@ -109,55 +108,44 @@ setAddresses(
      }
   };
 
-const addNewAddress = () => {
+ const addNewAddress = useCallback(() => {
   const newAddress: AddressInput = {
-    id: `local_${Date.now()}`,  // unique + stable
-    state: '',
-    lga: '',
-    address: '',
+     id: `local_${Date.now()}`,
+     state: '',
+     lga: '',
+     address: '',
   };
   setAddresses((prev) => [...prev, newAddress]);
-};
+ }, []);
 
 
-  const removeAddress = (addressId: string) => {
-    if (addresses.length > 1) {
-        setAddresses(addresses.filter(addr => addr.id !== addressId));
-    }
-  };
-
-  // const updateAddress = (addressId: string, field: keyof AddressInput, value: string) => {
-  //   setAddresses(addresses.map(addr => {
-  //     if (addr.id === addressId) {
-  //       // If updating state, reset LGA
-  //       if (field === 'state') {
-  //         return { ...addr, [field]: value, lga: ""};
-  //       }
-  //       return { ...addr, [field]: value };
-  //     }
-  //     return addr;
-  //   }));
-  // };
+  const removeAddress = useCallback((addressId: string) => {
+    setAddresses((prev) => {
+      if (prev.length > 1) {
+        return prev.filter(addr => addr.id !== addressId);
+      }
+      return prev;
+    });
+  }, []);
 
 
-  const updateAddress = (
-  addressId: string,
-  field: keyof AddressInput,
-  value: string
+const updateAddress = useCallback((
+   addressId: string,
+   field: keyof AddressInput,
+   value: string
 ) => {
-  setAddresses((prevAddresses) =>
+  setAddresses((prevAddresses) => 
     prevAddresses.map((addr) => {
       if (addr.id === addressId) {
         if (field === "state") {
           return { ...addr, [field]: value, lga: "" };
         }
-        return { ...addr, [field]: value };
+        return { ...addr, [field]: value};
       }
       return addr;
     })
   );
-};
-
+}, []);
 
   const handleSubmit  = async () => {
     if (!businessName.trim()) {
@@ -199,15 +187,10 @@ const addNewAddress = () => {
         }))
       };
 
-      console.log('Updating business with data:', requestData);
-
       const response = await apiClient.put(`/api/business/editBusiness/${id}`, requestData);
-
-      //console.log("Business updated successfully!:", response.data);
-
       showSuccessToast("Business updated successfully!");
 
-      // Navigate back afer a short delay 
+
       setTimeout(() => {
         router.push('/protected/profile/business-profile');
       }, 1500);
@@ -244,54 +227,6 @@ const addNewAddress = () => {
     }
   };
 
- const AddressCard = ({ address, index }: { address: AddressInput; index: number }) => (
-  <View style={styles.addressCard}>
-    <View style={styles.addressHeader}>
-      <Text style={styles.addressTitle}>Address {index + 1}</Text>
-      {addresses.length > 1 && (
-        <TouchableOpacity
-          onPress={() => removeAddress(address.id)}
-          style={styles.cancelButton}
-        >
-          <Text style={styles.cancelIcon}>×</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-
-    <View style={styles.inputGroup}>
-      <LocationDropdown
-        label="State"
-        type="state"
-        selectedValue={address.state}
-        onSelect={(value) => updateAddress(address.id, "state", value)}
-      />
-    </View>
-
-    <View style={styles.inputGroup}>
-      <LocationDropdown
-        label="Local Government Area"
-        type="lga"
-        selectedValue={address.lga}
-        selectedState={address.state}
-        onSelect={(value) => updateAddress(address.id, "lga", value)}
-      />
-    </View>
-
-    <View style={styles.inputGroup}>
-      <Text style={styles.label}>Address</Text>
-      <TextInput
-        style={[styles.input, styles.addressInput]}
-        placeholder="Enter your business address"
-        placeholderTextColor={colors.border}
-        value={address.address}
-        onChangeText={(value) => updateAddress(address.id, "address", value)}
-        editable={!loading}
-      />
-    </View>
-  </View>
-);
-
-
   if (initialLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -299,7 +234,7 @@ const addNewAddress = () => {
           <TouchableOpacity 
             onPress={() => router.back()} 
             style={styles.backButton}>
-              {/* <Text style={styles.backIcon}>←</Text> */}
+            <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Business</Text>
         </View>
@@ -314,30 +249,24 @@ const addNewAddress = () => {
 
 
     return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoid}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-        enabled
-      >
-        <View style={styles.header}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+         <View style={styles.header}>
            <TouchableOpacity 
              onPress={() => router.back()} 
              style={styles.backButton}>
               <AntDesign name="arrow-left" size={20} color={colors.darkGray} />
-               {/* <Text style={styles.backIcon}>←</Text> */}
            </TouchableOpacity>
            <Text style={styles.headerTitle}>Edit Business</Text>
         </View>
-
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flex}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
         <ScrollView 
           style={styles.content} 
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="none"
-          removeClippedSubviews={false}
         >
           <View style={styles.form}>
             <View style={styles.inputGroup}>
@@ -363,7 +292,6 @@ const addNewAddress = () => {
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
-                blurOnSubmit={false}
                 returnKeyType="done"
                 editable={!loading}
               />
@@ -373,7 +301,14 @@ const addNewAddress = () => {
                <Text style={styles.sectionTitle}>Address</Text>
 
                {addresses.map((address, index) => (
-                <AddressCard key={address.id} address={address} index={index} />
+                <AddressCard
+                   key={address.id}
+                   address={address}
+                   index={index}
+                   canRemove={addresses.length > 1}
+                   onRemove={removeAddress}
+                   onUpdate={updateAddress}
+                />
                ))}
 
                <TouchableOpacity
@@ -424,7 +359,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bgTheme
   },
-  keyboardAvoid: {
+  flex: {
     flex: 1,
   },
   header: {

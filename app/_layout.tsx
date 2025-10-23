@@ -31,6 +31,7 @@ const RootLayout = () => {
        <Stack.Screen name="auth/forgot-password" options={{ headerShown: false  }} />
        <Stack.Screen name="auth/verify-code" options={{ headerShown: false }} />
        <Stack.Screen name="auth/reset-password" options={{ headerShown: false }} />
+       <Stack.Screen name="auth/complete-profile" options={{ headerShown: false }} />
        <Stack.Screen 
          name="auth/success"
           options={{ 

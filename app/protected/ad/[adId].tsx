@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
+  Linking
 } from 'react-native';
 import { AntDesign, Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { colors } from '@/app/constants/theme';
@@ -16,11 +17,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import apiClient from '@/app/utils/apiClient';
-import { CombinedAd, SellerProfile } from '@/app/types/marketplace';
+import { CombinedAd } from '@/app/types/marketplace';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import ReportModal from '@/app/reusables/ReportModal';
 
 const { width: screenWidth } = Dimensions.get('window');
+
+interface SellerProfile {
+  _id: string;
+  fullName: string;
+  phoneNumber: string;
+  isGoogleUser: boolean;
+  image: string | null;
+  role: string;
+  isVerified: boolean;
+  hasSubmittedVerification: boolean;
+  verificationStatus: {
+    personal: 'verified' | 'pending' | 'rejected' | null;
+    business: 'verified' | 'pending' | 'rejected' | null;
+  };
+  createdAt: string;
+  joinedDate: string;
+}
 
 export default function App() {
   const router = useRouter();
@@ -232,6 +250,28 @@ const fetchSellerData = async (sellerId: string) => {
     }).format(amount);
   };
 
+  const handlePhoneCall = async (phoneNumber: string) => {
+    if (!phoneNumber || phoneNumber === "Loading...") {
+      showErrorToast("Phone number not available");
+      return;
+    }
+
+    try {
+      const phoneUrl = `tel:${phoneNumber}`;
+      const canOpen = await Linking.canOpenURL(phoneUrl);
+      
+      if (canOpen) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        showErrorToast("Unable to make phone call");
+      }
+    } catch (error) {
+      console.error("Error making phone call:", error);
+      showErrorToast("Failed to initiate call");
+    }
+  };
+
+
   const renderContent = () => {
     if (!ad) return null;
 
@@ -298,56 +338,60 @@ const fetchSellerData = async (sellerId: string) => {
             {/* Seller Info Section */}
             <View style={styles.sectionContainer}>
               <View style={styles.sellerContainer}>
-                <Image
-                  source={
-                    seller?.image 
-                    ? { uri: seller.image }
-                    : ad.business?.profileImage
-                    ? { uri: ad.business.profileImage }
-                    : require('@/assets/images/profile-circle.png')
-                  }
-                  style={styles.sellerLogo}
-                />
+                <View style={{ position: 'relative' }}>
+                  <Image 
+                    source={
+                      seller?.image
+                      ? { uri: seller.image }
+                      : ad.business?.profileImage
+                      ? { uri: ad.business.profileImage }
+                      : require('@/assets/images/profile-circle.png')
+                    }
+                    style={styles.sellerLogo}
+                  />
+                  {seller?.verificationStatus?.personal === 'verified' && (
+                    <View style={styles.verifiedBadge}>
+                      <Image 
+                      source={require('../../../assets/images/verified-thick.png')}
+                      style={{ width: 16, height: 16 }}
+                      />
+                    </View>
+                  )}
+                </View>
                 <View style={styles.sellerDetails}>
                   <TouchableOpacity>
                     <Text style={styles.sellerName}>
                      {ad.business?.businessName || seller?.fullName || 'Unknown Business'}
                     </Text>
                   </TouchableOpacity>
-                 {seller && (
-                   <View style={[
-                     styles.verifiedRow,
-                     seller.isVerified
-                     ? { backgroundColor: colors.greenSuccess}
-                     : { backgroundColor: colors.lightRed }
-                   ]}>
-                     {seller.isVerified ? (
-                       <>
-                         <Image 
-                            source={require('../../../assets/images/verified.png')}
-                            style={{ 
-                              width: 12,
-                              height: 12,
-                            }}
-                         />
-                         <Text style={styles.verifiedText}>Verified User</Text>
-                       </>
-                     ): (
-                      <>
-                       <Image 
-                          source={require('../../../assets/images/unverified.png')}
-                          style={{
-                             width: 12,
-                             height: 12,
-                          }}
-                       />
-                       <Text style={styles.unverifiedText}>Unverified user</Text>
-                      </>
-                     )}
+                   {seller && (
+                    <View style={[
+                      styles.verifiedRow,
+                      seller.verificationStatus?.business === 'verified'
+                      ? { backgroundColor: colors.greenSuccess }
+                      : {backgroundColor: colors.lightRed }
+                    ]}>
+                      {seller.verificationStatus?.business === 'verified' ? (
+                        <>
+                          <Image 
+                           source={require('../../../assets/images/verified.png')}
+                           style={{ width: 12, height: 12, }}
+                          />
+                          <Text style={styles.verifiedText}>Verified Business</Text>
+                        </>
+                      ): (
+                        <>
+                        <Image 
+                         source={require('../../../assets/images/unverified.png')}
+                         style={{ width: 12, height: 12 }}
+                        />
+                        <Text style={styles.unverifiedText}>Unverified Business</Text>
+                        </>
+                      )}
                     </View>
-                 )}
+                   )}
                   <Text style={styles.sellerJoinDate}>
-                    Joined Tentably on {formatDate(seller?.joinedDate || ad.business.createdAt || ad.carAd.createdAt)}
+                    Joined Tenaly on {formatDate(seller?.joinedDate || ad.business.createdAt || ad.carAd.createdAt)}
                   </Text>
                 </View>
               </View>
@@ -666,7 +710,37 @@ const fetchSellerData = async (sellerId: string) => {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={async () => {
+            if (seller?.phoneNumber) {
+              const phoneNumber = seller.phoneNumber.startsWith('+')
+                ? seller.phoneNumber
+                : `+234${seller.phoneNumber.replace(/^0/, '')}`;
+
+              const message = `Hello ${seller.fullName}, I'm interested in your ad on Tenaly`;
+              const encodedMessage = encodeURIComponent(message);
+              const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
+              const whatsappBusinessUrl = `whatsapp-business://send?phone=${phoneNumber}&text=${encodedMessage}`;
+
+              try {
+               // Check if WhatsApp is available 
+               const supported = await Linking.canOpenURL(whatsappUrl);
+
+               if (supported) {
+                await Linking.openURL(whatsappBusinessUrl);
+               } else {
+                // Fall back to browser version if neither is installed 
+                const webUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+                await Linking.openURL(webUrl);
+               }
+              } catch (error: any) {
+               showErrorToast("Unable to open WhatsApp. Please make sure it's installed.", error);
+              }
+            } else {
+              showErrorToast('Seller phone number not available');
+            }
+          }}
+        >
           <LinearGradient
             colors={['#00A8DF', '#1031AA']}
             start={{ x: 0, y: 0 }}
@@ -684,7 +758,9 @@ const fetchSellerData = async (sellerId: string) => {
           </LinearGradient>
         </TouchableOpacity>
         <View style={styles.footerBottomRow}>
-          <TouchableOpacity style={styles.messageButton}>
+          <TouchableOpacity 
+            onPress={() => handlePhoneCall(seller?.phoneNumber || '')}
+           style={styles.messageButton}>
             <Feather name="phone" size={18} color={colors.darkGray} />
             <Text style={styles.messageButtonText}>
               {seller?.phoneNumber}
@@ -1082,6 +1158,13 @@ deliveryInfoLabel: {
     width: 130,
     gap: 8,
     marginBottom: 4,
+  },
+  verifiedBadge: {
+   position: 'absolute',
+   top: -6,
+   right: 10,
+   borderRadius: 12,
+   padding: 12,
   },
   sellerLocation: {
     fontSize: 14,

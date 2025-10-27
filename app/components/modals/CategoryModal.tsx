@@ -23,14 +23,14 @@ const CategoryModal: React.FC<Props> = ({ visible, onClose, onSelect }) => {
 
     const vehicleCategories = ['car', 'bus', 'tricycle'];
     const propertyCategories = [
-       'Commercial Property for rent',
-       'Commercial Property for sale',
-       'House and Apartment Property for rent',
-       'House and Apartment Property for sale',
-       'Lands and Plots for rent',
-       'Lands and Plots for sale',
-       'Short let property',
-       'Event center and Venues'
+       'Commercial Property For Rent',
+       'Commercial Property For Sale',
+       'House and Apartment Property For Rent',
+       'House and Apartment Property For Sale',
+       'Land and Plot For Rent',
+       'Lands and Plot For Sale',
+       'Short Let Property',
+       'Event Center And Venues'
   ];
 
 

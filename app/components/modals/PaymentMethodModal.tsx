@@ -13,7 +13,7 @@ interface PaymentMethodModalProps {
     visible: boolean;
     onClose: () => void;
     onSelectWallet: () => void;
-    onSelectPaystack: () => void;
+    onFundWallet: () => void;
     walletBalance: number;
     requiredAmount: number;
 }
@@ -22,7 +22,7 @@ export default function PaymentMethodModal({
   visible,
   onClose,
   onSelectWallet,
-  onSelectPaystack,
+  onFundWallet,
   walletBalance,
   requiredAmount
 }: PaymentMethodModalProps) {
@@ -33,7 +33,7 @@ export default function PaymentMethodModal({
       <View style={styles.modalOverlay}>
        <View style={styles.modalContainer}>
          <View style={styles.header}>
-           <Text style={styles.title}>Choose Payment Method</Text>
+           <Text style={styles.title}>Wallet Payment</Text>
            <TouchableOpacity onPress={onClose}>
              <AntDesign name="close" size={24} color={colors.darkGray} />
            </TouchableOpacity>
@@ -61,14 +61,11 @@ export default function PaymentMethodModal({
             <AntDesign name='right' size={20} color={colors.lightGray} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.methodButton} onPress={onSelectPaystack}>
-            <AntDesign name="credit-card" size={24} color={colors.blue} />
-            <View style={styles.methodInfo}>
-              <Text style={styles.methodTitle}>Pay with Paystack</Text>
-              <Text style={styles.methodSubtitle}>Card, Bank Transfer, USSD</Text>
-            </View>
-            <AntDesign name='right' size={20} color={colors.lightGray} />
-          </TouchableOpacity>
+          {!hasEnoughBalance && (
+            <TouchableOpacity style={styles.fundButton} onPress={onFundWallet}>
+                <Text>Fund Wallet</Text>
+            </TouchableOpacity>
+          )}
        </View>
       </View>
     </Modal>
@@ -138,5 +135,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#F44336',
     marginTop: 4,
+  },
+  fundButton: {
+    backgroundColor: colors.blue,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  fundButtonText: {
+    color: colors.bg,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

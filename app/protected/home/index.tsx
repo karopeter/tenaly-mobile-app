@@ -209,16 +209,6 @@ export default function HomeScreen() {
   })
   .slice(0, 6);
 
-  // const newVehicles = ads
-  //   .filter(ad => ad.vehicleAd && String(ad.carAd?.category || '').toLowerCase().includes('car'))
-  //   .sort((a, b) => new Date(b.carAd?.createdAt || 0).getTime() - new Date(a.carAd?.createdAt || 0).getTime())
-  //   .slice(0, 6);
-
-  // const newProperties = ads
-  //   .filter(ad => ad.propertyAd)
-  //   .sort((a, b) => new Date(b.carAd?.createdAt || 0).getTime() - new Date(a.carAd?.createdAt || 0).getTime())
-  //   .slice(0, 6);
-
   
   const newProperties = ads
   .filter(ad => {

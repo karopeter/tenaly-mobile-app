@@ -53,7 +53,7 @@ const pickImage = async () => {
        mediaTypes: ImagePicker.MediaTypeOptions.Images,
        allowsEditing: true,
        aspect: [1, 1,],
-       quality: 0.8,
+       quality: 0.5,
        allowsMultipleSelection: true,
        selectionLimit: 10 - images.length,
      });
@@ -150,7 +150,7 @@ const pickImage = async () => {
          'Land and Plot For Rent': '/protected/myads/land-plot-rent',
          'Land and Plot For Sale': '/protected/myads/land-plot-sale',
          'Short Let Property': '/protected/myads/short-let-property',
-         'Event Center and Avenues': '/protected/myads/event-center-venues'
+         'Event Center And Venues': '/protected/myads/event-center-venues'
         };
 
         const routePath = categoryRoutes[adCategory] || '/protected/myads/property-details';
@@ -167,7 +167,15 @@ const pickImage = async () => {
        }
     } catch (error: any) {
      console.error('Submit ad error:', error);
-     showErrorToast(error.response?.data?.message || 'Failed to submit ad');
+    
+      if (error.response?.status === 413) {
+        showErrorToast(
+           'One or more images are too large. Please compress or choose smaller images before uploading.'
+        );
+        return;
+      }
+
+      showErrorToast(error.response?.data?.message || 'Failed to submit ad');
     } finally {
       setLoading(false);
     }

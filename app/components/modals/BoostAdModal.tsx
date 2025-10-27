@@ -82,7 +82,7 @@ export default function BoostAdModal({
                   )}
                 </View>
                 <View style={styles.planIcon}>
-                  <AntDesign name="star" size={16} color={colors.blue} />
+                  <AntDesign name="star" size={16} color={colors.darkGray} />
                 </View>
                 <Text style={styles.planName}>{plan.name}</Text>
                 <Text style={styles.planPrice}>₦{plan.price.toLocaleString()}</Text>
@@ -105,7 +105,7 @@ export default function BoostAdModal({
               onPress={handlePromote}
               disabled={!selectedPlan}
             >
-              <Text>Yes, promote my ad</Text>
+              <Text style={styles.promoteAdButtonText}>Yes, promote my ad</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
@@ -138,25 +138,37 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: colors.darkGray,
     textAlign: 'center',
+    fontFamily: 'WorkSans_600SemiBold',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 13,
-    color: colors.lightGray,
+    fontSize: 14,
+    color: "#767676",
     textAlign: 'center',
+    fontWeight: '400',
+    fontFamily: 'WorkSans_400Regular',
     marginBottom: 12,
   },
   learnMoreButton: {
     alignSelf: 'center',
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#DFDFF9',
+    marginVertical: 16,
+    marginHorizontal: 20,
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   learnMoreText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.blue,
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium'
   },
   plansList: {
     marginBottom: 20,
@@ -196,13 +208,15 @@ const styles = StyleSheet.create({
   planName: {
     flex: 1,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '400',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_400Regular'
   },
   planPrice: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
     color: colors.darkGray,
+    fontFamily: 'WorkSans_500Medium'
   },
   freeButton: {
     paddingVertical: 14,
@@ -213,9 +227,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   freeButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.darkGray,
-    fontWeight: '500',
+    fontWeight: '600',
+    fontFamily: 'WorkSans_600SemiBold'
   },
   promoteButtonGradient: {
     borderRadius: 8,
@@ -225,10 +240,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  promoteButtonText: {
-    fontSize: 14,
+  promoteAdButtonText: {
     color: colors.bg,
+    fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'WorkSans_600SemiBold'
   },
   buttonDisabled: {
     opacity: 0.5,

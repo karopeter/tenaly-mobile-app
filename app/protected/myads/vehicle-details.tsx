@@ -244,11 +244,12 @@ export default function VehicleDetailsForm() {
     const amount = planAmounts[selectedPlan || 'basic'] || 0;
 
     if (useWallet && walletBalance < amount) {
-      showErrorToast('Insufficient wallet balance');
+      showErrorToast('Insufficient wallet balance. Please fund your wallet.');
+      router.push('/protected/wallet');
       return;
     }
 
-    submitAd(selectedPlan || 'free', useWallet);
+    submitAd(selectedPlan || 'free', true);
   };
   
   const submitAd = async (plan: string, useWallet: boolean) => {
@@ -281,8 +282,6 @@ export default function VehicleDetailsForm() {
      } else if (response.data.data.paymentUrl) {
       showSuccessToast('Redirecting to payment...');
       await Linking.openURL(response.data.data.paymentUrl);
-
-      // Start polling for payment verification 
      startPaymentPolling(response.data.data.reference);
      }
     } catch (error: any) {
@@ -364,7 +363,9 @@ export default function VehicleDetailsForm() {
       const payload = {
         ...formData,
         businessCategory: selectedBusiness._id,
-        carAdId: carAdId || undefined
+        carAdId: carAdId || undefined,
+        plan: userHighestPlan || selectedPlan || "free",
+        isDraft: true
       };
 
       console.log('💾 Saving draft:', payload);
@@ -380,54 +381,6 @@ export default function VehicleDetailsForm() {
       setSavingDraft(false);
     }
   };
-
-  // const submitAd = async () => {
-  //   if (!selectedBusiness) {
-  //     showErrorToast('Please select a business');
-  //     return;
-  //   }
-
-  //   if (!formData.vehicleType || !formData.model || !formData.amount || !formData.year) {
-  //     showErrorToast('Please fill all required fields (Make, Model, Year, Amount)');
-  //     return;
-  //   }
-
-  //   try {
-  //    setLoading(true);
-
-  //    if (!apiClient) {
-  //       showErrorToast('API client not initialized');
-  //       return;
-  //    }
-
-  //    // Show boost modal instead  of posting directly 
-  //    setShowBoostModal(true);
-
-  //    const payload = {
-  //       ...formData,
-  //       businessCategory: selectedBusiness._id,
-  //       plan: plan || 'free',
-  //       useWalletBalance: paymentMethod === 'wallet',
-  //       carAdId: carAdId || undefined
-  //    };
-
-  //    const response = await apiClient.post('/api/vehicles/post-vehicle-ad', payload);
-
-  //    if (response.data.data.paymentStatus === 'success') {
-  //       showSuccessToast('Vehicle ad posted successfully!');
-  //       setTimeout(() => router.push('/protected/home'), 1500);
-  //    } else if (response.data.data.paymentUrl) {
-  //       // Redirect to paystack oayment 
-  //       showSuccessToast("Redirecting to payment...");
-  //       // Real app linking openURL
-  //    }
-  //   } catch (error: any) {
-  //     showErrorToast(error.response?.data?.message || 'Failed to post ad');
-  //   } finally {
-  //       setLoading(false);
-  //   }
-  // };
-
 
   return (
     <View style={styles.container}>
@@ -449,6 +402,7 @@ export default function VehicleDetailsForm() {
       }}
       keyboardShouldPersistTaps="handled"
     >
+
         {/* Form Fields - Two Column Layout */}
         <View style={styles.row}>
           <PostAdDropdown
@@ -702,7 +656,11 @@ export default function VehicleDetailsForm() {
          visible={showPaymentModal}
          onClose={() => setShowPaymentModal(false)}
          onSelectWallet={() => handlePaymentMethodSelected(true)}
-         onSelectPaystack={() => handlePaymentMethodSelected(false)}
+         onFundWallet={() => {
+          setShowPaymentModal(false);
+          showErrorToast("Insufficient funds. Please fund your wallet to continue.");
+          router.push("/protected/wallet");
+         }}
          walletBalance={walletBalance}
          requiredAmount={selectedPlan ? 
          {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
@@ -756,7 +714,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.black,
+    color: colors.darkGray,
     marginBottom: 8,
     marginTop: 16
   },

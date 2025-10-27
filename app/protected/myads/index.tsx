@@ -17,7 +17,7 @@ import {
 import { colors } from '@/app/constants/theme';
 import { MyAdsProps } from '@/app/types/myAds.types';
 import { useAuth } from '@/app/context/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import apiClient from '@/app/utils/apiClient';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { router } from 'expo-router';
@@ -198,30 +198,57 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
   };
 
   const renderAdItem = ({ item }: { item: Ad }) => {
-    const ad = item.vehicleAd || item.propertyAd;
-    if (!ad) return null;
+    const ad = activeTab === 'vehicle' ? item.vehicleAd : item.propertyAd;
 
-    const images = item.carAd.vehicleImage?.length > 0 
-      ? item.carAd.vehicleImage 
-      : item.carAd.propertyImage || [];
+    if (!ad) {
+      console.log(`No ${activeTab} data for item:`, item.adId);
+      return null;
+    }
 
-    const title = item.vehicleAd 
-      ? `${ad.vehicleType} ${ad.model} ${ad.year}`
-      : ad.propertyName;
+    // Determine ad type based on activeTab 
+    const isVehicleAd = activeTab === 'vehicle';
 
-    const adType = item.vehicleAd ? 'vehicle' : 'property';
+    // Get images based on ActiveTab 
+    let images: string[] = [];
+    if (item.carAd) {
+      if (isVehicleAd) {
+        images = item.carAd.vehicleImage || [];
+      } else {
+        images = item.carAd.propertyImage || [];
+      }
+    }
+
+    console.log(`${activeTab} Ad ${item.adId} - Images:`, images);
+
+    // Get title based on ad type 
+    const title = isVehicleAd 
+       ? `${ad.vehicleType || ''} ${ad.model || ''} ${ad.year || ''}`.trim()
+       : ad.propertyName || 'Property';
     
-    // 🔄 ADDED: Get description
+    const adType = isVehicleAd ? 'vehicle' : 'property';
     const description = ad.description || '';
+    const location = item.carAd?.location || 'Location not specified';
 
     return (
      <View style={styles.adCard}>
-       {images.length > 0 && (
-        <Image 
-           source={{ uri: images[0] }}
-           style={styles.adImage}
-           resizeMode="cover"
-        />
+       {images.length > 0  && (
+        <View>
+           <Image 
+             source={{ uri: images[0] }}
+             style={styles.adImage}
+             resizeMode="cover"
+           />
+           {/* Plan Badge Overlay */}
+           <View style={styles.planBadge}>
+            <Image 
+              source={require('../../../assets/images/prem.png')}
+              style={styles.planBadgeIcon}
+            />
+             <Text style={styles.planBadgeText}>
+               {ad.plan?.toUpperCase() || 'FREE'}
+             </Text>
+           </View>
+        </View>
        )}
 
        <View style={styles.adContent}>
@@ -270,22 +297,38 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                   gap: 4,
                 }}
               >
-              <Ionicons
-                name ={
-                  ad.status === 'approved'
-                  ? 'checkmark-circle'
-                  : ad.status === 'pending'
-                  ? 'time'
-                  : ad.status === 'rejected'
-                  ? 'close-circle'
-                  : ad.status === 'sold'
-                  ? 'checkmark-circle'
-                  : 'help-circle'
+              {(() => {
+                let statusIcon;
+
+                if (ad.isDraft) {
+                  statusIcon = require('../../../assets/images/rejected.png');
+                } else if (ad.status === 'approved') {
+                  statusIcon = require('../../../assets/images/approved.png');
+                } else if (ad.status === 'pending') {
+                   statusIcon = require('../../../assets/images/timer1.png');
+                } else if (ad.status === 'rejected') {
+                   statusIcon = require('../../../assets/images/rejected.png');
+                } else if (ad.status === 'sold') {
+                  statusIcon = require('../../../assets/images/tick-circle.png');
+                } else {
+                  statusIcon = require('../../../assets/images/timer1.png');
                 }
-                size={14}
-                color={getStatusColor(ad.status)}
-              />
-                <Text style={[styles.statusText, { color: getStatusColor(ad.status)}]}>{getStatusText(ad.status)}</Text>
+
+                return (
+                  <Image 
+                   source={statusIcon}
+                   style={{ width: 16, height: 16, marginRight: 4 }}
+                  />
+                );
+              })()}
+                <Text
+                  style={[
+                    styles.statusText,
+                    { color: ad.isDraft ? '#6B7280' : getStatusColor(ad.status) }
+                  ]}
+                >
+                 {ad.isDraft ? 'Draft' : getStatusText(ad.status)}
+                </Text>
               </View>
             </View>
           </View>
@@ -477,37 +520,107 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
          >
           <View style={styles.modalContent}>
             <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>More</Text>
-
+            <Text style={styles.modalTitle}>Actions</Text>
+             
             <TouchableOpacity
               style={styles.modalOption}
               onPress={() => selectedAd && handleViewDetails(selectedAd)}
             >
-             <Text style={styles.modalOptionIcon}>👁️</Text>
+             <AntDesign
+              name="eye"
+              size={20}
+              color={colors.darkGray}
+             />
              <Text style={styles.modalOptionText}>View details</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={() => selectedAd && handleEditAd(selectedAd)}
-            >
-               <Text style={styles.modalOptionIcon}>✏️</Text>
-              <Text style={styles.modalOptionText}>Edit</Text>
-            </TouchableOpacity>
+            {(() => {
+               const currentAd = activeTab === 'vehicle'
+                ? selectedAd?.vehicleAd
+                : selectedAd?.propertyAd
 
-            {/* 🔄 FIXED: Uncommented and fixed delete handler */}
-            <TouchableOpacity
-              style={[styles.modalOption, styles.deleteOption]}
-              onPress={() => {
-                if (selectedAd) {
-                 const adType = (selectedAd as any).adType;
-                 handleDeleteAd(selectedAd.adId, adType);
+                if (!currentAd) return null;
+              
+                const status = currentAd.status;
+                const isDraft = currentAd.isDraft === true;
+
+                // Draft: show complete draft + delete 
+                if (isDraft) {
+                  return (
+                    <>
+                      <TouchableOpacity 
+                      style={styles.modalOption}
+                       onPress={() => {
+                        console.log("Complete draft clicked");
+                       }}
+                      >
+                       <AntDesign name="form" size={20} color={colors.darkGray} />
+                       <Text style={styles.modalOptionText}>Complete Draft</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={styles.modalOption}
+                        onPress={() => {
+                          setModalVisible(false);
+                          handleDeleteAd(selectedAd?.adId || '', (selectedAd as any).adType);
+                        }}
+                      >
+                       <AntDesign name="delete" size={20} color="#CB0D0D" />
+                       <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
+                      </TouchableOpacity>
+                    </>
+                  );
                 }
-              }}
-            >
-             <Text style={styles.modalOptionIcon}>🗑️</Text>
-              <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
-            </TouchableOpacity>
+
+                // Rejected: Show resubmit + Delete 
+                if (status === 'rejected') {
+                  return (
+                    <>
+                     <TouchableOpacity
+                       style={styles.modalOption}
+                       onPress={() => {
+                        setModalVisible(false);
+                        // Navigate to edit/resubmit
+                       }}
+                     >
+                      <AntDesign name="reload" size={20} colors={colors.darkGray} />
+                      <Text style={styles.modalOptionText}>Resubmit</Text>
+                     </TouchableOpacity>
+
+                     <TouchableOpacity
+                       style={styles.modalOption}
+                       onPress={() => {
+                         setModalVisible(false);
+                         handleDeleteAd(selectedAd?.adId || '', (selectedAd as any).adType);
+                       }}
+                     >
+                      <AntDesign name="delete" size={20} color="#CB0D0D" />
+                      <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
+                     </TouchableOpacity>
+                    </>
+                  );
+                }
+
+                //Pending or Approved: Show Delete only 
+                if (status === 'pending' || status === 'approved') {
+                  return (
+                   <TouchableOpacity
+                    style={styles.modalOption}
+                    onPress={() => {
+                     setModalVisible(false);
+                     handleDeleteAd(selectedAd?.adId || '', (selectedAd as any).adType);
+                   }}>
+                   <AntDesign name="delete" size={20} color="#CB0D0D" />
+                   <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
+                   </TouchableOpacity>
+                  );
+                }
+
+                // Sold: Only View Details (already shown above, so returning null)
+                if(status === 'sold') {
+                  return null;
+                }
+            })()}
           </View>
          </TouchableOpacity>
        </Modal>
@@ -690,6 +803,28 @@ businessName: {
     borderRadius: 8,
     marginRight: 12,
   },
+  planBadge: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    backgroundColor: colors.lightBlue,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  planBadgeIcon: {
+    // width: 14,
+    // height: 14,
+  },
+  planBadgeText: {
+    color: colors.bg,
+    fontSize: 10,
+    fontFamily: 'WorkSans_600SemiBold',
+    textTransform: 'uppercase'
+  },
   adContent: {
     flex: 1,
     paddingTop: 4,
@@ -856,12 +991,6 @@ businessName: {
     color: '#6B7280',
     textAlign: 'center',
   },
-  switchMessage: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-    paddingHorizontal: 32,
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -893,6 +1022,7 @@ businessName: {
   modalOption: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: "10",
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -904,14 +1034,15 @@ businessName: {
   },
   modalOptionText: {
     fontSize: 16,
-    color: '#111827',
-  },
-  deleteOption: {
-    backgroundColor: '#FEE2E2',
+    fontWeight: '600',
+    fontFamily: 'WorkSans_600SemiBold',
+    color: colors.darkGray,
   },
   deleteText: {
-    color: '#DC2626',
+    color: '#CB0D0D',
     fontWeight: '600',
+    fontSize: 16,
+    fontFamily: 'WorkSans_600SemiBold'
   },
 });
 

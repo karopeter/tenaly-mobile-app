@@ -106,7 +106,8 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
 const styles = StyleSheet.create({
   label: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
+    fontFamily: 'WorkSans_600SemiBold',
     color: colors.darkGray,
     marginBottom: 8,
   },

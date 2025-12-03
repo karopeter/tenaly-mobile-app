@@ -23,8 +23,33 @@ interface CarCardProps {
   carType?: string;
   propertyType?: string;
   transmission?: string;
+  adType?: 'vehicle' | 'property' | 'pet' | 'agriculture' | 'kids' | 'service' | 'equipment' | 'gadget' | 'laptop' | 'fashion' | 'household' | 'beauty' | 'construction' | 'job' | 'hire' | 'other';
   propertyFacilities?: string;
   ownershipStatus?: string;
+  gadgetCondition?: string;
+  gadgetBrand?: string;
+  fashionMaterial?: string;
+  fashionType?: string;
+  jobType?: string;
+  workMode?: string;
+  condition?: string;
+  brand?: string;
+  beautyType?: string;
+  beautyBrand?: string;
+  constructionType?: string;
+  constructionBrand?: string;
+  breed?: string;
+  age?: string;
+  ageGroup?: string;
+  gender?: string;
+  serviceExperience?: string;
+  pricingType?: string;
+  equipmentCondition?: string;
+  equipmentBrand?: string;
+  householdCondition?: string;
+  householdType?: string;
+  laptopCondition?: string;
+  laptopBrand?: string;
   propertyDuration?: string;
   squareMeter?: string;
   tags: string[];
@@ -50,6 +75,30 @@ const CarCard: React.FC<CarCardProps> = ({
   carType,
   propertyType,
    transmission,
+   gadgetCondition,
+   gadgetBrand,
+   fashionType,
+   fashionMaterial,
+   jobType,
+   workMode,
+   condition,
+   brand,
+   beautyBrand,
+   beautyType,
+   constructionType,
+   constructionBrand,
+   breed,
+   age,
+   ageGroup,
+   gender,
+   serviceExperience,
+   pricingType,
+   equipmentCondition,
+   equipmentBrand,
+   householdCondition,
+   householdType,
+   laptopCondition,
+   laptopBrand,
   propertyFacilities,
   ownershipStatus,
   propertyDuration,
@@ -145,6 +194,150 @@ const CarCard: React.FC<CarCardProps> = ({
           {propertyDuration ? (
             <View style={styles.localBox}>
               <Text style={styles.localText}>{propertyDuration}</Text>
+            </View>
+          ): null}
+
+          {gadgetCondition ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{gadgetCondition}</Text> 
+            </View>
+          ): null}
+
+          {gadgetBrand ? (
+             <View style={styles.localBox}>
+              <Text style={styles.localText}>{gadgetBrand}</Text> 
+            </View>
+          ): null}
+
+          {fashionMaterial ? (
+           <View style={styles.localBox}>
+            <Text style={styles.localText}>{fashionMaterial}</Text>
+           </View>
+          ): null}
+
+          {fashionType ? (
+           <View style={styles.localBox}>
+             <Text style={styles.localText}>{fashionType}</Text>
+           </View>
+          ): null}
+
+          {jobType ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{jobType}</Text>
+            </View>
+          ): null}
+
+          {workMode ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{workMode}</Text>
+            </View>
+          ): null}
+
+          {condition ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{condition}</Text>
+            </View>
+          ): null}
+
+          {brand ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{brand}</Text>
+            </View>
+          ): null}
+
+          {beautyBrand ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{beautyBrand}</Text>
+            </View>
+          ): null}
+
+          {beautyType ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{beautyType}</Text>
+            </View>
+          ): null}
+
+          {constructionType ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{constructionType}</Text>
+            </View>
+          ): null}
+
+          {constructionBrand ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{constructionBrand}</Text>
+            </View>
+          ): null}
+
+          {breed ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{breed}</Text>
+            </View>
+          ): null}
+
+          {age ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{age}</Text>
+            </View>
+          ): null}
+
+          {ageGroup ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{ageGroup}</Text>
+            </View>
+          ): null}
+
+          {gender ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{gender}</Text>
+            </View>
+          ): null}
+
+          {serviceExperience ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{serviceExperience}</Text>
+            </View>
+          ): null}
+
+          {pricingType ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{pricingType}</Text>
+            </View>
+          ): null}
+
+          {equipmentCondition ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{equipmentCondition}</Text>
+            </View>
+          ): null}
+
+          {equipmentBrand ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{equipmentBrand}</Text>
+            </View>
+          ): null}
+
+          {householdCondition ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{householdCondition}</Text>
+            </View>
+          ): null}
+
+          {householdType ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{householdType}</Text>
+            </View>
+          ): null}
+
+          {laptopCondition ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{laptopCondition}</Text>
+            </View>
+          ): null}
+
+          {laptopBrand ? (
+            <View style={styles.localBox}>
+              <Text style={styles.localText}>{laptopBrand}</Text>
             </View>
           ): null}
         </View>

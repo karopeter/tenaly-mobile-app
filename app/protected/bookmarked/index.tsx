@@ -19,51 +19,8 @@ import { colors } from '@/app/constants/theme';
 import { useRouter } from 'expo-router';
 import apiClient from '@/app/utils/apiClient';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
+import { BookmarkedAd } from '@/app/types/bookmarked.types';
 
-interface BookmarkedAd {
-  adId: string;
-  carAd: {
-    _id: string;
-    userId: string;
-    businessCategory: {
-      _id: string;
-      businessName: string;
-    };
-    category: string;
-    location: string;
-    vehicleImage: string[];
-    propertyImage: string[];
-    adId: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  vehicleAd: {
-    _id: string;
-    vehicleType: string;
-    model: string;
-    year: number;
-    color: string;
-    transmission: string;
-    horsePower: string;
-    amount: number;
-    negotiation: string;
-    description: string;
-    createdAt: string;
-  } | null;
-  propertyAd: {
-    _id: string;
-    propertyName: string;
-    propertyType: string;
-    propertyAddress: string;
-    amount: number;
-    furnishing: string;
-    squareMeter: string;
-    negotiation: string;
-    description: string;
-    createdAt: string;
-  } | null;
-  isSold: boolean;
-}
 
 interface BookmarkedResponse {
   success: boolean;
@@ -172,27 +129,44 @@ export default function Bookmarked() {
   };
 
   // Get ad title based on type  
-  const getAdTitle = (ad: BookmarkedAd) => {
-    if (ad.vehicleAd) {
-      return `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}`;
-    } else if (ad.propertyAd) {
-      return ad.propertyAd.propertyName || 'Property';
-    }
-
-    return 'Ad';
-  };
+ const getAdTitle = (ad: BookmarkedAd) => {
+  if (ad.petAd)  return ad.petAd.petType;
+  if (ad.agricultureAd) return ad.agricultureAd.title;
+  if (ad.gadgetAd) return ad.gadgetAd.gadgetTitle;
+  if (ad.fashionAd) return ad.fashionAd.fashionTitle;
+  if (ad.householdAd) return ad.householdAd.householdTitle;
+  if (ad.laptopAd) return ad.laptopAd.laptopTitle;
+  if (ad.kidAd) return ad.kidAd.title;
+  if (ad.serviceAd) return ad.serviceAd.serviceTitle;
+  if (ad.equipmentAd) return ad.equipmentAd.equipmentTitle;
+  if (ad.beautyAd) return ad.beautyAd.beautyTitle;
+  if (ad.constructionAd) return ad.constructionAd.constructionTitle;
+  if (ad.jobAd) return ad.jobAd.jobTitle;
+  if (ad.hireAd) return ad.hireAd?.hireTitle;
+  if (ad.vehicleAd) return `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}`;
+  if (ad.propertyAd) return ad.propertyAd.propertyName || 'Property';
+  return 'Ad';
+};
 
   // Get ad price 
   const getAdPrice = (ad: BookmarkedAd) => {
-    if (ad.vehicleAd) {
-      return ad.vehicleAd.amount;
-    } else if (ad.propertyAd) {
-      return ad.propertyAd.amount;
-    }
-
-    return 0;
-  };
-
+  if (ad.petAd) return ad.petAd.amount;
+  if (ad.agricultureAd) return ad.agricultureAd.amount;
+  if (ad.gadgetAd) return typeof ad.gadgetAd.amount === 'string' ? parseFloat(ad.gadgetAd.amount) : ad.gadgetAd.amount;
+  if (ad.fashionAd) return ad.fashionAd.amount;
+  if (ad.householdAd) return ad.householdAd.amount;
+  if (ad.laptopAd) return ad.laptopAd.amount;
+  if (ad.kidAd) return ad.kidAd.amount;
+  if (ad.serviceAd) return ad.serviceAd.amount;
+  if (ad.equipmentAd) return ad.equipmentAd.amount;
+  if (ad.beautyAd) return ad.beautyAd.amount;
+  if (ad.constructionAd) return ad.constructionAd.amount;
+  if (ad.jobAd) return ad.jobAd.salaryRange;
+  if (ad.hireAd) return ad.hireAd.salaryRange;
+  if (ad.vehicleAd)  return ad.vehicleAd.amount;
+  if (ad.propertyAd) return ad.propertyAd.amount;
+  return 0;
+};
   const handlePhoneCall = async (phoneNumber: string) => {
     if (!phoneNumber || phoneNumber === "Loading...") {
       showErrorToast("Phone number not available");
@@ -256,14 +230,29 @@ export default function Bookmarked() {
 
   // Get ad images 
   const getAdImages = (ad: BookmarkedAd) => {
-    const relevantVehicleCategories = ["car", "bus", "tricycle"];
+  if (ad.petAd && ad.carAd.petsImage)  return ad.carAd.petsImage;
+  if (ad.agricultureAd && ad.carAd.agricultureImage) return ad.carAd.agricultureImage;
+  if (ad.carAd.gadgetImage?.length) return ad.carAd.gadgetImage;
+  if (ad.carAd.fashionImage?.length) return ad.carAd.fashionImage;
+  if (ad.carAd.householdImage?.length) return ad.carAd.householdImage;
+  if (ad.carAd.laptopImage?.length) return ad.carAd.laptopImage;
+  if (ad.carAd.kidsImage?.length) return ad.carAd.kidsImage;
+  if (ad.carAd.serviceImage?.length) return ad.carAd.serviceImage;
+  if (ad.carAd.equipmentImage?.length) return ad.carAd.equipmentImage;
+  if (ad.carAd.beautyImage?.length) return ad.carAd.beautyImage;
+  if (ad.carAd.constructionImage?.length) return ad.carAd.constructionImage;
+  if (ad.carAd.jobImage?.length) return ad.carAd.jobImage;
+  if (ad.carAd.hireImage?.length) return ad.carAd.hireImage;
+  
+  
+  const relevantVehicleCategories = ["car", "bus", "tricycle"];
 
-    if (relevantVehicleCategories.includes(ad.carAd.category)) {
-      return ad.carAd.vehicleImage || [];
-    } else {
-      return ad.carAd.propertyImage || [];
-    }
-  };
+  if (relevantVehicleCategories.includes(ad.carAd.category)) {
+    return ad.carAd.vehicleImage || [];
+  } else {
+    return ad.carAd.propertyImage || [];
+  }
+};
 
   // Render bookmark item
   const renderBookmarkItem = ({ item } : {item: BookmarkedAd }) => {
@@ -373,7 +362,134 @@ export default function Bookmarked() {
                   <Text style={styles.detailText}>{item.propertyAd.squareMeter || "N/A" }Sq</Text>
                 </View>
               </>
-            ): null}
+            ): item.petAd ? (
+              <>
+             <View style={styles.detailItem}>
+               <Text style={styles.detailText}>{item.petAd.breed}</Text>
+             </View>
+             <View style={styles.detailItem}>
+               <Text style={styles.detailText}>{item.petAd.age}</Text>
+             </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailText}>{item.petAd.gender}</Text>
+           </View>
+              </>
+            ): item.agricultureAd ? (
+            <>
+             <View style={styles.detailItem}>
+        <Text style={styles.detailText}>
+          {item.agricultureAd.agricultureType?.[0] || 'Product'}
+        </Text>
+      </View>
+      <View style={styles.detailItem}>
+        <Text style={styles.detailText}>{item.agricultureAd.condition}</Text>
+      </View>
+      <View style={styles.detailItem}>
+        <Text style={styles.detailText}>{item.agricultureAd.unit}</Text>
+      </View>
+            </>
+            ): item.gadgetAd ? (
+              <>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailText}>{item.gadgetAd.condition}</Text>
+              </View>
+              <View style={styles.detailItem}> 
+                 <Text style={styles.detailText}>{item.gadgetAd.gadgetBrand}</Text>
+              </View>
+              </>
+            ): item.fashionAd ? (
+              <>
+              <View style={styles.detailItem}>
+               <Text style={styles.detailText}>{item.fashionAd.condition}</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailText}>{item.fashionAd.fashionBrand}</Text>
+              </View>
+              </>
+            ): item.householdAd ? (
+              <>
+              <View style={styles.detailItem}>
+                 <Text style={styles.detailText}>{item.householdAd.condition}</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailText}>{item.householdAd.householdBrand}</Text>
+              </View>
+              </>
+            ): item.laptopAd ? (
+              <>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.laptopAd.condition}</Text>
+                </View>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.laptopAd.laptopBrand}</Text>
+                </View>
+              </>
+            ): item.kidAd ? (
+              <>
+               <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.kidAd.condition}</Text>
+               </View>
+               <View style={styles.detailItem}>
+                 <Text style={styles.detailText}>{item.kidAd.gender}</Text>
+               </View>
+              </>
+            ): item.serviceAd ? (
+              <>
+               <View style={styles.detailItem}>
+                 <Text style={styles.detailText}>{item.serviceAd.pricingType}</Text>
+               </View>
+               <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.serviceAd.serviceExperience}</Text>
+               </View>
+              </>
+            ): item.equipmentAd ? (
+              <>
+                <View style={styles.detailItem}>
+                 <Text style={styles.detailText}>{item.equipmentAd.condition}</Text>
+                </View>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.equipmentAd.brand}</Text>
+                </View>
+              </>
+            ): item.beautyAd ? (
+              <>
+               <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.beautyAd.condition}</Text>
+               </View>
+               <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.beautyAd.beautyBrand}</Text>
+               </View>
+              </>
+            ): item.constructionAd ? (
+              <>
+              <View style={styles.detailItem}>
+                <Text style={styles.detailText}>{item.constructionAd.constructionBrand}</Text>
+              </View>
+              <View style={styles.detailItem}>
+                 <Text style={styles.detailText}>{item.constructionAd.constructionType}</Text>
+              </View>
+              </>
+            ): item.jobAd ? (
+              <>
+               <View style={styles.detailItem}>
+                 <Text style={styles.detailText}>{item.jobAd.jobType}</Text>
+               </View>
+               <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.jobAd.experienceLevel}</Text>
+               </View>
+              </>
+            ): item.hireAd ? (
+              <>
+               <View style={styles.detailItem}>
+                  <Text style={styles.detailText}>{item.hireAd.jobType}</Text>
+               </View>
+               <View style={styles.detailItem}>
+                 <Text style={styles.detailText}>{item.hireAd.workMode}</Text>
+               </View>
+              </>
+            ):
+            
+            null}
           </View>
 
           <View style={styles.adFooter}>

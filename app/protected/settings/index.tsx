@@ -34,6 +34,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { user: authUser, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const [imageError, setImageError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,7 +69,9 @@ export default function SettingsScreen() {
 
   const fullName = profile?.fullName || authUser?.fullName || 'User';
   const email = profile?.email || authUser?.email || 'No email';
-  const imageUri = profile?.image;
+ // const imageUri = profile?.image;
+  const imageUri =
+    profile?.image && profile.image.trim() !== "" ? profile.image : null;
   const planType = profile?.paidPlans?.[0]?.planType || 'free';
   const isPremium = planType !== 'free' && planType !== null;
 
@@ -80,12 +83,23 @@ export default function SettingsScreen() {
       {/* Profile Card */}
       <View style={styles.profileCard}>
         <View style={styles.profileRow}>
-          <Image
+          {/* <Image 
             source={imageUri ? { uri: imageUri } : PLACEHOLDER_IMAGE }
             style={styles.profileImage}
             resizeMode="cover"
             defaultSource={PLACEHOLDER_IMAGE}
-          />
+          /> */}
+
+          <Image
+            source={
+            !imageUri || imageError
+             ? PLACEHOLDER_IMAGE
+             : { uri: imageUri }
+             }
+            style={styles.profileImage}
+            resizeMode="cover"
+            onError={() => setImageError(true)}
+            />
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{fullName}</Text>
             <Text style={styles.profileEmail}>{email}</Text>

@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import LocationSelectorModal from '@/app/components/LocationSelectorModal';
+import { colors } from '@/app/constants/theme';
+import { CombinedAd } from '@/app/types/marketplace';
+import apiClient from '@/app/utils/apiClient';
+import { showErrorToast } from '@/app/utils/toast';
+import { AntDesign } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
+  ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
-  TouchableOpacity,
   Platform,
   ScrollView,
-  Image,
-  TextInput,
   StyleSheet,
-  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import {AntDesign} from '@expo/vector-icons';
 import { SelectList } from 'react-native-dropdown-select-list';
-import LocationSelectorModal from '@/app/components/LocationSelectorModal';
 import CarListingSection from '../../reusables/carListingSection';
-import apiClient from '@/app/utils/apiClient';
-import { CombinedAd } from '@/app/types/marketplace';
-import { showErrorToast } from '@/app/utils/toast';
-import { colors } from '@/app/constants/theme';
-import { useRouter } from 'expo-router';
 
 
 export interface UserProfile {
@@ -31,20 +31,20 @@ export interface UserProfile {
   isGoogleUser: boolean;
   image: string | null;
   role: string;
-  paidPlans: Array<{
+  paidPlans: {
     planType: string;
     status: string;
     reference: string;
     _id: string;
-  }>;
+  }[];
   walletBalance: number;
-  walletTransactions: Array<{
+  walletTransactions: {
     amount: number;
     reference: string;
     status: string;
     paymentDate: string;
     _id: string;
-  }>;
+  }[];
   isVerified: boolean;
   hasSubmittedVerification: boolean;
   createdAt: string;
@@ -192,22 +192,35 @@ export default function HomeScreen() {
 
   const now = Date.now();
 
- 
-  const premiumAds = ads.filter(ad => {
-    const paidAd = ad.vehicleAd || ad.propertyAd;
-    return paidAd?.paymentStatus === 'success' && paidAd?.plan !== 'free';
+const premiumAds = ads.filter(item => {
+  const ad = item.vehicleAd || item.propertyAd || item.petAd || item.agricultureAd || 
+             item.kidsAd || item.serviceAd || item.equipmentAd || item.gadgetAd || 
+             item.laptopAd || item.fashionAd || item.householdAd || item.beautyAd || 
+             item.constructionAd || item.jobAd || item.hireAd;
+  
+  console.log('Ad check:', {
+    hasAd: !!ad,
+    plan: ad?.plan,
+    paymentStatus: ad?.paymentStatus,
+    isPremium: ad?.paymentStatus === "success" && ["premium", "vip", "diamond", "enterprise"].includes(ad.plan?.toLowerCase())
   });
+  
+  if (!ad) return false;
+  
+  const premiumPlans = ["premium", "vip", "diamond", "enterprise"];
+  return ad.paymentStatus === "success" && premiumPlans.includes(ad.plan?.toLowerCase());
+});
+
 
   const newVehicles = ads
   .filter(ad => {
     if (!ad.vehicleAd) return false;
-    const createdAt = new Date(ad.carAd?.createdAt).getTime();
+    const createdAt = new Date(ad.vehicleAd?.createdAt ?? 0).getTime();
     return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000; // within 7 days
   })
   .sort((a, b) => {
-    return new Date(b.carAd?.createdAt).getTime() - new Date(a.carAd?.createdAt).getTime();
+    return new Date(b.vehicleAd?.createdAt ?? 0).getTime() - new Date(a.vehicleAd?.createdAt ?? 0).getTime();
   })
-  .slice(0, 6);
 
   
   const newProperties = ads
@@ -221,14 +234,172 @@ export default function HomeScreen() {
       new Date(b.propertyAd?.createdAt ?? 0).getTime() -
       new Date(a.propertyAd?.createdAt ?? 0).getTime()
   )
-  .slice(0, 6);
 
-  const recommendedAds = ads
+  const newGadget = ads 
     .filter(ad => {
-      const paidAd = ad.vehicleAd || ad.propertyAd;
-      return paidAd?.paymentStatus === 'free' || paidAd?.plan === 'free';
+      if (!ad.gadgetAd) return false;
+       const createdAt = new Date(ad.gadgetAd?.createdAt ?? 0).getTime();
+       return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
     })
-    .slice(0, 6);
+    .sort(
+      (a, b) => 
+         new Date(b.gadgetAd?.createdAt ?? 0).getTime() - 
+         new Date(a.gadgetAd?.createdAt ?? 0).getTime()
+    )
+
+     const newFashion = ads 
+        .filter(ad => {
+          if (!ad.fashionAd) return false;
+          const createdAt = new Date(ad.fashionAd?.createdAt ?? 0).getTime();
+          return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+        })
+         .sort(
+          (a, b) => 
+            new Date(b.fashionAd?.createdAt ?? 0).getTime() - 
+           new Date(a.fashionAd?.createdAt ?? 0).getTime() 
+         )
+
+         const newHousehold = ads 
+           .filter(ad => {
+            if (!ad.householdAd) return false;
+            const createdAt = new Date(ad.householdAd?.createdAt ?? 0).getTime();
+            return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+           })
+            .sort(
+              (a, b) => 
+                new Date(b.householdAd?.createdAt ?? 0).getTime() - 
+              new Date(a.householdAd?.createdAt ?? 0).getTime()
+            )
+
+            const newLaptop = ads 
+                .filter(ad => {
+                  if (!ad.laptopAd) return false;
+                  const createdAt = new Date(ad.laptopAd?.createdAt ?? 0).getTime();
+                  return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+             })
+              .sort(
+                (a, b) => 
+                  new Date(b.laptopAd?.createdAt ?? 0).getTime() - 
+                new Date(a.laptopAd?.createdAt ?? 0).getTime()
+              )
+
+              const newPet = ads 
+                 .filter(ad => {
+                  if (!ad.petAd) return false;
+                  const createdAt = new Date(ad.petAd?.createdAt ?? 0).getTime();
+                  return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                 })
+                 .sort(
+                  (a, b) => 
+                     new Date(b.petAd?.createdAt ?? 0).getTime() - 
+                    new Date(a.petAd?.createdAt ?? 0).getTime()
+                 )
+
+                 const newAgriculture = ads 
+                   .filter(ad => {
+                    if (!ad.agricultureAd) return false;
+                    const createdAt = new Date(ad.agricultureAd?.createdAt ?? 0).getTime();
+                    return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                   })
+                   .sort(
+                    (a, b) => 
+                       new Date(b.agricultureAd?.createdAt ?? 0).getTime() - 
+                      new Date(a.agricultureAd?.createdAt ?? 0).getTime()
+                   )
+
+                   const newKid = ads 
+                     .filter(ad => {
+                      if (!ad.kidsAd) return false;
+                      const createdAt = new Date(ad.kidsAd?.createdAt ?? 0).getTime();
+                      return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                     })
+                      .sort(
+                        (a, b) => 
+                         new Date(b.kidsAd?.createdAt ?? 0).getTime() - 
+                        new Date(a.kidsAd?.createdAt ?? 0).getTime()
+                      )
+
+                      const newService = ads 
+                         .filter(ad => {
+                          if (!ad.serviceAd) return false;
+                          const createdAt = new Date(ad.serviceAd?.createdAt ?? 0).getTime();
+                          return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                         })
+                         .sort(
+                          (a, b) => 
+                            new Date(b.serviceAd?.createdAt ?? 0).getTime() - 
+                           new Date(a.serviceAd?.createdAt ?? 0).getTime()
+                         )
+
+                        const newEquipment = ads 
+                           .filter(ad => {
+                            if (!ad.equipmentAd) return false;
+                            const createdAt = new Date(ad.equipmentAd?.createdAt ?? 0).getTime();
+                            return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                           })
+                           .sort(
+                             (a, b) => 
+                               new Date(b.equipmentAd?.createdAt ?? 0).getTime() - 
+                             new Date(a.equipmentAd?.createdAt ?? 0).getTime()
+                           )
+
+                        const newBeauty = ads 
+                            .filter(ad => {
+                              if (!ad.beautyAd) return false;
+                              const createdAt = new Date(ad.beautyAd?.createdAt ?? 0).getTime();
+                              return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                            })
+                            .sort(
+                              (a, b) => 
+                                new Date(b.beautyAd?.createdAt ?? 0).getTime() - 
+                               new Date(a.beautyAd?.createdAt ?? 0).getTime()
+                            )
+
+                     const newConstruction = ads 
+                        .filter(ad => {
+                          if (!ad.constructionAd) return false;
+                          const createdAt = new Date(ad.constructionAd?.createdAt ?? 0).getTime();
+                          return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                        })
+                        .sort(
+                           (a, b) => 
+                             new Date(b.constructionAd?.createdAt ?? 0).getTime() -
+                            new Date(a.constructionAd?.createdAt ?? 0).getTime()
+                        )
+
+                        const newJob = ads 
+                           .filter(ad => {
+                            if (!ad.jobAd) return false;
+                             const createdAt = new Date(ad.jobAd?.createdAt ?? 0).getTime();
+                             return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                           })
+                           .sort(
+                            (a, b) => 
+                                new Date(b.jobAd?.createdAt ?? 0).getTime() - 
+                              new Date(a.jobAd?.createdAt ?? 0).getTime()
+                           )
+
+                           const newHire = ads 
+                             .filter(ad => {
+                              if (!ad.hireAd) return false;
+                              const createdAt = new Date(ad.hireAd?.createdAt ?? 0).getTime();
+                              return (now - createdAt) <= 7 * 24 * 60 * 60 * 1000;
+                             })
+                             .sort(
+                              (a, b) => 
+                                new Date(b.hireAd?.createdAt ?? 0).getTime() -
+                               new Date(a.hireAd?.createdAt ?? 0).getTime()
+                             )
+
+ const recommendedAds = ads
+  .filter(ad => {
+    const paidAd = ad.vehicleAd || ad.propertyAd || ad.gadgetAd || ad.fashionAd || 
+                   ad.petAd || ad.agricultureAd || ad.kidsAd || ad.serviceAd || 
+                   ad.equipmentAd || ad.laptopAd || ad.householdAd || ad.beautyAd || 
+                   ad.constructionAd || ad.jobAd || ad.hireAd;
+    
+    return paidAd?.plan === 'free' || !paidAd?.plan;
+  });
 
   const handleAdPress = (ad: CombinedAd) => {
     console.log('Pressed ad:', ad.adId);
@@ -392,6 +563,71 @@ export default function HomeScreen() {
                   ads={newProperties} 
                   onAdPress={handleAdPress} 
                  />
+                 <CarListingSection
+                   title="Newly Posted Gadget"
+                   ads={newGadget}
+                   onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                    title="Newly Posted Fashion"
+                    ads={newFashion}
+                    onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                   title="Newly Posted household"
+                   ads={newHousehold}
+                   onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                   title="Newly Posted laptops"
+                   ads={newLaptop}
+                   onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                   title="Newly Posted Pet"
+                   ads={newPet}
+                   onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                   title="Newly Posted Agriculture"
+                   ads={newAgriculture}
+                   onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                   title="Newly Posted Kid toys"
+                   ads={newKid}
+                   onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                    title="Newly Posted Services"
+                    ads={newService}
+                    onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                    title="Newly Posted Equipment"
+                    ads={newEquipment}
+                    onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                  title="Newly Posted Beauty"
+                  ads={newBeauty}
+                  onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                   title="Newly Posted Construction"
+                   ads={newConstruction}
+                   onAdPress={handleAdPress}
+                 />
+                 <CarListingSection
+                   title="Newly Posted Job"
+                   ads={newJob}
+                   onAdPress={handleAdPress}
+                 /> 
+                 <CarListingSection
+                    title="Newly Posted Hire"
+                    ads={newHire}
+                    onAdPress={handleAdPress}
+                 /> 
                 <CarListingSection 
                  title="Recommended For You" 
                  ads={recommendedAds} 

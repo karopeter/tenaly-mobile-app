@@ -40,7 +40,7 @@ interface SellerProfile {
   joinedDate: string;
 }
 
-export default function App() {
+export default function HomeListDetails() {
   const router = useRouter();
   const { adId } = useLocalSearchParams<{ adId: string }>();
   const [ad, setAd] = useState<CombinedAd | null>(null);
@@ -178,42 +178,342 @@ const fetchSellerData = async (sellerId: string) => {
 
   // Get appropriate images based on ad type
   const getImages = () => {
-    if (!ad) return [];
-    
-    if (ad.carAd.category === 'car' || ad.carAd.category === 'bus' || ad.carAd.category === 'tricycle') {
-      return ad.carAd.vehicleImage || [];
-    } else {
-      return ad.carAd.propertyImage || [];
-    }
-  };
+  if (!ad) return [];
+
+  if (ad.petAd) {
+    return ad.carAd.petsImage || [];
+  }
+  if (ad.agricultureAd) {
+    return ad.carAd.agricultureImage || [];
+  }
+  
+  if (ad.vehicleAd) {
+    return ad.carAd.vehicleImage || [];
+  } else if (ad.propertyAd) {
+    return ad.carAd.propertyImage || [];
+  }
+
+  // Add other types:
+  if (ad.gadgetAd) return ad.carAd.gadgetImage || [];
+  if (ad.fashionAd) return ad.carAd.fashionImage || [];
+  if (ad.householdAd) return ad.carAd.householdImage || [];
+  if (ad.laptopAd) return ad.carAd.laptopImage || [];
+  if (ad.kidsAd) return ad.carAd.kidsImage || [];
+  if (ad.serviceAd) return ad.carAd.serviceImage || [];
+  if (ad.equipmentAd) return ad.carAd.equipmentImage || [];
+  if (ad.beautyAd) return ad.carAd.beautyImage || [];
+  if (ad.constructionAd) return ad.carAd.constructionImage || [];
+  if (ad.jobAd) return ad.carAd.jobImage || [];
+  if (ad.hireAd) return ad.carAd.hireImage || [];
+
+  return [];
+};
 
   // Get details based on ad type
   const getAdDetails = () => {
     if (!ad) return {};
 
-    if (ad.vehicleAd) {
-      return {
-        'Make': ad.vehicleAd.vehicleType || 'N/A',
-        'Model': ad.vehicleAd.model || 'N/A',
-        'Manufacturing Year': ad.vehicleAd.year?.toString() || 'N/A',
-        'Color': ad.vehicleAd.color || 'N/A',
-        'Fuel Type': ad.vehicleAd.fuelType || 'N/A',
-        'Transmission': ad.vehicleAd.transmission || 'N/A',
-        'Car Type': ad.vehicleAd.carType || 'N/A',
-        'Key Features': ad.vehicleAd.carKeyFeatures || 'N/A',
-      };
-    } else if (ad.propertyAd) {
-      return {
-        'Property Type': ad.propertyAd.propertyType || 'N/A',
-        'Furnishing': ad.propertyAd.furnishing || 'N/A',
-        'Square Meter': ad.propertyAd.squareMeter || 'N/A',
-        'Parking': ad.propertyAd.parking || 'N/A',
-        'Service Charge': ad.propertyAd.serviceCharge || 'N/A',
-        'Ownership': ad.propertyAd.ownershipStatus || 'N/A',
-        'Duration': ad.propertyAd.propertyDuration || 'N/A',
-        'Negotiation': ad.propertyAd.negotiation || 'N/A',
-      };
+    if (ad.petAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.petAd.petType) details['Pet Type'] = ad.petAd.petType;
+      if (ad.petAd.breed) details['Breed'] = ad.petAd.breed;
+      if (ad.petAd.age) details['Age'] = ad.petAd.age;
+      if (ad.petAd.gender) details['Gender'] = ad.petAd.gender;
+      if (ad.petAd.healthStatus) details['Health Status'] = ad.petAd.healthStatus.join(', ');
+      if (ad.petAd.negotiation) details['Negotiation'] = ad.petAd.negotiation;
+
+      return details;
     }
+
+     // New Agriculture Ad Details 
+    if (ad.agricultureAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.agricultureAd.title) details['Title'] = ad.agricultureAd.title;
+      if (ad.agricultureAd.agricultureType) details['Type'] = ad.agricultureAd.agricultureType.join(', ');
+      if (ad.agricultureAd.condition) details['Condition'] = ad.agricultureAd.condition;
+      if (ad.agricultureAd.unit) details['Unit'] = ad.agricultureAd.unit;
+      if (ad.agricultureAd.bulkPrice && ad.agricultureAd.bulkPrice.length > 0) {
+        details['Bulk Price'] = ad.agricultureAd.bulkPrice.map(bp => 
+          `${bp.quantity} ${bp.unit} @ ₦${bp.amountPerUnit.toLocaleString()}`
+        ).join(', ');
+      }
+      if (ad.agricultureAd.feedType) details['Feed Type'] = ad.agricultureAd.feedType.join(', ');
+      if (ad.agricultureAd.brand) details['Brand'] = ad.agricultureAd.brand;
+       if (ad.agricultureAd.formulationType) details['Formulation Type'] = ad.agricultureAd.formulationType.join(', ');
+       if (ad.agricultureAd.serviceMode) details['Service Mode'] = ad.agricultureAd.serviceMode.join(', ');
+       if (ad.agricultureAd.negotiation) details['Negotiation'] = ad.agricultureAd.negotiation;
+
+      return details;
+    }
+
+    // Hire Ad Details 
+    if (ad.hireAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.hireAd.hireGender) details['Gender'] = ad.hireAd.hireGender;
+      if (ad.hireAd.jobType) details['Job Type'] = ad.hireAd.jobType;
+      if (ad.hireAd.experienceLevel) details['Experience Level'] = ad.hireAd.experienceLevel;
+      if (ad.hireAd.workMode) details['Work Mode'] = ad.hireAd.workMode;
+      if (ad.hireAd.yearsOfExperience) details['Years of Experience'] = ad.hireAd.yearsOfExperience;
+      if (ad.hireAd.relationshipStatus) details['Relationship Status'] = ad.hireAd.relationshipStatus;
+      if (ad.hireAd.skills) details['Skills'] = ad.hireAd.skills;
+      if (ad.hireAd.pricingType) details['Pricing Type'] = ad.hireAd.pricingType;
+      if (ad.hireAd.negotiation)  details['Negotiation'] = ad.hireAd.negotiation;
+      return details;
+    }
+
+    if (ad.equipmentAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.equipmentAd.condition) details['Condition'] = ad.equipmentAd.condition;
+      if (ad.equipmentAd.powerSource) details['Power Source'] = ad.equipmentAd.powerSource;
+      if (ad.equipmentAd.brand) details['Brand'] = ad.equipmentAd.brand;
+      if (ad.equipmentAd.usageType) details['Usage Type'] = ad.equipmentAd.usageType;
+      if (ad.equipmentAd.negotiation) details['Negotiation'] = ad.equipmentAd.negotiation;
+
+      return details;
+    }
+
+    if (ad.fashionAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.fashionAd.fashionType) details['Fashion Type'] = ad.fashionAd.fashionType;
+      if (ad.fashionAd.condition) details['Condition'] = ad.fashionAd.condition;
+      if (ad.fashionAd.fashionBrand) details['Brand'] = ad.fashionAd.fashionBrand;
+      if (ad.fashionAd.gender) details['Gender'] = ad.fashionAd.gender;
+      if (ad.fashionAd.size) details['Size'] = ad.fashionAd.size;
+      if (ad.fashionAd.fashionMaterial) details['Material'] = ad.fashionAd.fashionMaterial;
+      if (ad.fashionAd.fashionColor) details ['Color'] = ad.fashionAd.fashionColor;
+      if (ad.fashionAd.negotiation) details['Negotiation'] = ad.fashionAd.negotiation;
+
+      return details;
+    }
+
+    if (ad.jobAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.jobAd.companyEmployerName) details['Company Employer Name'] = ad.jobAd.companyEmployerName;
+      if (ad.jobAd.location) details['Job Location'] = ad.jobAd.location;
+      if (ad.jobAd.jobType) details['Job Type'] = ad.jobAd.jobType;
+      if (ad.jobAd.experienceLevel) details['Experience Level'] = ad.jobAd.experienceLevel;
+      if (ad.jobAd.yearOfExperience) details['Year of Experience'] = ad.jobAd.yearOfExperience;
+      if (ad.jobAd.genderPreference) details['Gender Preference'] = ad.jobAd.genderPreference;
+      if (ad.jobAd.applicationDeadline) details['Application Deadline'] = ad.jobAd.applicationDeadline;
+      if (ad.jobAd.skils) details['Skills'] = ad.jobAd.skils;
+      if (ad.jobAd.jobLocationType) details['Job Location Type'] = ad.jobAd.jobLocationType;
+      if (ad.jobAd.responsibilities) details['Responsibilities'] = ad.jobAd.responsibilities;
+      if (ad.jobAd.requirements) details['Requirements'] = ad.jobAd.requirements;
+      if (ad.jobAd.pricingType) details['Pricing Type'] = ad.jobAd.pricingType;
+      if (ad.jobAd.negotiation) details['Negotiation'] = ad.jobAd.negotiation;
+
+      return details;
+    }
+
+    if (ad.constructionAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.constructionAd.constructionType) details['Type'] = ad.constructionAd.constructionType;
+      if (ad.constructionAd.constructionMaterial) details['Materials'] = ad.constructionAd.constructionMaterial;
+      if (ad.constructionAd.constructionUnit) details['Unit'] = ad.constructionAd.constructionUnit;
+      if (ad.constructionAd.constructionBrand) details['Brand'] = ad.constructionAd.constructionBrand;
+      if (ad.constructionAd.condition) details['Condition'] = ad.constructionAd.condition;
+      if (ad.constructionAd.warranty) details['Warranty'] = ad.constructionAd.warranty;
+      if (ad.constructionAd.powerRating) details['Power Rating'] = ad.constructionAd.powerRating;
+      if (ad.constructionAd.yearOfManufacture) details['Year of Manufacture'] = ad.constructionAd.yearOfManufacture;
+      if (ad.constructionAd.fuelType) details['Fuel Type'] = ad.constructionAd.fuelType;
+      if (ad.constructionAd.finish) details['Finish'] = ad.constructionAd.finish;
+      if (ad.constructionAd.constructionColor) details['Color'] = ad.constructionAd.constructionColor;
+      if (ad.constructionAd.size) details['Size'] = ad.constructionAd.size;
+      if (ad.constructionAd.experienceLevel) details['Experience Level'] = ad.constructionAd.experienceLevel;
+      if (ad.constructionAd.constructionAvailability) details['Availability'] = ad.constructionAd.constructionAvailability;
+      if (ad.constructionAd.constructionUnit) details['Unit'] = ad.constructionAd.constructionUnit;
+      if (ad.constructionAd.negotiation) details['Negotiation'] = ad.constructionAd.negotiation;
+      if (ad.constructionAd.bulkPrice && ad.constructionAd.bulkPrice.length > 0) {
+        details['Bulk Price'] = ad.constructionAd.bulkPrice.map(bp => 
+          `${bp.quantity} ${bp.unit} @ ₦${bp.amountPerUnit.toLocaleString()}`
+        ).join(', ');
+      }
+
+      return details;
+    }
+
+    if (ad.householdAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.householdAd.householdType) details['Type'] = ad.householdAd.householdType;
+      if (ad.householdAd.condition) details['Condition'] = ad.householdAd.condition;
+      if (ad.householdAd.householdBrand) details['Brand'] = ad.householdAd.householdBrand;
+      if (ad.householdAd.householdMaterial) details['Material']  = ad.householdAd.householdMaterial;
+      if (ad.householdAd.householdStyle) details['Style'] = ad.householdAd.householdStyle;
+      if (ad.householdAd.householdColor) details['Color'] = ad.householdAd.householdColor;
+      if (ad.householdAd.roomType) details['Room Type'] = ad.householdAd.roomType;
+      if (ad.householdAd.powerType) details['Power Type'] = ad.householdAd.powerType;
+      if (ad.householdAd.size) details['Size'] = ad.householdAd.size;
+      if (ad.householdAd.householdPowersource) details['Power Source'] = ad.householdAd.householdPowersource;
+      if (ad.householdAd.colorTemperature) details['Color Temperature'] = ad.householdAd.colorTemperature;
+      if (ad.householdAd.negotiation) details['Negotiation'] = ad.householdAd.negotiation;
+
+      return details;
+     }
+
+     if (ad.laptopAd) {
+      const details: Record<string, string> = {};
+
+      if (ad.laptopAd.condition) details['Condition'] = ad.laptopAd.condition;
+      if (ad.laptopAd.laptopType) details['Type'] = ad.laptopAd.laptopType;
+      if (ad.laptopAd.laptopBrand) details['Brand'] = ad.laptopAd.laptopBrand;
+      if (ad.laptopAd.laptopWarranty) details['Warranty'] = ad.laptopAd.laptopWarranty;
+      if (ad.laptopAd.laptopConnectivityType) details['Connectivity Type'] = ad.laptopAd.laptopConnectivityType.join(', ');
+      if (ad.laptopAd.speedRating) details['Speet Rating'] = ad.laptopAd.speedRating;
+      if (ad.laptopAd.laptopStorage) details['Storage'] = ad.laptopAd.laptopStorage;
+      if (ad.laptopAd.laptopOperating) details['Operating System']  = ad.laptopAd.laptopOperating;
+      if (ad.laptopAd.laptopRam) details['Ram'] = ad.laptopAd.laptopRam;
+      if (ad.laptopAd.laptopProcessor) details['Processor'] = ad.laptopAd.laptopProcessor;
+      if (ad.laptopAd.laptopScreenSize) details['Screen Size'] =  ad.laptopAd.laptopScreenSize;
+      if (ad.laptopAd.laptopBatteryHealth) details['Battery Health'] = ad.laptopAd.laptopBatteryHealth;
+      if (ad.laptopAd.laptopColor) details['Color'] = ad.laptopAd.laptopColor;
+      if (ad.laptopAd.laptopAccessories) details['Accessories'] = ad.laptopAd.laptopAccessories;
+      if (ad.laptopAd.laptopWarranty) details['Warranty'] = ad.laptopAd.laptopWarranty;
+      if (ad.laptopAd.screenSize) details['Screen Size'] = ad.laptopAd.screenSize;
+      if (ad.laptopAd.resolution) details['Resolution'] = ad.laptopAd.resolution;
+      if (ad.laptopAd.refreshRate) details['Refresh Rate'] = ad.laptopAd.refreshRate;
+      if (ad.laptopAd.capacity) details['capacity'] = ad.laptopAd.capacity;
+      if (ad.laptopAd.negotiation) details['Negotiation'] = ad.laptopAd.negotiation;
+
+      return details;
+     }
+
+
+     if (ad.beautyAd) {
+       const details: Record<string, string> = {};
+
+       if (ad.beautyAd.beautyType) details['Type'] = ad.beautyAd.beautyType;
+       if (ad.beautyAd.condition) details['Condition'] = ad.beautyAd.condition;
+       if (ad.beautyAd.hairType) details['Hair Type'] = ad.beautyAd.hairType;
+       if (ad.beautyAd.gender) details['Gender'] = ad.beautyAd.gender;
+       if (ad.beautyAd.beautyBrand) details['Brand'] = ad.beautyAd.beautyBrand;
+       if (ad.beautyAd.skinType) details['skinType'] = ad.beautyAd.skinType;
+       if (ad.beautyAd.targetConcern) details['Target Concern'] = ad.beautyAd.targetConcern;
+       if (ad.beautyAd.skinTone) details['Skin Tone'] = ad.beautyAd.skinTone;
+       if (ad.beautyAd.fragranceFamily) details['Fragrance'] = ad.beautyAd.fragranceFamily;
+       if (ad.beautyAd.beautyPowerSource) details['Power Source'] = ad.beautyAd.beautyPowerSource;
+       if (ad.beautyAd.negotiation) details['Negotiation'] = ad.beautyAd.negotiation;
+
+       return details;
+      }
+
+      if (ad.serviceAd) {
+        const details: Record<string, string> = {};
+
+        if (ad.serviceAd.serviceDuration) details['Duration'] = ad.serviceAd.serviceDuration;
+        if (ad.serviceAd.serviceExperience) details['Experience'] = ad.serviceAd.serviceExperience;
+        if (ad.serviceAd.serviceAvailability) details['Availability'] = ad.serviceAd.serviceAvailability;
+        if (ad.serviceAd.serviceLocation) details['Location'] = ad.serviceAd.serviceLocation;
+        if (ad.serviceAd.yearOfExperience) details['Year of Experience'] = ad.serviceAd.yearOfExperience;
+        if (ad.serviceAd.pricingType) details['Pricing Type'] = ad.serviceAd.pricingType;
+        if (ad.serviceAd.serviceDiscount) details['Discount'] = ad.serviceAd.serviceDiscount;
+        if (ad.serviceAd.negotiation) details['Negotiation'] = ad.serviceAd.negotiation;
+        return details;
+      }
+
+      if (ad.kidsAd) {
+        const details: Record<string, string> = {};
+
+        if (ad.kidsAd.condition) details['Condition'] = ad.kidsAd.condition;
+        if (ad.kidsAd.color) details['Color'] = ad.kidsAd.color;
+        if (ad.kidsAd.gender) details['Gender'] = ad.kidsAd.gender;
+        if (ad.kidsAd.ageGroup) details['Age Group'] = ad.kidsAd.ageGroup;
+        if (ad.kidsAd.plasticGroup) details['Plastic Group'] = ad.kidsAd.plasticGroup;
+        if (ad.kidsAd.woodOptions) details['Wood Options'] = ad.kidsAd.woodOptions;
+        if (ad.kidsAd.negotiation) details['Negotiation'] = ad.kidsAd.negotiation;
+
+        return details;
+      }
+
+
+
+   // Gadget details 
+if (ad.gadgetAd) {
+  const details: Record<string, string> = {};
+  
+  // if (ad.gadgetAd.gadgetTitle) details['Title'] = ad.gadgetAd.gadgetTitle;
+  if (ad.gadgetAd.condition) details['Condition'] = ad.gadgetAd.condition;
+  if (ad.gadgetAd.gadgetBrand) details['Brand'] = ad.gadgetAd.gadgetBrand;
+  if (ad.gadgetAd.storageCapacity) details['Storage'] = ad.gadgetAd.storageCapacity;
+  if (ad.gadgetAd.ram) details['RAM'] = ad.gadgetAd.ram;
+  if (ad.gadgetAd.operatingSystem) details['OS'] = ad.gadgetAd.operatingSystem;
+  if (ad.gadgetAd.network) details['Network'] = ad.gadgetAd.network;
+  if (ad.gadgetAd.batteryHealth) details['Battery Health'] = ad.gadgetAd.batteryHealth;
+  if (ad.gadgetAd.gadgetColor) details['Color'] = ad.gadgetAd.gadgetColor;
+  if (ad.gadgetAd.simType) details['Sim Type'] = ad.gadgetAd.simType;
+  if (ad.gadgetAd.accessories) details['Accessories'] = ad.gadgetAd.accessories;
+  if (ad.gadgetAd.warranty) details['Warranty'] = ad.gadgetAd.warranty;
+  if (ad.gadgetAd.connectivityType) details['Connectivity Type'] = ad.gadgetAd.connectivityType;
+  if (ad.gadgetAd.negotiation) details['Negotiation'] = ad.gadgetAd.negotiation;
+  
+  return details;
+}
+
+
+if (ad.vehicleAd) {
+  const details: Record<string, string> = {};
+
+  if (ad.vehicleAd.model)  details['Model'] = ad.vehicleAd.model; 
+  if (ad.vehicleAd.year) details['Year'] = ad.vehicleAd.year.toString();
+  if (ad.vehicleAd.trim) details['Trim'] = ad.vehicleAd.trim;
+  if (ad.vehicleAd.color) details['Color'] = ad.vehicleAd.color;
+  if (ad.vehicleAd.interiorColor) details['Interior Color'] = ad.vehicleAd.interiorColor;
+  if (ad.vehicleAd.transmission) details['Transmission'] = ad.vehicleAd.transmission;
+  if (ad.vehicleAd.vinChassisNumber) details['Vin Chassis Number'] = ad.vehicleAd.vinChassisNumber;
+  if (ad.vehicleAd.carRegistered) details['Car Registered'] = ad.vehicleAd.carRegistered;
+  if (ad.vehicleAd.exchangePossible) details['Exchange Possible'] = ad.vehicleAd.exchangePossible;
+  if (ad.vehicleAd.carKeyFeatures) details['Car Key Features'] = ad.vehicleAd.carKeyFeatures.join(', ');
+  if (ad.vehicleAd.carType) details['Car Type'] = ad.vehicleAd.carType;
+  if (ad.vehicleAd.carBody) details['Car Body'] = ad.vehicleAd.carBody;
+  if (ad.vehicleAd.fuel) details['Fuel'] = ad.vehicleAd.fuel;
+  if (ad.vehicleAd.seat) details['Seat'] = ad.vehicleAd.seat;
+  if (ad.vehicleAd.driveTrain) details['Drive Train'] = ad.vehicleAd.driveTrain;
+  if (ad.vehicleAd.numberOfCylinders) details['Number of Cylinders'] = ad.vehicleAd.numberOfCylinders;
+  if (ad.vehicleAd.engineSizes) details['Engine Sizes'] = ad.vehicleAd.engineSizes;
+  if (ad.vehicleAd.horsePower) details['Horse Power'] = ad.vehicleAd.horsePower;
+  if (ad.vehicleAd.negotiation) details['Negotiation'] = ad.vehicleAd.negotiation;
+
+  return details;
+}
+
+if (ad.propertyAd) {
+  const details: Record<string, string> = {};
+
+  if (ad.propertyAd.propertyAddress) details['Address'] = ad.propertyAd.propertyAddress;
+  if (ad.propertyAd.propertyType) details['Property Type'] = ad.propertyAd.propertyType;
+  if (ad.propertyAd.propertyCondition) details['Condition'] = ad.propertyAd.propertyCondition;
+  if (ad.propertyAd.propertyFacilities) details['Facilities'] = ad.propertyAd.propertyFacilities.join(', ');
+  if (ad.propertyAd.furnishing) details['Furnishing'] = ad.propertyAd.furnishing;
+  if (ad.propertyAd.parking) details['Parking'] = ad.propertyAd.parking;
+  if (ad.propertyAd.squareMeter) details['Square Meter'] = ad.propertyAd.squareMeter;
+  if (ad.propertyAd.ownershipStatus) details['Ownership Status'] = ad.propertyAd.ownershipStatus;
+  if (ad.propertyAd.serviceCharge) details['Service Charge'] = ad.propertyAd.serviceCharge;
+  if (ad.propertyAd.numberOfBedrooms) details['Number of Bedrooms'] = ad.propertyAd.numberOfBedrooms;
+  if (ad.propertyAd.numberOfBathrooms) details['Number of Bathrooms'] = ad.propertyAd.numberOfBathrooms;
+  if (ad.propertyAd.numberOfToilet) details['Number of Toilet'] = ad.propertyAd.numberOfToilet;
+  if (ad.propertyAd.titleDocuments) details['Title Documents'] = ad.propertyAd.titleDocuments;
+  if (ad.propertyAd.maximumAllowedGuest) details['Maximum Allowed Guest'] = ad.propertyAd.maximumAllowedGuest;
+  if (ad.propertyAd.isSmokingAllowed) details['Smoking Allowed'] = ad.propertyAd.isSmokingAllowed;
+  if (ad.propertyAd.isPartiesAllowed) details['Parties Allowed'] = ad.propertyAd.isPartiesAllowed;
+  if (ad.propertyAd.petsAllowed) details['Pets Allowed'] = ad.propertyAd.petsAllowed;
+  if (ad.propertyAd.developmentFee) details['Development Fee'] = ad.propertyAd.developmentFee;
+  if (ad.propertyAd.surveyFee) details['Survey Fee'] = ad.propertyAd.surveyFee;
+  if (ad.propertyAd.legalFee) details['Legal Fee'] = ad.propertyAd.legalFee;
+  if (ad.propertyAd.pricingUnits) details['Pricing Units'] = ad.propertyAd.pricingUnits;
+  if (ad.propertyAd.serviceFee) details['Service Fee'] = ad.propertyAd.serviceFee;
+  if (ad.propertyAd.propertyDuration) details['Duration'] = ad.propertyAd.propertyDuration;
+  if (ad.propertyAd.guestNumber) details['Guest Number'] = ad.propertyAd.guestNumber;
+  if (ad.propertyAd.negotiation) details['Negotiation'] = ad.propertyAd.negotiation;
+
+  return details;
+}
     return {};
   };
 
@@ -285,7 +585,22 @@ const fetchSellerData = async (sellerId: string) => {
             <View style={styles.sectionContainer}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>
-                  {ad.vehicleAd ? 'Vehicle Details' : 'Property Details'}
+                   {ad.petAd ? 'Pet Details' :
+                     ad.agricultureAd ? 'Agriculture Product Details' :
+                     ad.gadgetAd ? 'Gadget Details' :
+                     ad.hireAd ? 'Hire Details' :
+                     ad.equipmentAd ? 'Equipment Details' :
+                     ad.fashionAd ? 'Fashion Details' : 
+                     ad.jobAd ? 'Job Details' :
+                     ad.constructionAd ? 'Construction Details' : 
+                     ad.householdAd ? 'Household Details' :
+                     ad.laptopAd ? 'Laptop Details' :
+                     ad.beautyAd ? 'Beauty Details' :
+                     ad.serviceAd ? 'Service Details' :
+                     ad.kidsAd ?  'Kids Details' :
+                     ad.petAd ? 'Pet Details' :
+                    ad.vehicleAd ? 'Vehicle Details' : 
+                    'Property Details'}
                 </Text>
                 <TouchableOpacity onPress={() => setShowDetails(!showDetails)}>
                  <View style={styles.seeRow}>
@@ -311,13 +626,63 @@ const fetchSellerData = async (sellerId: string) => {
                   ))}
                 </View>
               )}
+
+              {/* New section for Hire Ad Links */}
+              {ad.hireAd && showDetails && (
+                <View style={{ marginTop: 16 }}>
+                  {ad.hireAd.portfolioLink && (
+                    <TouchableOpacity
+                      onPress={() => ad.hireAd?.portfolioLink && Linking.openURL(ad.hireAd.portfolioLink)}
+                      style={styles.linkButton}
+                    >
+                     <Feather name="link" size={16} color={colors.blue} />
+                     <Text style={styles.linkText}>View Portfolio</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
+              {ad.hireAd?.otherLinks && (
+                <TouchableOpacity
+                  onPress={() => ad.hireAd?.otherLinks && Linking.openURL(ad.hireAd.otherLinks)}
+                  style={styles.linkButton}
+                >
+                 <Feather name="link" size={16} color={colors.blue} />
+                  <Text style={styles.linkText}>View Other Links</Text>
+                </TouchableOpacity>
+              )}
+
+              {ad.hireAd?.resume && (
+               <TouchableOpacity
+                 onPress={() => ad.hireAd?.resume && Linking.openURL(ad.hireAd.resume)}
+                 style={styles.linkButton}
+               >
+                <Feather name="file-text" size={16} color={colors.blue} />
+                  <Text style={styles.linkText}>View Resume</Text>
+               </TouchableOpacity>
+              )}
             </View>
 
             {/* More Info Section */}
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>More Info</Text>
               <Text style={styles.moreInfoText}>
-                {ad.vehicleAd?.description || ad.propertyAd?.description || 'No description available'}
+               {ad.petAd?.description || 
+                 ad.agricultureAd?.description ||
+                 ad.vehicleAd?.description || 
+                 ad.gadgetAd?.description || 
+                 ad.hireAd?.description ||
+                 ad.equipmentAd?.description || 
+                 ad.fashionAd?.description || 
+                 ad.jobAd?.description || 
+                 ad.constructionAd?.description || 
+                 ad.householdAd?.description || 
+                 ad.laptopAd?.description || 
+                 ad.beautyAd?.description || 
+                 ad.serviceAd?.description || 
+                 ad.kidsAd?.description || 
+                 ad.propertyAd?.description || 
+                'No description available'}
               </Text>
             </View>
 
@@ -617,12 +982,38 @@ const fetchSellerData = async (sellerId: string) => {
         <View style={styles.infoContainer}>
           <View style={styles.infoTopRow}>
             <View>
-              <Text style={styles.productName}>
-                {ad.vehicleAd ? 
-                  `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}` :
-                  ad.propertyAd?.propertyName || 'Property'
-                }
-              </Text>
+            <Text style={styles.productName}>
+              {ad.petAd ? 
+               ad.petAd.petType :
+               ad.agricultureAd ?
+               ad.agricultureAd.title :
+               ad.gadgetAd ? 
+               ad.gadgetAd.gadgetTitle :
+               ad.hireAd ?
+               ad.hireAd.hireTitle :
+               ad.equipmentAd ? 
+               ad.equipmentAd.equipmentTitle :
+               ad.fashionAd ?
+               ad.fashionAd.fashionTitle :
+               ad.jobAd ? 
+               ad.jobAd.jobTitle :
+               ad.constructionAd ? 
+               ad.constructionAd.constructionTitle :
+               ad.householdAd ? 
+               ad.householdAd.householdTitle :
+               ad.laptopAd ?
+               ad.laptopAd.laptopTitle :
+               ad.beautyAd ?
+               ad.beautyAd.beautyTitle :
+               ad.serviceAd ? 
+               ad.serviceAd.serviceTitle :
+               ad.kidsAd ?
+               ad.kidsAd.title :
+               ad.vehicleAd ? 
+              `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}` :
+               ad.propertyAd?.propertyName || 'Product'
+               }
+             </Text>
               <View style={styles.locationCon}>
                 <Image
                   source={require('../../../assets/images/location.png')}
@@ -638,7 +1029,24 @@ const fetchSellerData = async (sellerId: string) => {
             </View>
             <View style={styles.viewsContainer}>
               <Feather name="eye" size={16} color="#9CA3AF" />
-              <Text style={styles.viewsText}>16,000 views</Text>
+              <Text style={styles.viewsText}>
+                {ad.petAd?.viewCount || 
+                  ad.agricultureAd?.viewCount || 
+                  ad.gadgetAd?.viewCount || 
+                  ad.hireAd?.viewCount || 
+                  ad.equipmentAd?.viewCount ||
+                  ad.fashionAd?.viewCount || 
+                  ad.jobAd?.viewCount || 
+                  ad.constructionAd?.viewCount || 
+                  ad.householdAd?.viewCount || 
+                  ad.laptopAd?.viewCount || 
+                  ad.beautyAd?.viewCount || 
+                  ad.serviceAd?.viewCount || 
+                  ad.kidsAd?.viewCount || 
+                  ad.vehicleAd?.viewCount || 
+                  ad.propertyAd?.viewCount || 
+                  0} views
+                 </Text>
             </View>
           </View>
         </View>
@@ -668,14 +1076,45 @@ const fetchSellerData = async (sellerId: string) => {
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Price</Text>
             <Text style={styles.priceValue}>
-              {formatPrice(ad.vehicleAd?.amount || ad.propertyAd?.amount || 0)}
+              {formatPrice(
+                ad.petAd?.amount || 
+                ad.agricultureAd?.amount || 
+                (typeof ad.gadgetAd?.amount === 'string' ? parseFloat(ad.gadgetAd.amount) : ad.gadgetAd?.amount) ||
+                ad.hireAd?.salaryRange ||
+                ad.equipmentAd?.amount ||
+                ad.jobAd?.salaryRange || 
+                ad.fashionAd?.amount ||
+                ad.constructionAd?.amount ||
+                ad.householdAd?.amount || 
+                ad.laptopAd?.amount || 
+                ad.beautyAd?.amount || 
+                ad.serviceAd?.amount || 
+                ad.kidsAd?.amount ||
+                ad.vehicleAd?.amount || 
+                ad.propertyAd?.amount || 
+                0
+              )}
             </Text>
           </View>
-          {(ad.vehicleAd?.negotiation === 'Yes' || ad.propertyAd?.negotiation === 'Yes') && (
-            <TouchableOpacity style={styles.offerButton}>
-              <Text style={styles.offerButtonText}>Make an Offer</Text>
-            </TouchableOpacity>
-          )}
+         {(ad.vehicleAd?.negotiation === 'Yes' || 
+            ad.propertyAd?.negotiation === 'Yes' ||
+            ad.petAd?.negotiation === 'Yes' ||
+            ad.gadgetAd?.negotiation === 'Yes' ||
+            ad.hireAd?.negotiation === 'Yes' || 
+            ad.equipmentAd?.negotiation === 'Yes' || 
+            ad.fashionAd?.negotiation === 'Yes' ||
+            ad.jobAd?.negotiation === 'Yes' || 
+            ad.constructionAd?.negotiation === 'Yes' ||
+            ad.householdAd?.negotiation === 'Yes' ||
+            ad.laptopAd?.negotiation === 'Yes' ||
+            ad.beautyAd?.negotiation === 'Yes' || 
+            ad.serviceAd?.negotiation === 'Yes' ||
+            ad.kidsAd?.negotiation === 'Yes' ||
+            ad.agricultureAd?.negotiation === 'Yes') && (
+           <TouchableOpacity style={styles.offerButton}>
+             <Text style={styles.offerButtonText}>Make an Offer</Text>
+          </TouchableOpacity>
+         )}
         </View>
 
         {/* Tab Navigation */}
@@ -685,7 +1124,21 @@ const fetchSellerData = async (sellerId: string) => {
             onPress={() => setActiveTab('details')}
           >
             <Text style={[styles.tabText, activeTab === 'details' && styles.activeTabText]}>
-              {ad.vehicleAd ? 'Vehicle Details' : 'Property Details'}
+               {ad.petAd ? 'Pet Details' :
+                 ad.agricultureAd ? 'Agriculture Details' :
+                 ad.gadgetAd ? 'Gadget Details' :
+                 ad.hireAd ? 'Hire Details' :
+                 ad.equipmentAd ? 'Equipment Details' :
+                 ad.fashionAd ? 'Fashion Details' :
+                 ad.jobAd ? 'Job Details' :
+                 ad.constructionAd ? 'Construction Details' :
+                 ad.householdAd ? 'Household Details' :
+                 ad.laptopAd ? 'Laptop Details' :
+                 ad.beautyAd ? 'Beauty Details' :
+                 ad.serviceAd ? 'Service Details' :
+                 ad.kidsAd ? 'Kids Details' :
+                 ad.vehicleAd ? 'Vehicle Details' : 
+                 'Property Details'}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -1049,7 +1502,8 @@ deliveryInfoLabel: {
     color: colors.darkGray,
     fontSize: 14, 
     fontFamily: 'WorkSans_600SemiBold',
-    fontWeight: '500'
+    fontWeight: '500',
+    flexShrink: 1,
   },
   sectionContainer: {
     backgroundColor: colors.whiteShade,
@@ -1099,6 +1553,22 @@ deliveryInfoLabel: {
     color: colors.darkGray,
     fontFamily: 'WorkSans_500Medium'
   },
+  linkButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: colors.blueGrey,
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  borderRadius: 8,
+  marginBottom: 8,
+  gap: 8,
+},
+linkText: {
+  color: colors.blue,
+  fontSize: 14,
+  fontWeight: '500',
+  fontFamily: 'WorkSans_500Medium',
+},
   moreInfoText: {
     fontSize: 14,
     lineHeight: 22,

@@ -18,7 +18,7 @@ import { colors } from '@/app/constants/theme';
 const menuItems = [
   { title: "Profile", icon: <Ionicons name="person-outline" size={20} color="#525252" />, route: "/protected/profile" },
   { title: "Analytics", icon: <MaterialIcons name="analytics" size={20} color="#525252" />, route: "/protected/analytics" },
-  { title: "Account Settings", icon: <Ionicons name="settings-outline" size={20} color="#525252" />, route: "/protected/account-settings" },
+  // { title: "Account Settings", icon: <Ionicons name="settings-outline" size={20} color="#525252" />, route: "/protected/account-settings" },
   { title: "Bookmarked", icon: <FontAwesome5 name="bookmark" size={18} color="#525252" />, route: "/protected/bookmarked" },
   { title: "Customer Reviews", icon: <Ionicons name="chatbubble-ellipses-outline" size={20} color="#525252" />, route: "/protected/reviews" },
   { title: "Premium Service", icon: <FontAwesome5 name="crown" size={18} color="#525252" />, route: "/protected/premium" },

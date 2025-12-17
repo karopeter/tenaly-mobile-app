@@ -20,25 +20,11 @@ import apiClient from '@/app/utils/apiClient';
 import { CombinedAd } from '@/app/types/marketplace';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import ReportModal from '@/app/reusables/ReportModal';
+import { SellerProfile } from '../../types/seller-profile.types';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-interface SellerProfile {
-  _id: string;
-  fullName: string;
-  phoneNumber: string;
-  isGoogleUser: boolean;
-  image: string | null;
-  role: string;
-  isVerified: boolean;
-  hasSubmittedVerification: boolean;
-  verificationStatus: {
-    personal: 'verified' | 'pending' | 'rejected' | null;
-    business: 'verified' | 'pending' | 'rejected' | null;
-  };
-  createdAt: string;
-  joinedDate: string;
-}
+
 
 export default function HomeListDetails() {
   const router = useRouter();

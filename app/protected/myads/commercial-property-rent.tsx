@@ -541,6 +541,7 @@ const router = useRouter();
             value={formData.amount}
             placeholder="Enter your amount"
             onChangeText={(value) => updateField('amount', value)}
+            keyboardType="numeric" 
           />
         </View>
 

@@ -10,33 +10,36 @@ import {
  RefreshControl,
  Modal,
  Switch,
- Dimensions,
  ScrollView
  } from 'react-native';
  import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/app/constants/theme';
 import { MyAdsProps } from '@/app/types/myAds.types';
 import { useAuth } from '@/app/context/AuthContext';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import apiClient from '@/app/utils/apiClient';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ad } from '@/app/types/ad.types';
 
-const { width } = Dimensions.get('window');
-
-interface Ad {
- adId: string;
- carAd: any;
- vehicleAd?: any;
- propertyAd?: any;
- isSold: boolean;
-}
 
 const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
   const { user, token } = useAuth();
   const [vehicleAds, setVehicleAds] = useState<Ad[]>([]);
   const [propertyAds, setPropertyAds] = useState<Ad[]>([]);
+  const [agricultureAds, setAgricultureAds] = useState<Ad[]>([]);
+  const [equipmentAds, setEquipmentAds] = useState<Ad[]>([]);
+  const [gadgetAds, setGadgetAds] = useState<Ad[]>([]);
+  const [laptopAds, setLaptopAds] = useState<Ad[]>([]);
+  const [fashionAds, setFashionAds] = useState<Ad[]>([]);
+  const [householdAds, setHouseholdAds] = useState<Ad[]>([]);
+  const [constructionAds, setConstructionAds] = useState<Ad[]>([]);
+  const [petAds, setPetAds] = useState<Ad[]>([]);
+  const [kidAds, setKidAds] = useState<Ad[]>([]);
+  const [jobAds, setJobAds] = useState<Ad[]>([]);
+  const [hireAds, setHireAds] = useState<Ad[]>([]);
+  const [beautyAds, setBeautyAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(initialLoading || false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
@@ -47,7 +50,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
   const [selectedBusinessIndex, setSelectedBusinessIndex] = useState(0);
   const [businessName, setBusinessName] = useState<string>('');
   const [businessId, setBusinessId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'vehicle' | 'property'>('vehicle');
+  const [activeTab, setActiveTab] = useState<'vehicle' | 'property' | 'agriculture' | 'equipment' | 'gadget' | 'laptop' | 'fashion' | 'household' | 'construction' | 'pet' | 'kid' | 'job' | 'hire' | 'beauty'>('vehicle');
   
   useEffect(() => {
     if (user?.role) {
@@ -80,7 +83,6 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     }
     } catch (error: any) {
       console.error("Error fetching business category:", error);
-      // If business category doesn't exist, user needs to create one 
       if (error.response?.status === 404) {
         showErrorToast('Please create a business profile first');
       } 
@@ -100,17 +102,79 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
 
     setLoading(true);
     try {
-      const [vehicleResponse, propertyResponse] = await Promise.all([
+      const [vehicleResponse, 
+        propertyResponse, 
+        agricultureResponse, 
+        equipmentResponse, 
+        gadgetResponse, 
+        laptopResponse, 
+        fashionResponse, 
+        householdResponse,
+        constructionResponse,
+        petResponse,
+        kidResponse,
+        jobResponse,
+        hireResponse,
+        beautyReasponse,
+      ] = await Promise.all([
         apiClient.get('/api/vehicles/ads/combined-vehicle', {
             params: { page: 1, limit: 10, businessId }
         }),
         apiClient.get('/api/property/ads/combined-property', {
             params: { page: 1, limit: 10, businessId },
         }),
+        apiClient.get('/api/agriculture/ads/combined-agriculture', {
+          params: { page: 1, limit: 10, businessId },
+        }),
+        apiClient.get('/api/equipments/ads/combined-equipment', {
+          params: { page: 1, limit: 10, businessId },
+        }),
+        apiClient.get('/api/gadget/ads/combined-gadget', { 
+          params: { page: 1, limit: 10, businessId },
+        }),
+        apiClient.get('/api/laptops/ads/combined-laptop', {
+          params: { page: 1, limit: 10, businessId },
+        }),
+        apiClient.get('/api/fashion/ads/combined-fashion', {
+          params: { page: 1, limit: 10, businessId },
+        }),
+        apiClient.get('/api/household/ads/combined-household', {
+          params: { page: 1, limit: 10, businessId }
+        }),
+        apiClient.get('/api/construction/ads/combined-construction', {
+          params: { page: 1, limit: 10, businessId },
+        }),
+        apiClient.get('/api/pets/ads/combined-pets', {
+          params: { page: 1, limit: 10, businessId }
+        }),
+        apiClient.get('/api/kids/ads/combined-kids', {
+           params: { page: 1, limit: 10, businessId }
+        }),
+        apiClient.get('/api/jobs/ads/combined-job', {
+          params: { page: 1, limit: 10, businessId }
+        }),
+        apiClient.get('/api/hire/ads/combined-hire', {
+           params: { page: 1, limit: 10, businessId }
+        }),
+        apiClient.get('/api/beauty/ads/combined-beauty', {
+           params: { page: 1, limit: 10, businessId }
+        }),
       ]);
 
       setVehicleAds(vehicleResponse.data.data || []);
       setPropertyAds(propertyResponse.data.data || []);
+      setAgricultureAds(agricultureResponse.data.data || []);
+      setEquipmentAds(equipmentResponse.data.data || []);
+      setGadgetAds(gadgetResponse.data.data || []);
+      setLaptopAds(laptopResponse.data.data || []);
+      setFashionAds(fashionResponse.data.data || []);
+      setHouseholdAds(householdResponse.data.data || []);
+      setConstructionAds(constructionResponse.data.data || []);
+      setPetAds(petResponse.data.data || []);
+      setKidAds(kidResponse.data.data || []);
+      setJobAds(jobResponse.data.data || []);
+      setHireAds(hireResponse.data.data || []);
+      setBeautyAds(beautyReasponse.data.data || []);
     } catch (error: any) {
       console.error("Error fetching ads:", error);
       showErrorToast("Failed to fetch ads");
@@ -152,7 +216,6 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     } catch (error: any) {
       console.error("Error switching role:", error);
       showErrorToast("Failed to switch role");
-      // Revert the switch if failed 
       setUserRole(userRole);
     } finally {
         setIsSwitchingRole(false);
@@ -166,16 +229,210 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     fetchAllAds();
   };
 
- 
-  const handleDeleteAd = async (adId: string, adType: 'vehicle' | 'property') => {
-    console.log("Delete coming soon");
-  };
-
   const handleViewDetails = (ad: Ad) => {
     setModalVisible(false);
-    // navigate to details screen when ready 
-    console.log('View details:', ad.adId);
+   
+    const adType = activeTab;
+    const adId = adType === 'vehicle'
+       ? ad.vehicleAd?._id
+       : adType === 'property'
+       ? ad.propertyAd?._id
+       : adType === 'agriculture'
+       ? ad.agricultureAd?._id
+       : adType === 'equipment'
+       ? ad.equipmentAd?._id
+       : adType === 'gadget'
+       ? ad?.gadgetAd?._id
+       : adType === 'laptop'
+       ? ad?.laptopAd?._id
+       : adType === 'fashion'
+       ? ad?.fashionAd?._id
+       : adType === 'household' 
+       ? ad?.householdAd?._id
+       : adType === 'construction'
+       ? ad?.constructionAd?._id
+       : adType === 'pet'
+       ? ad?.petAd?._id
+       : adType === 'kid'
+       ? ad?.kidAd?._id
+       : adType === 'job'
+       ? ad?.jobAd?._id
+       : adType === 'hire'
+       ? ad?.hireAd?._id 
+       : ad?.beautyAd?._id
+       
+
+    const carAdId = ad.carAd?._id;
+
+    router.push({
+      pathname: '/protected/myads/ad-details',
+      params: {
+        adId,
+        adType,
+        carAdId
+      }
+    });
   }
+
+   const handleDeleteAd = async (carAdId: string, adType: string) => {
+       if (!apiClient) {
+         showErrorToast('API client not initialized');
+         return;
+       }
+
+       try {
+        let endpoint = '';
+        switch (adType) {
+          case 'vehicle': 
+           endpoint = `/api/vehicles/delete-vehicles/${carAdId}`;
+           break;
+          case 'property': 
+            endpoint = `/api/property/delete-property/${carAdId}`;
+            break;
+          case 'equipment': 
+            endpoint = `/api/equipments/delete-equipment/${carAdId}`;
+            break;
+          case 'gadget': 
+           endpoint = `/api/gadget/delete-gadget/${carAdId}`;
+           break;
+          case 'fashion': 
+           endpoint = `/api/fashion/delete-fashion/${carAdId}`;
+           break;
+          case 'household': 
+            endpoint = `/api/household/delete-household/${carAdId}`;
+            break;
+          case 'construction': 
+            endpoint = `/api/construction/delete-construction/${carAdId}`;
+            break;
+          case 'pet': 
+            endpoint = `/api/kids/delete-kid/${carAdId}`;
+            break;
+          case 'job': 
+            endpoint = `/api/jobs/delete-job/${carAdId}`;
+            break;
+          case 'hire': 
+           endpoint = `/api/hire/delete-hire/${carAdId}`;
+           break;
+          case 'beauty': 
+            endpoint = `/api/beauty/delete-beauty/${carAdId}`;
+            break;
+          default: 
+           showErrorToast('Invalid ad type');
+           return;
+        }
+
+        // Delete the ad 
+        const response = await apiClient.delete(endpoint);
+
+        if (response.data.success) {
+          showSuccessToast('Ad deleted successfully');
+          await fetchAllAds();
+        }
+       } catch (error: any) {
+         console.error('Error deleting ad:', error);
+         showErrorToast(error.response?.data?.message || 'Failed to delete ad');
+       }
+    };
+
+    const handleDeleteCarAd = async (carAdId: string) => {
+      if (!apiClient) {
+        showErrorToast('API client not initialized');
+        return;
+      }
+
+      try {
+       const response = await apiClient.delete(`/api/carAdd/delete-car-ad/${carAdId}`);
+
+       if (response.data.success) {
+        showSuccessToast('Ad images deleted successfully');
+        await fetchAllAds();
+       }
+      } catch (error: any) {
+        console.error('Error deleting car ad:', error);
+        showErrorToast(error.response?.data?.message || 'Failed to delete ad images');
+      }
+    };
+
+
+    const handleMarkAsSold = async (carAdId: string, adType: string) => {
+       if (!apiClient) {
+        showErrorToast('API client not initialized');
+        return;
+       }
+
+       // Validation 
+       if (!carAdId) {
+        showErrorToast('Car Ad ID not found');
+        return;
+       }
+
+       try {
+       let endpoint = '';
+       switch (adType) {
+        case 'vehicle': 
+          endpoint = `/api/vehicles/mark-vehicle-as-sold/${carAdId}`;
+          break;
+        case 'property': 
+          endpoint = `/api/property/mark-property-as-sold/${carAdId}`;
+          break;
+        case 'agriculture': 
+          endpoint = `/api/agriculture/mark-agriculture-as-sold/${carAdId}`;
+          break;
+        case 'equipment': 
+          endpoint =  `/api/equipments/mark-equipment-ad-as-sold/${carAdId}`;
+          break;
+        case 'gadget': 
+          endpoint = `/api/gadget/mark-gadget-ad-as-sold/${carAdId}`;
+          break;
+        case 'laptop': 
+          endpoint = `/api/laptops/mark-laptop-ad-as-sold/${carAdId}`;
+          break;
+        case  'fashion': 
+          endpoint = `/api/fashion/mark-fashion-ad-as-sold/${carAdId}`;
+          break;
+        case 'household': 
+           endpoint = `/api/household/mark-household-ad-as-sold/${carAdId}`;
+           break;
+        case 'construction': 
+          endpoint = `/api/construction/mark-construction-ad-as-sold/${carAdId}`;
+          break;
+        case 'pet': 
+           endpoint = `/api/pets/mark-pet-as-sold/${carAdId}`;
+           break;
+        case 'kid': 
+          endpoint = `/api/kids/mark-kid-ad-as-sold/${carAdId}`;
+          break;
+        case 'job': 
+          endpoint = `/api/jobs/mark-job-ad-as-sold/${carAdId}`;
+          break;
+        case 'hire': 
+          endpoint = `/api/hire/mark-hire-ad-as-sold/${carAdId}`;
+          break;
+        case 'beauty': 
+          endpoint = `/api/beauty/mark-beauty-ad-as-sold/${carAdId}`;
+          break;
+         default: 
+          showErrorToast('Invalid ad type');
+          return;
+       }
+
+       // Mark as sold 
+       const response = await apiClient.patch(endpoint);
+
+       if (response.data.success) {
+        showSuccessToast(
+          adType === 'job'
+           ? 'Job marked as closed successfully'
+           : 'Ad marked as sold successfully'
+        );
+        await fetchAllAds();
+       }
+       } catch (error: any) {
+         console.error('Error marking ad as sold:', error);
+         showErrorToast(error.response?.data?.message || 'Failed to mark ad as sold');
+       }
+    };
+
 
   const handleEditAd = (ad: Ad) => {
     setModalVisible(false);
@@ -189,7 +446,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
       case 'pending': return '#FDBA40';
       case 'rejected': return '#CB0D0D';
       case 'sold': return '#000087';
-      default: return '#9CA3AF';
+      default: return '#B532B7';
     }
   };
 
@@ -198,7 +455,34 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
   };
 
   const renderAdItem = ({ item }: { item: Ad }) => {
-    const ad = activeTab === 'vehicle' ? item.vehicleAd : item.propertyAd;
+    const ad = activeTab ===  'vehicle' 
+     ? item.vehicleAd 
+     : activeTab === 'property'
+     ? item.propertyAd
+     : activeTab === 'agriculture'
+     ? item.agricultureAd
+     : activeTab === 'equipment'
+     ? item.equipmentAd
+     : activeTab === 'gadget'
+     ? item.gadgetAd
+     : activeTab === 'laptop'
+     ? item.laptopAd
+     : activeTab === 'fashion'
+     ? item.fashionAd
+     : activeTab === 'household'
+     ? item.householdAd
+     : activeTab === 'construction'
+     ? item.constructionAd
+     : activeTab === 'pet'
+     ? item.petAd
+     : activeTab === 'kid'
+     ? item.kidAd
+     : activeTab === 'job'
+     ? item.jobAd
+     : activeTab === 'hire'
+     ? item.hireAd
+     : item.beautyAd
+
 
     if (!ad) {
       console.log(`No ${activeTab} data for item:`, item.adId);
@@ -207,23 +491,84 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
 
     // Determine ad type based on activeTab 
     const isVehicleAd = activeTab === 'vehicle';
+    const isPropertyAd = activeTab === 'property';
+    const isAgricultureAd = activeTab === 'agriculture';
+    const isEquipmentAd = activeTab === 'equipment';
+    const isGadgetAd = activeTab === 'gadget';
+    const isLaptopAd = activeTab === 'laptop';
+    const isFashionAd = activeTab === 'fashion';
+    const isHouseholdAd = activeTab === 'household';
+    const isConstructionAd = activeTab === 'construction';
+    const isPetAd = activeTab === 'pet';
+    const isKidAd = activeTab === 'kid';
+    const isJobAd = activeTab === 'job';
+    const isHireAd = activeTab === 'hire';
+    const isBeautyAd = activeTab === 'beauty';
 
     // Get images based on ActiveTab 
     let images: string[] = [];
     if (item.carAd) {
       if (isVehicleAd) {
         images = item.carAd.vehicleImage || [];
-      } else {
-        images = item.carAd.propertyImage || [];
+      } else if (isPropertyAd) {
+         images = item.carAd.propertyImage || [];
+      } else if (isAgricultureAd) {
+        images = item.carAd.agricultureImage || [];
+      } else if (isEquipmentAd) {
+        images = item.carAd.equipmentImage || [];
+      } else if (isGadgetAd) {
+        images = item.carAd.gadgetImage || [];
+      } else if (isLaptopAd) {
+        images = item.carAd.laptopImage || [];
+      } else if (isFashionAd) {
+        images = item.carAd.fashionImage || [];
+      } else if (isHouseholdAd) {
+        images = item.carAd.householdImage || [];
+      } else if (isConstructionAd) {
+        images = item.carAd.constructionImage || [];
+      } else if (isPetAd) {
+        images = item.carAd.petsImage || [];
+      } else if (isKidAd) {
+        images = item.carAd.kidsImage || [];
+      } else if (isJobAd) {
+        images = item.carAd.jobImage || [];
+      } else if (isHireAd) {
+        images = item.carAd.hireImage || [];
+      } else if (isBeautyAd) {
+        images = item.carAd.beautyImage || [];
       }
     }
 
-    console.log(`${activeTab} Ad ${item.adId} - Images:`, images);
 
     // Get title based on ad type 
     const title = isVehicleAd 
        ? `${ad.vehicleType || ''} ${ad.model || ''} ${ad.year || ''}`.trim()
-       : ad.propertyName || 'Property';
+       : isPropertyAd 
+       ?  ad.propertyName || 'Property'
+       : isAgricultureAd 
+       ? ad.title || 'Agriculture Product'
+       : isEquipmentAd 
+       ? ad.equipmentTitle || 'Equipment Product'
+       : isGadgetAd 
+       ? ad.gadgetTitle || 'Gadget Product'
+       : isLaptopAd 
+       ? ad.laptopTitle || 'Laptop Product'
+       : isFashionAd
+       ? ad.fashionTitle || 'Fashion Product'
+       : isHouseholdAd 
+       ? ad.householdTitle || 'Household Product'
+       : isConstructionAd
+       ? ad.constructionTitle || 'Construction Product'
+       : isPetAd 
+       ? ad.petType || 'Pet Product'
+       : isKidAd 
+       ? ad.title || 'Kid product' 
+       : isJobAd 
+       ? ad.jobTitle || 'Job Product'
+       : isHireAd
+       ? ad.hireTitle || 'Hire Product'
+       : ad.beautyTitle || 'Beauty Product';
+
     
     const adType = isVehicleAd ? 'vehicle' : 'property';
     const description = ad.description || '';
@@ -253,7 +598,9 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
 
        <View style={styles.adContent}>
           <View style={styles.adHeader}>
-           <Text style={styles.adPrice}>₦{ad.amount.toLocaleString()}</Text>
+           <Text style={styles.adPrice}>
+              ₦{(ad.amount || ad.salaryRange || 0).toLocaleString()}
+           </Text>
             <TouchableOpacity
               onPress={() => {
                 setSelectedAd({ ...item, adType } as any);
@@ -286,6 +633,217 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                   </View>
                 </View>
             )}
+
+            {/* Property Specs */}
+            {item.propertyAd && (
+              <View style={styles.specContainer}>
+                {ad.ownershipStatus && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.ownershipStatus}</Text>
+                  </View>
+                )}
+
+                {ad.parking && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.parking}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Agriculture specs */}
+            {item.agricultureAd && (
+              <View style={styles.specContainer}>
+                {ad.agricultureType && ad.agricultureType.length > 0 && ad.agricultureType[0] && (
+                 <View style={styles.specBadge}>
+                  <Text style={styles.specText}>{ad.agricultureType[0]}</Text>
+                 </View>
+                )}
+
+                {ad.unit && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.unit}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Equipment spect */}
+            {item.equipmentAd && (
+              <View style={styles.specContainer}>
+                {ad.condition && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.condition}</Text>
+                  </View>
+                )}
+
+                {ad.powerSource && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.powerSource}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Gadget Specs */}
+            {item.gadgetAd && (
+              <View style={styles.specContainer}>
+                {ad.condition && (
+                 <View style={styles.specBadge}>
+                   <Text style={styles.specText}>{ad.condition}</Text>
+                 </View>
+                )}
+                {ad.gadgetBrand && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.gadgetBrand}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Laptop Specs */}
+            {item.laptopAd && (
+            <View style={styles.specContainer}>
+              {ad.condition && (
+                <View style={styles.specBadge}>
+                  <Text style={styles.specText}>{ad.condition}</Text>
+                </View>
+              )}
+              {ad.laptopType && (
+                <View style={styles.specBadge}>
+                  <Text style={styles.specText}>{ad.laptopType}</Text>
+                </View>
+              )}
+            </View>
+            )}
+
+            {/* Fashion Specs */}
+            {item.fashionAd && (
+              <View style={styles.specContainer}>
+                {ad.condition && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.condition}</Text>
+                  </View>
+                )}
+                {ad.fashionType && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.fashionType}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Household Specs */}
+            {item.householdAd && (
+              <View style={styles.specContainer}>
+                {ad.householdType && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.householdType}</Text>
+                   </View>
+                )}
+                {ad.condition && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.condition}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Construction Specs */}
+            {item.constructionAd && (
+              <View style={styles.specContainer}>
+                {ad.constructionType && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.constructionType}</Text>
+                   </View>
+                )}
+                {ad.condition && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.condition}</Text>
+                   </View>
+                )}
+               </View>
+            )}
+
+            {/* Pet Specs */}
+            {item.petAd && (
+              <View style={styles.specContainer}>
+                {ad.breed && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.breed}</Text>
+                  </View>
+                )}
+                {ad.gender && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.gender}</Text>
+                  </View>
+                )}
+               </View>
+            )}
+
+            {/* Kids Spec */}
+            {item.kidAd && (
+              <View style={styles.specContainer}>
+                {ad.condition && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.condition}</Text>
+                  </View>
+                )}
+                {ad.gender && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.gender}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* Job Specs */}
+            {item.jobAd && (
+              <View style={styles.specContainer}>
+                {ad.jobType && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.jobType}</Text>
+                  </View>
+                )}
+                {ad.yearOfExperience && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.yearOfExperience}</Text>
+                   </View>
+                )}
+              </View>
+            )}
+
+            {/* Hire Specs */}
+            {item.hireAd && (
+              <View style={styles.specContainer}>
+                {ad.jobType && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.jobType}</Text>
+                   </View>
+                )}
+                {ad.workMode && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.workMode}</Text>
+                  </View>
+                )}
+               </View>
+            )}
+
+            {/* Job Specs */}
+            {item.hireAd && (
+              <View style={styles.specContainer}>
+                {ad.condition && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.condition}</Text>
+                  </View>
+                )}
+                {ad.gender && (
+                  <View style={styles.specBadge}>
+                    <Text style={styles.specText}>{ad.gender}</Text>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
 
           <View style={styles.statusContainer}>
@@ -301,7 +859,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                 let statusIcon;
 
                 if (ad.isDraft) {
-                  statusIcon = require('../../../assets/images/rejected.png');
+                  statusIcon = require('../../../assets/images/draft-icon.png');
                 } else if (ad.status === 'approved') {
                   statusIcon = require('../../../assets/images/approved.png');
                 } else if (ad.status === 'pending') {
@@ -324,7 +882,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                 <Text
                   style={[
                     styles.statusText,
-                    { color: ad.isDraft ? '#6B7280' : getStatusColor(ad.status) }
+                    { color: ad.isDraft ? '#B532B7' : getStatusColor(ad.status) }
                   ]}
                 >
                  {ad.isDraft ? 'Draft' : getStatusText(ad.status)}
@@ -346,7 +904,33 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     </View>
   );
 
-  const currentAds = activeTab === 'vehicle' ? vehicleAds : propertyAds;
+  const currentAds = activeTab ===  'vehicle'
+     ? vehicleAds
+     : activeTab === 'property'
+     ? propertyAds
+     : activeTab === 'agriculture'
+     ? agricultureAds
+     : activeTab === 'equipment'
+     ? equipmentAds
+     : activeTab === 'gadget'
+     ?  gadgetAds
+     : activeTab === 'laptop'
+     ? laptopAds
+     : activeTab === 'fashion'
+     ? fashionAds
+     : activeTab === 'household'
+     ? householdAds
+     : activeTab === 'construction'
+     ? constructionAds
+     : activeTab === 'pet'
+     ? petAds
+     : activeTab === 'kid'
+     ? kidAds
+     : activeTab === 'job'
+     ? jobAds
+     : activeTab === 'hire'
+     ? hireAds
+     : beautyAds
 
   if (loading && !refreshing) {
     return (
@@ -430,9 +1014,25 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
          </View>
 
             
-              {vehicleAds.length > 0 && propertyAds.length > 0 && (
-                <View style={styles.tabContainer}>
-                  <TouchableOpacity 
+             {(vehicleAds.length > 0 || propertyAds.length > 0 ||  
+              agricultureAds.length > 0 ||  
+              equipmentAds.length > 0 || 
+              gadgetAds.length > 0 ||   
+              laptopAds.length > 0 ||  
+              fashionAds.length > 0 ||
+               householdAds.length > 0 || 
+               constructionAds.length > 0 || 
+               petAds.length > 0 ||
+               kidAds.length > 0 ||
+               jobAds.length > 0 || 
+               hireAds.length > 0 || 
+                beautyAds.length > 0) && (
+                <ScrollView 
+                 horizontal
+                 showsHorizontalScrollIndicator={false}
+                 contentContainerStyle={styles.tabContainer}>
+                 {vehicleAds.length > 0 && (
+                   <TouchableOpacity 
                     style={[styles.tab, activeTab === 'vehicle' && styles.activeTab]}
                     onPress={() => setActiveTab('vehicle')}
                   >
@@ -440,7 +1040,10 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                       Vehicle Ads ({vehicleAds.length})
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                 )}
+                
+                {propertyAds.length > 0 && (
+                   <TouchableOpacity 
                     style={[styles.tab, activeTab === 'property' && styles.activeTab]}
                     onPress={() => setActiveTab('property')}
                   >
@@ -448,8 +1051,153 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                       Property Ads ({propertyAds.length})
                     </Text>
                   </TouchableOpacity>
-                </View>
-              )}
+                )}
+
+                {agricultureAds.length > 0 && (
+                  <TouchableOpacity 
+                    style={[styles.tab, activeTab === 'agriculture' && styles.activeTab]}
+                    onPress={() => setActiveTab('agriculture')}>
+                   <Text style={[styles.tabText, activeTab === 'agriculture' && styles.activeTabText]}>
+                     Agriculture ({agricultureAds.length})
+                   </Text>
+                   </TouchableOpacity>
+                  )}
+
+                  {equipmentAds.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.tab, activeTab === 'equipment' && styles.activeTab]}
+                      onPress={() => setActiveTab('equipment')}
+                    >
+                      <Text 
+                       style={[styles.tabText, activeTab === 'equipment' && styles.activeTabText]}>
+                         Equipment ({equipmentAds.length})
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {gadgetAds.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.tab, activeTab === 'gadget' && styles.activeTab]}
+                      onPress={() => setActiveTab('gadget')}
+                    > 
+                     <Text style={[styles.tabText, activeTab === 'gadget' && styles.activeTabText]}>
+                       Gadget ({gadgetAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {laptopAds.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.tab, activeTab === 'laptop' && styles.activeTab]}
+                      onPress={() => setActiveTab('laptop')}
+                    >
+                     <Text style={[styles.tabText, activeTab === 'laptop' && styles.activeTabText]}>
+                      Laptop ({laptopAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {fashionAds.length > 0 && (
+                     <TouchableOpacity
+                       style={[styles.tab, activeTab === 'fashion' && styles.activeTab]}
+                       onPress={() => setActiveTab('fashion')}
+                     >
+                      <Text style={[styles.tabText, activeTab === 'fashion' && styles.activeTabText]}>
+                        Fashion  ({fashionAds.length})
+                      </Text>
+                     </TouchableOpacity>
+                  )}
+
+                  {householdAds.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.tab, activeTab === 'household' && styles.activeTab]}
+                      onPress={() => setActiveTab('household')}
+                    >
+                     <Text 
+                      style={[styles.tabText, activeTab === 'household' && styles.activeTabText]}>
+                       Household ({householdAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {constructionAds.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.tab, activeTab === 'construction' && styles.activeTab]}
+                      onPress={() => setActiveTab('construction')}
+                    >
+                     <Text 
+                       style={[styles.tabText, activeTab === 'construction' && styles.activeTabText]}
+                     >
+                      Construction ({constructionAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {petAds.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.tab, activeTab === 'pet' && styles.activeTab]}
+                      onPress={() => setActiveTab('pet')}
+                    >
+                    <Text 
+                      style={[styles.tabText, activeTab === 'pet' && styles.activeTabText]}
+                    >
+                       Pet ({petAds.length})
+                    </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {kidAds.length > 0 && ( 
+                    <TouchableOpacity
+                       style={[styles.tab, activeTab === 'kid' && styles.activeTab]}
+                      onPress={() => setActiveTab('kid')}
+                    >
+                     <Text
+                      style={[styles.tabText, activeTab === 'kid' && styles.activeTabText]}
+                     >
+                       Kid ({kidAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {jobAds.length > 0 && (
+                    <TouchableOpacity
+                       style={[styles.tab, activeTab === 'job' && styles.activeTab]}
+                      onPress={() => setActiveTab('job')}
+                    >
+                     <Text
+                      style={[styles.tabText, activeTab === 'job' && styles.activeTabText]}
+                     >
+                       Job ({jobAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {hireAds.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.tab, activeTab === 'hire' && styles.activeTab]}
+                      onPress={() => setActiveTab('hire')}
+                    >
+                     <Text
+                      style={[styles.tabText, activeTab === 'hire' && styles.activeTabText]}
+                     >
+                      Hire ({hireAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {beautyAds.length > 0 && (
+                    <TouchableOpacity
+                     style={[styles.tab, activeTab === 'beauty' && styles.activeTab]}
+                     onPress={() => setActiveTab('beauty')}
+                    >
+                     <Text>
+                      Beauty ({beautyAds.length})
+                     </Text>
+                    </TouchableOpacity>
+                  )}
+                </ScrollView>
+                
+                )}
 
               <FlatList
                data={currentAds}
@@ -534,10 +1282,51 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
              <Text style={styles.modalOptionText}>View details</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={async () => {
+                setModalVisible(false);
+                const carAdId = selectedAd?.carAd?._id;
+                if (carAdId) {
+                  await handleDeleteCarAd(carAdId);
+                } else { 
+                  showErrorToast('No images to delete')
+                }
+              }}
+            >
+                <AntDesign name="picture" size={20} color={colors.darkGray} />
+                <Text style={styles.modalOptionText}>Delete Images Only</Text>
+            </TouchableOpacity>
+
             {(() => {
                const currentAd = activeTab === 'vehicle'
                 ? selectedAd?.vehicleAd
-                : selectedAd?.propertyAd
+                : activeTab === 'property'
+                ? selectedAd?.propertyAd
+                : activeTab === 'agriculture'
+                ? selectedAd?.agricultureAd
+                : activeTab === 'equipment'
+                ? selectedAd?.equipmentAd
+                : activeTab === 'gadget' 
+                ? selectedAd?.gadgetAd
+                : activeTab === 'laptop'
+                ? selectedAd?.laptopAd
+                : activeTab === 'fashion'
+                ? selectedAd?.fashionAd
+                : activeTab === 'household'
+                ? selectedAd?.householdAd
+                : activeTab === 'construction'
+                ? selectedAd?.constructionAd
+                : activeTab === 'kid'
+                ? selectedAd?.kidAd 
+                : activeTab === 'pet'
+                ? selectedAd?.petAd
+                : activeTab === 'job'
+                ? selectedAd?.jobAd
+                : activeTab === 'hire'
+                ? selectedAd?.hireAd
+                : selectedAd?.beautyAd
+                
 
                 if (!currentAd) return null;
               
@@ -560,10 +1349,21 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
 
                       <TouchableOpacity
                         style={styles.modalOption}
-                        onPress={() => {
-                          setModalVisible(false);
-                          handleDeleteAd(selectedAd?.adId || '', (selectedAd as any).adType);
-                        }}
+                          onPress={async () => {
+                        setModalVisible(false);
+
+                         const carAdId = selectedAd?.carAd?._id;
+
+                         if (carAdId) {
+                          await handleDeleteAd(carAdId, activeTab);
+                         } else {
+                          showErrorToast('Ad ID not found');
+                         }
+
+                         if (carAdId) {
+                          await handleDeleteCarAd(carAdId);
+                         }
+                       }}
                       >
                        <AntDesign name="delete" size={20} color="#CB0D0D" />
                        <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
@@ -578,42 +1378,108 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                     <>
                      <TouchableOpacity
                        style={styles.modalOption}
-                       onPress={() => {
-                        setModalVisible(false);
-                        // Navigate to edit/resubmit
-                       }}
                      >
                       <AntDesign name="reload" size={20} colors={colors.darkGray} />
                       <Text style={styles.modalOptionText}>Resubmit</Text>
                      </TouchableOpacity>
 
                      <TouchableOpacity
-                       style={styles.modalOption}
-                       onPress={() => {
-                         setModalVisible(false);
-                         handleDeleteAd(selectedAd?.adId || '', (selectedAd as any).adType);
+                    style={styles.modalOption}
+                      onPress={async () => {
+                        setModalVisible(false);
+
+                         const carAdId = selectedAd?.carAd?._id;
+
+                         if (carAdId) {
+                          await handleDeleteAd(carAdId, activeTab);
+                         } else {
+                          showErrorToast('Ad ID not found');
+                         }
+                         
+                         if (carAdId) {
+                          await handleDeleteCarAd(carAdId);
+                         }
                        }}
-                     >
-                      <AntDesign name="delete" size={20} color="#CB0D0D" />
-                      <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
-                     </TouchableOpacity>
+                    >
+                   <AntDesign name="delete" size={20} color={colors.red} />
+                   <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
+                   </TouchableOpacity>
                     </>
                   );
                 }
 
                 //Pending or Approved: Show Delete only 
-                if (status === 'pending' || status === 'approved') {
+                if (status === 'pending') {
                   return (
                    <TouchableOpacity
                     style={styles.modalOption}
-                    onPress={() => {
-                     setModalVisible(false);
-                     handleDeleteAd(selectedAd?.adId || '', (selectedAd as any).adType);
-                   }}>
-                   <AntDesign name="delete" size={20} color="#CB0D0D" />
+                      onPress={async () => {
+                        setModalVisible(false);
+
+                         const carAdId = selectedAd?.carAd?._id;
+
+                         if (carAdId) {
+                          await handleDeleteAd(carAdId, activeTab);
+                         } else {
+                          showErrorToast('Ad ID not found');
+                         }
+                         
+                         if (carAdId) {
+                          await handleDeleteCarAd(carAdId);
+                         }
+                       }}
+                    >
+                   <AntDesign name="delete" size={20} color={colors.red} />
                    <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
                    </TouchableOpacity>
                   );
+                }
+
+                if (status === 'approved') {
+                  return (
+                   <>
+                  <TouchableOpacity
+                   style={styles.modalOption}
+                   onPress={async () => {
+                    setModalVisible(false);
+
+                    const carAdId = selectedAd?.carAd?._id;
+    
+                   if (carAdId) {
+                    await handleMarkAsSold(carAdId, activeTab);
+                  } else {
+                    showErrorToast('Ad ID not found');
+                  }
+                 }}>
+                 <AntDesign name="check-circle" size={20} color={colors.blue} />
+                  <Text style={styles.modalOptionText}>
+                   {activeTab === 'job' ? 'Mark as Closed' : 'Mark as Sold'}
+                 </Text>
+                </TouchableOpacity>
+
+                   <TouchableOpacity
+                    style={styles.modalOption}
+                      onPress={async () => {
+                        setModalVisible(false);
+
+                         const carAdId = selectedAd?.carAd?._id;
+
+                         if (carAdId) {
+                          await handleDeleteAd(carAdId, activeTab);
+                         } else {
+                          showErrorToast('Ad ID not found');
+                         }
+                         
+                         if (carAdId) {
+                          await handleDeleteCarAd(carAdId);
+                         }
+                       }}
+                    >
+                   <AntDesign name="delete" size={20} color={colors.red} />
+                   <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
+                   </TouchableOpacity>
+                   </>
+                  )
                 }
 
                 // Sold: Only View Details (already shown above, so returning null)
@@ -755,14 +1621,16 @@ businessName: {
     gap: 12,
   },
   tab: {
-    flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
     backgroundColor: colors.bg,
     borderWidth: 1,
+    minWidth: 140,
+    height: 45,
     borderColor: colors.border,
     alignItems: 'center',
+    justifyContent: 'center'
   },
   activeTab: {
     backgroundColor: colors.blue,

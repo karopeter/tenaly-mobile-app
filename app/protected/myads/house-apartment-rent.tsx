@@ -553,6 +553,7 @@ export default function HouseAparmentRentForm() {
               value={formData.amount}
               placeholder="Enter amount"
               onChangeText={(value) => updateField('amount', value)}
+              keyboardType="numeric" 
             />
           </View>
 

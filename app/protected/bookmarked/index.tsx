@@ -188,46 +188,7 @@ export default function Bookmarked() {
      }
   };
 
-  // Handle Send message with productive preview 
-  // const handleSendMessage = async (ad: BookmarkedAd) => {
-  //    try {
-  //     if (!apiClient) {
-  //       showErrorToast("API client is not initialized");
-  //       return;
-  //     }
-
-  //     // Get or create conversation with the seller 
-  //     const response = await apiClient.post('/api/conversation/create-conversation', {
-  //      userId: ad.carAd.userId
-  //     });
-
-  //     if (response.data.conversation) {
-  //       const conversationId = response.data.conversation._id;
-
-  //       // Get product details for preview 
-  //       const productTitle = getAdTitle(ad);
-  //       const productImage = getAdImages(ad)[0] || null;
-  //       const productPrice = getAdPrice(ad);
-
-  //       // Navigate to message screen with conversation and product Info
-  //       router.push({
-  //         pathName: '/protected/message',
-  //         params: {
-  //           conversationId,
-  //           sellerId: ad.carAd.userId,
-  //           adId: ad.adId,
-  //           productTitle,
-  //           productImage,
-  //           productPrice: productPrice.toString()
-  //         }
-  //       });
-  //     }
-  //    } catch(error: any) {
-  //      console.error("Error creating conversation:", error);
-  //      showErrorToast(error.response?.data?.error || "Failed to start conversation");
-  //    }
-  // };
-
+  
   // Get ad images 
   const getAdImages = (ad: BookmarkedAd) => {
   if (ad.petAd && ad.carAd.petsImage)  return ad.carAd.petsImage;

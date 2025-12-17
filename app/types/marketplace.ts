@@ -257,10 +257,13 @@ export interface EquipmentAd {
   carAdId: string | null;
   businessCategory: string; 
    equipmentTitle: string;
+   equipmentType: string;
    condition: string;
    powerSource: string;
    brand: string;
    usageType: string;
+   yearOfManufacture: string;
+   fuelType: string;
    amount: number;
    negotiation: string;
    description: string;

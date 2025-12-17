@@ -476,6 +476,7 @@ export default function EventCenterAdForm() {
               value={formData.amount}
               placeholder="Enter amount"
               onChangeText={(value) => updateField('amount', value)}
+              keyboardType="numeric" 
             />
           </View>
 

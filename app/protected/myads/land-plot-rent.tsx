@@ -577,6 +577,7 @@ export default function LandAndPlotSaleAdForm() {
              placeholder="Enter your amount"
              value={formData.amount}
              onChangeText={(value) => updateField('amount', value)} 
+             keyboardType="numeric" 
             />
           </View>
 

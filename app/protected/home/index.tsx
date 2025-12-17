@@ -6,7 +6,7 @@ import { showErrorToast } from '@/app/utils/toast';
 import { AntDesign } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -21,34 +21,10 @@ import {
 } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list';
 import CarListingSection from '../../reusables/carListingSection';
+import { UserProfile } from '@/app/types/home.types';
+import { useFocusEffect } from 'expo-router';
 
 
-export interface UserProfile {
-   _id: string;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  isGoogleUser: boolean;
-  image: string | null;
-  role: string;
-  paidPlans: {
-    planType: string;
-    status: string;
-    reference: string;
-    _id: string;
-  }[];
-  walletBalance: number;
-  walletTransactions: {
-    amount: number;
-    reference: string;
-    status: string;
-    paymentDate: string;
-    _id: string;
-  }[];
-  isVerified: boolean;
-  hasSubmittedVerification: boolean;
-  createdAt: string;
-}
 
 export default function HomeScreen() {
   const [selectedPropertyKey, setSelectedPropertyKey] = useState<string>(''); 
@@ -58,6 +34,7 @@ export default function HomeScreen() {
   const [ads, setAds] = useState<CombinedAd[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
   const [searchText, setSearchText] = useState<string>('');
   const router = useRouter();
 
@@ -122,6 +99,16 @@ export default function HomeScreen() {
     fetchAds();
   }, []);
 
+  // useEffect(() => {
+  //   fetchUnreadCount();
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+       fetchUnreadCount();
+    }, [])
+  );
+
   const fetchAds = async (opts?: { search?: string; category?: string }) => {
     try {
       if (!apiClient) {
@@ -144,6 +131,20 @@ export default function HomeScreen() {
       setLoading(false);
     }
   };
+
+  const fetchUnreadCount = async () => {
+    try {
+     if (!apiClient) return;
+
+     const res = await apiClient.get('/api/notification');
+     if (res.data.success) {
+      const unread = res.data.notifications.filter((n: any) => !n.isRead).length;
+      setUnreadCount(unread);
+     }
+    } catch (err) {
+     console.error('Failed to fetch unread count:', err);
+    }
+  }
 
 
   const handleSearch = async (opts?: { propertyKey?: string; vehicleKey?: string; search?: string }) => {
@@ -197,13 +198,6 @@ const premiumAds = ads.filter(item => {
              item.kidsAd || item.serviceAd || item.equipmentAd || item.gadgetAd || 
              item.laptopAd || item.fashionAd || item.householdAd || item.beautyAd || 
              item.constructionAd || item.jobAd || item.hireAd;
-  
-  console.log('Ad check:', {
-    hasAd: !!ad,
-    plan: ad?.plan,
-    paymentStatus: ad?.paymentStatus,
-    isPremium: ad?.paymentStatus === "success" && ["premium", "vip", "diamond", "enterprise"].includes(ad.plan?.toLowerCase())
-  });
   
   if (!ad) return false;
   
@@ -455,8 +449,32 @@ const premiumAds = ads.filter(item => {
               </View>
             </View>
 
-            <TouchableOpacity className="w-10 h-10 rounded-[40px] bg-[#EDEDED] justify-center items-center">
-              <Image source={require("../../../assets/images/notifications.png")} className="w-6 h-6" />
+            {/* Notification Box */}
+            <TouchableOpacity 
+             onPress={() => router.push('/protected/notification/notification')}
+             className="w-10 h-10 rounded-[40px] bg-[#EDEDED] justify-center items-center">
+             <Image 
+              source={require("../../../assets/images/notifications.png")} 
+              className="w-6 h-6" 
+             />
+             {unreadCount > 0 && (
+               <View style={{
+                position: 'absolute',
+                top: -2,
+                right: -2,
+                 backgroundColor: '#FF6B6B',
+                 borderRadius: 10,
+                 minWidth: 18,
+                 height: 18,
+                 justifyContent: 'center',
+                 alignItems: 'center',
+                 paddingHorizontal: 4,
+               }}>
+                <Text style={{ color: colors.bg, fontSize: 10, fontWeight: 'bold'}}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+               </View>
+             )}
             </TouchableOpacity>
           </View>
 

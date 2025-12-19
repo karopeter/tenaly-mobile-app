@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
+import { useAuth } from '../context/AuthContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRouter, useSegments, Stack, Slot } from 'expo-router';
@@ -9,8 +10,11 @@ import { useRouter, useSegments, Stack, Slot } from 'expo-router';
 export default function ProtectedLayout() {
   const segments = useSegments();
   const router = useRouter();
+  const { user } = useAuth();
+  const userRole = user?.role || 'buyer';
 
-  const navItems = [
+ 
+  const allNavItems = [
     {
       label: 'Home', 
       icon: <AntDesign name="home" size={24} color="#8C8C8C" />,
@@ -57,6 +61,13 @@ export default function ProtectedLayout() {
      route: '/protected/settings'
     }
   ];
+
+  const navItems = allNavItems.filter(item => {
+    if (userRole === 'buyer' && (item.label === 'My Ads' || item.label === 'wallet')) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <>

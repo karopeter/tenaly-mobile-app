@@ -17,7 +17,7 @@ export const signUpSchema = Yup.object().shape({
     passwordConfirm: Yup.string()
         .oneOf([Yup.ref('password')], 'Passwords must match')
         .required('Please confirm your password'),
-    roleSelection: Yup.string().oneOf(['customer', 'seller']).required('Please select an option'),
+    roleSelection: Yup.string().oneOf(['buyer', 'seller']).required('Please select an option'),
 });
 
 

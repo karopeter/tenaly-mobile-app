@@ -37,11 +37,12 @@ const SignUp: React.FC = () => {
      const router = useRouter();
      const { signIn } = useAuth();
      const [showPassword, setShowPassword] = useState<boolean>(false);
+     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
      const [loading, setLoading] = useState<boolean>(false);
 
    // Dropdown options 
    const roleOptions = [
-     { label: 'I am Buying', value: 'customer'},
+     { label: 'I am Buying', value: 'buyer'},
      { label: 'I am Selling', value: 'seller'}
    ];
 
@@ -301,12 +302,12 @@ const SignUp: React.FC = () => {
               value={values.passwordConfirm}
               onChangeText={handleChange('passwordConfirm')}
                onBlur={() => handleBlur('passwordConfirm')}
-              secureTextEntry={!showPassword}
+              secureTextEntry={!showConfirmPassword}
               error={errors.passwordConfirm}
               touched={touched.passwordConfirm}
               rightIcon={
-                <TouchableOpacity  onPress={() => setShowPassword(!showPassword)}>
-                   <Icon  name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#6B7280" />
+                <TouchableOpacity  onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                   <Icon  name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#6B7280" />
                 </TouchableOpacity>
               }
             />

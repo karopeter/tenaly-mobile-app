@@ -954,7 +954,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
         </View>
 
     
-        <View style={styles.switchWrapper}>
+        {/* <View style={styles.switchWrapper}>
           <View style={styles.switchContainer}>
             <Text style={[
             styles.switchLabel,
@@ -976,7 +976,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
               I am selling
             </Text>
           </View>
-        </View>
+        </View> */}
 
         {/* Ads List */}
         {userRole === 'seller' ? (

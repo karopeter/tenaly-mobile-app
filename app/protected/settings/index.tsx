@@ -34,6 +34,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { user: authUser, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const userRole = authUser?.role || profile?.role || 'buyer';
   const [imageError, setImageError] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -75,6 +76,15 @@ export default function SettingsScreen() {
   const planType = profile?.paidPlans?.[0]?.planType || 'free';
   const isPremium = planType !== 'free' && planType !== null;
 
+  const filteredMenuItems = menuItems.filter(item => {
+    // Hide "Analytics" for buyers 
+    if (userRole === 'buyer' && item.title === 'Analytics') {
+      return false;
+    }
+    return true;
+  });
+
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -83,13 +93,6 @@ export default function SettingsScreen() {
       {/* Profile Card */}
       <View style={styles.profileCard}>
         <View style={styles.profileRow}>
-          {/* <Image 
-            source={imageUri ? { uri: imageUri } : PLACEHOLDER_IMAGE }
-            style={styles.profileImage}
-            resizeMode="cover"
-            defaultSource={PLACEHOLDER_IMAGE}
-          /> */}
-
           <Image
             source={
             !imageUri || imageError
@@ -125,7 +128,7 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.menuContainer}>
-          {menuItems.map((item, index) => (
+          {filteredMenuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={styles.menuItem}

@@ -2,10 +2,10 @@ import LocationSelectorModal from '@/app/components/LocationSelectorModal';
 import { colors } from '@/app/constants/theme';
 import { CombinedAd } from '@/app/types/marketplace';
 import apiClient from '@/app/utils/apiClient';
-import { showErrorToast } from '@/app/utils/toast';
+import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { AntDesign } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -18,11 +18,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Switch
 } from 'react-native';
-import { SelectList } from 'react-native-dropdown-select-list';
 import CarListingSection from '../../reusables/carListingSection';
+import CategoryFilterModal from '@/app/components/modals/CategoryFilterModal';
+import { LinearGradient } from 'expo-linear-gradient';
 import { UserProfile } from '@/app/types/home.types';
-import { useFocusEffect } from 'expo-router';
 
 
 
@@ -35,6 +36,11 @@ export default function HomeScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [userRole, setUserRole] = useState<'buyer' | 'seller'>('buyer');
+  const [switchingRole, setSwitchingRole] = useState(false);
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [searchText, setSearchText] = useState<string>('');
   const router = useRouter();
 
@@ -99,9 +105,6 @@ export default function HomeScreen() {
     fetchAds();
   }, []);
 
-  // useEffect(() => {
-  //   fetchUnreadCount();
-  // }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -109,7 +112,7 @@ export default function HomeScreen() {
     }, [])
   );
 
-  const fetchAds = async (opts?: { search?: string; category?: string }) => {
+  const fetchAds = async (opts?: { search?: string; category?: string; location?: string }) => {
     try {
       if (!apiClient) {
         showErrorToast('API client not initialized.');
@@ -120,6 +123,7 @@ export default function HomeScreen() {
       const params: any = {};
       if (opts?.search) params.search = opts.search;
       if (opts?.category) params.category = opts.category;
+      if (opts?.location) params.location = opts.location;
 
       const res = await apiClient.get('/api/products/get-all-marketproducts', { params });
       const data = res.data?.data ?? [];
@@ -146,6 +150,65 @@ export default function HomeScreen() {
     }
   }
 
+  const handleRoleSwitch = async (newRole: 'buyer' | 'seller') => {
+     if (switchingRole) return;
+
+     setSwitchingRole(true);
+     try {
+      if (!apiClient) {
+        showErrorToast('API client not initialized');
+        return;
+      } 
+
+      const res = await apiClient.patch('/api/profile/switch-role', { role: newRole });
+
+      if (res.data.message === 'Role updated successfully') {
+        setUserRole(newRole);
+        showSuccessToast(`Switched to ${newRole} mode`);
+        
+         // Refresh profile 
+         const profileRes = await apiClient.get('/api/profile');
+         setProfile(profileRes.data);
+      }
+     } catch (err: any) {
+      console.error('Role switch error:', err);
+      showErrorToast(err.response?.data?.message || 'Failed to switch role');
+     } finally {
+      setSwitchingRole(false);
+     }
+  };
+
+  const handleCategorySelect  = async (category: string, subcategory?: string) => {
+     setSelectedCategory(category);
+     setSelectedSubcategory(subcategory || '');
+
+     // Extract location from "LGA, State" format
+     const locationToSend = selectedLocation !== 'Location' ? selectedLocation : undefined;
+
+     await fetchAds({
+      category: subcategory || category,
+      search: searchText,
+      location: locationToSend
+     });
+  };
+
+  useEffect(() => {
+    if (selectedLocation !== 'Location') {
+      const locationToSend = selectedLocation;
+      fetchAds({
+        search: searchText,
+        category: selectedSubcategory || selectedCategory || undefined,
+        location: locationToSend
+      });
+    }
+  }, [selectedLocation]);
+
+  useEffect(() => {
+    if (profile?.role) {
+      setUserRole(profile.role === 'seller' ? 'seller' : 'buyer');
+    }
+  }, [profile]);
+
 
   const handleSearch = async (opts?: { propertyKey?: string; vehicleKey?: string; search?: string }) => {
     try {
@@ -164,9 +227,12 @@ export default function HomeScreen() {
 
       const search = typeof opts?.search !== 'undefined' ? opts.search : searchText;
 
+      const locationToSend = selectedLocation !== 'Location' ? selectedLocation : undefined;
+
       await fetchAds({
         search: search?.trim() ? search.trim() : undefined,
         category: backendCategory || undefined,
+        location: locationToSend
       });
     } catch (err: any) {
       console.error('handleSearch error', err);
@@ -176,16 +242,6 @@ export default function HomeScreen() {
     }
   };
 
-  
-  const onSelectProperty = (key: string) => {
-    setSelectedPropertyKey(key);
-    handleSearch({ propertyKey: key, search: searchText });
-  };
-
-  const onSelectVehicle = (key: string) => {
-    setSelectedVehicleKey(key);
-    handleSearch({ vehicleKey: key, search: searchText });
-  };
 
   const onPressSearchButton = () => {
     handleSearch({ search: searchText, propertyKey: selectedPropertyKey, vehicleKey: selectedVehicleKey });
@@ -414,69 +470,115 @@ const premiumAds = ads.filter(item => {
 
   return (
     <>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-[#F8F8F8] mt-10">
+      <KeyboardAvoidingView 
+         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+         className="flex-1 bg-[#F8F8F8] mt-10">
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           {/* Header (unchanged) */}
-          <View 
-            className="flex-row items-center justify-between px-6 py-4 bg-white" 
-            style={{ 
-               shadowColor: '#000', 
-               shadowOffset: { width: 0, height: 2 }, 
-               shadowOpacity: 0.1,
-               elevation: 4 
-               }}>
-            <View className="flex-row gap-2 items-center">
+        <View 
+          className='px-6 py-4 bg-white'
+          style={{
+            shadowColor: '#140C291A',
+            shadowOffset: { width: 0, height: 1, },
+            shadowOpacity: 0.1,
+            elevation: 4
+          }}
+          >
+         {/* Top Row: Profile + Notification */}
+         <View className="flex-row items-center justify-between mb-3">
+           <View className='flex-row gap-2 items-center'>
              {profile?.image ? (
-              <Image 
-                source={{ uri: profile.image }}
-                style={styles.profileImage}
-              />
+              <Image source={{ uri: profile.image }} style={styles.profileImage} />
              ): (
-              <Image 
-                source={require('@/assets/images/profile-circle.png')}
-                style={styles.profileImage}
-              />
+              <Image source={require('@/assets/images/profile-circle.png')} style={styles.profileImage} />
              )}
-              <View className="flex-col gap-2">
-                <Text 
-                  style={styles.profileText}>
-                  Welcome {profile?.fullName || "User" }
-                </Text>
-                <TouchableOpacity className="flex-row items-center" onPress={() => setIsLocationModalVisible(true)}>
-                  <Text style={styles.profileText}>{selectedLocation}</Text>
-                  <AntDesign name="caret-down" size={10} color="#8C8C8C" style={{ marginLeft: 4 }} />
-                </TouchableOpacity>
-              </View>
-            </View>
+             <View className='flex-col gap-2'>
+              <Text style={styles.profileText}>Welcome {profile?.fullName || "User"}</Text>
+              <TouchableOpacity 
+                className="flex-row items-center" onPress={() => setIsLocationModalVisible(true)}>
+                <Text style={styles.profileText}>{selectedLocation}</Text>
+                <AntDesign name='caret-down' size={10} color={colors.darkGray} style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
+             </View>
+           </View>
 
-            {/* Notification Box */}
-            <TouchableOpacity 
-             onPress={() => router.push('/protected/notification/notification')}
-             className="w-10 h-10 rounded-[40px] bg-[#EDEDED] justify-center items-center">
+           <TouchableOpacity 
+            onPress={() => router.push('/protected/notification/notification')}
+            className='w-10 h-10 rounded-[40px] bg-[#EDEDED] justify-center items-center'
+            >
              <Image 
-              source={require("../../../assets/images/notifications.png")} 
-              className="w-6 h-6" 
+               source={require('../../../assets/images/notifications.png')}
+              className='w-6 h-6'
              />
              {unreadCount > 0 && (
-               <View style={{
+              <View style={{ 
                 position: 'absolute',
-                top: -2,
+                top: -2, 
                 right: -2,
-                 backgroundColor: '#FF6B6B',
-                 borderRadius: 10,
-                 minWidth: 18,
-                 height: 18,
-                 justifyContent: 'center',
-                 alignItems: 'center',
-                 paddingHorizontal: 4,
-               }}>
-                <Text style={{ color: colors.bg, fontSize: 10, fontWeight: 'bold'}}>
+                backgroundColor: colors.blue,
+                borderRadius: 10, 
+                minWidth: 18,
+                height: 18, 
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: 4,
+              }}>
+                <Text style={{
+                  color: colors.bg, 
+                  fontSize: 10,
+                  fontWeight: 'bold',
+                  fontFamily: 'WorkSans_700Bold'
+                }}>
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </Text>
-               </View>
+              </View>
              )}
-            </TouchableOpacity>
+           </TouchableOpacity>
+         </View>
+
+        {/* Role Switch Toggle */ }
+        <View
+          className='flex-row items-start justify-start mt-5'
+          style={{
+           height: 32,
+           paddingHorizontal: 16,
+           gap: 12,
+          }}
+        >
+          <Text style={[
+            styles.roleToggleText,
+            userRole === 'buyer' && styles.roleToggleTextActive
+          ]}>
+            I am buying
+          </Text>
+
+          <View style={styles.switchContainer}>
+            <LinearGradient
+              colors={['#00A8DF', '#1031AA']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.switchGradient}
+            >
+            <Switch 
+              value={userRole === 'seller'}
+              onValueChange={(value) => handleRoleSwitch(value ? 'seller' : 'buyer')}
+              disabled={switchingRole}
+              trackColor={{ false: 'transparent', true: 'transparent' }}
+              thumbColor={colors.bg}
+              ios_backgroundColor="transparent"
+              style={styles.switch}
+            />
+            </LinearGradient>
           </View>
+
+          <Text style={[
+            styles.roleToggleText,
+            userRole === 'seller' && styles.roleToggleTextActive 
+          ]}>
+            I am selling 
+          </Text>
+         </View>
+        </View>
 
           {/* Search */}
           <View className="flex-row items-center mb-6 px-6">
@@ -496,66 +598,30 @@ const premiumAds = ads.filter(item => {
           </View>
 
           {/* Dropdowns */}
-          <View className="flex-row mb-6 px-6">
-            <View className="relative flex-1 mr-3">
-              <SelectList
-                setSelected={onSelectProperty}        // returns a key like "1"
-                data={propertyData}
-                placeholder="Property"
-                boxStyles={{ height: 44, backgroundColor: colors.lightSpot, borderWidth: 0.5, borderColor: colors.border, borderRadius: 8, paddingLeft: 36, paddingRight: 12 }}
-                inputStyles={{ color: colors.darkGray, fontSize: 14 }}
-                dropdownStyles={{ maxHeight: 300, backgroundColor: colors.bg, borderColor: colors.border, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderBottomWidth: 0, shadowColor: colors.black, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, width: '100%', maxWidth: 300 }}
-                dropdownItemStyles={{ borderBottomWidth: 1, borderBottomColor: '#EDEDED', paddingVertical: 16, paddingHorizontal: 20 }}
-                dropdownTextStyles={{ color: colors.darkGray, fontSize: 14, textAlign: 'center' }}
-              />
-              <Image
-                source={require('../../../assets/images/propertyFilter.png')} 
-                style={styles.dropdownImage} />
-            </View>
-
-            <View className="relative flex-1">
-              <SelectList
-                setSelected={onSelectVehicle}
-                data={vehicleData}
-                placeholder="Vehicle"
-                boxStyles={{ 
-                  height: 44, 
-                  backgroundColor: colors.lightSpot, 
-                  borderWidth: 0.5, 
-                  borderColor: colors.border, 
-                  borderRadius: 8, 
-                  paddingLeft: 36, 
-                  paddingRight: 12 
-                }}
-                inputStyles={{ 
-                   color: '#525252', 
-                   fontSize: 14 
-                }}
-                dropdownStyles={{ 
-                  maxHeight: 300,
-                   backgroundColor: colors.bg, 
-                   borderColor: colors.border, 
-                   borderTopLeftRadius: 24, 
-                   borderTopRightRadius: 24, 
-                   borderBottomWidth: 0, 
-                   shadowColor: colors.black, 
-                   shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, width: '100%', maxWidth: 300 }}
-                dropdownItemStyles={{ 
-                   borderBottomWidth: 1,
-                   borderBottomColor: colors.lightSpot, 
-                   paddingVertical: 16, 
-                   paddingHorizontal: 20 
-                }}
-                dropdownTextStyles={{ 
-                  color: colors.darkGray, 
-                  fontSize: 14, 
-                  textAlign: 'center' 
-                }}
-              />
-              <Image
-               source={require('../../../assets/images/vehicleFilter.png')} 
-               style={styles.dropdownImage} />
-            </View>
+          {/* Category Filter */}
+          <View className='px-6 mb-4'>
+           <ScrollView
+            horizontal showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 12 }}
+           >
+            <TouchableOpacity
+             onPress={() => setIsCategoryModalVisible(true)}
+             style={{
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+              backgroundColor: selectedCategory ? colors.prikyBlue : colors.lightSpot,
+              borderRadius: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+             }}
+            >
+             <Text style={{ color: selectedCategory ? colors.bg : colors.darkGray, fontSize: 14, fontWeight: '500' }}>
+            {selectedSubcategory || selectedCategory || 'All Categories'}
+            </Text>
+            <Ionicons name="filter" size={16} color={selectedCategory ? colors.bg : colors.darkGray} />
+            </TouchableOpacity>
+           </ScrollView>
           </View>
 
           {/* Product Listing Section */}
@@ -655,13 +721,25 @@ const premiumAds = ads.filter(item => {
             )}
           </View>
         </ScrollView>
+
+        <CategoryFilterModal
+           visible={isCategoryModalVisible}
+            onClose={() => setIsCategoryModalVisible(false)}
+         onCategorySelect={handleCategorySelect}
+        />
       </KeyboardAvoidingView>
 
       <LocationSelectorModal
         visible={isLocationModalVisible}
         onClose={() => setIsLocationModalVisible(false)}
         onLocationSelect={(state, lga) => {
-          setSelectedLocation(`${lga}, ${state}`);
+          const newLocation = `${lga}, ${state}`;
+          setSelectedLocation(newLocation);
+          fetchAds({
+            search: searchText,
+            category: selectedSubcategory ||  selectedCategory || undefined,
+            location: newLocation
+          });
         }}
       />
     </>
@@ -709,5 +787,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'WorkSans_600SemiBold',
     fontSize: 14,
+  },
+  switchContainer: {
+    borderRadius: 16,
+    overflow: 'hidden'
+  },
+  switchGradient: {
+    borderRadius: 16,
+    padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  switch: {
+   transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }]
+  },
+  roleToggleText: {
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium',
+    color: colors.border
+  },
+  roleToggleTextActive: {
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: 'WorkSans_600SemiBold',
+    color: colors.darkGray
   }
 })

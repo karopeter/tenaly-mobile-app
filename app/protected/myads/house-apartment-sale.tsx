@@ -69,6 +69,8 @@ export default function HouseApartmentSaleForm() {
    const [businessModalVisible, setBusinessModalVisible] = useState(false);
    const [loading, setLoading] = useState(false);
    const [savingDraft, setSavingDraft] = useState(false);
+   const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+   const [isDraftMode, setIsDraftMode] = useState(false);
 
    // Dropdown modal state 
    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -85,7 +87,6 @@ export default function HouseApartmentSaleForm() {
 
 
    // Service charges 
-   const [serviceChargesModalVisible, setServiceChargesModalVisible] = useState(false);
    const [serviceCharges, setServiceCharges] = useState<{ name: string; fee: string}[]>([]);
 
 
@@ -147,6 +148,65 @@ export default function HouseApartmentSaleForm() {
      useEffect(() => {
          fetchUserProfile();
        }, []);
+
+    useEffect(() => {
+      const fetchDraftData = async () => {
+         const draftMode = params.isDraft === 'true';
+         const draftCarAdId = params.carAdId;
+
+         if (!draftMode || !draftCarAdId) {
+          return;
+         }
+
+         setIsDraftMode(true);
+         setIsLoadingDraft(true);
+
+         try {
+          if (!apiClient) return;
+
+          const propertyResponse = await apiClient.get(`/api/property/draft/${draftCarAdId}`);
+          const propertyAd = propertyResponse.data.propertyAd;
+
+          setFormData({
+            propertyName: propertyAd.propertyName || '',
+            propertyAddress: propertyAd.propertyAddress || '',
+            propertyType: propertyAd.propertyType || '',
+            furnishing: propertyAd.furnishing || '',
+            parking: propertyAd.parking || '',
+            squareMeter: propertyAd.squareMeter || '',
+            ownershipStatus: propertyAd.ownershipStatus || '',
+            serviceCharge: propertyAd.serviceCharge || '',
+            serviceFee: propertyAd.serviceFee || '',
+            propertyFacilities: propertyAd.propertyFacilities || '',
+            numberOfBedrooms: propertyAd.numberOfBedrooms || '',
+            numberOfBathrooms: propertyAd.numberOfBathrooms || '',
+            numberOfToilet: propertyAd.numberOfToilet || '',
+            propertyDuration: propertyAd.propertyDuration || '',
+            titleDocuments: propertyAd.titleDocuments || '',
+            propertyCondition: propertyAd.propertyCondition || '',
+            amount: propertyAd.amount || '',
+            negotiation: propertyAd.negotiation || '',
+            description: propertyAd.description || '',
+          });
+
+          // Set Business if available 
+          if (propertyAd.businessCategory) {
+            setSelectectBusiness({
+              _id: propertyAd.businessCategory._id || propertyAd.businessCategory,
+              businessName: propertyAd.businessCategory.businessName || 'Selected Business'
+            });
+          }
+
+          showSuccessToast('Draft loaded! Complete your ad details.');
+         } catch (error: any) {
+          showErrorToast('Failed to load draft');
+         } finally {
+          setIsLoadingDraft(false);
+         }
+      };
+      
+      fetchDraftData();
+    }, [params.carAdId, params.isDraft]);
     
       
        const fetchUserProfile = async () => {
@@ -191,14 +251,6 @@ export default function HouseApartmentSaleForm() {
         setActiveDropdown(field);
         setDropdownTitle(title);
         setDropdownOptions(dropdownData[field] || []);
-      };
-    
-      const addServiceCharge = (service: { name: string; fee: string}) => {
-        setServiceCharges([...serviceCharges, service]);
-      };
-    
-      const removeServiceCharge = (index: number) => {
-        setServiceCharges(serviceCharges.filter((_, i) => i !== index));
       };
     
       const handleBoostPlanSelected = (planId: string) => {
@@ -398,7 +450,9 @@ export default function HouseApartmentSaleForm() {
            <TouchableOpacity onPress={() => router.back()}>
              <AntDesign name="arrow-left" size={24} color={colors.darkGray} />
            </TouchableOpacity>
-           <Text style={styles.headerTitle}>House and Apartment Property for sale Ad</Text>
+           <Text style={styles.headerTitle}>
+             {isDraftMode ? 'Complete House and Apartment Property for sale Ad' : 'House and Apartment Property for sale Ad'}
+           </Text>
          </View>
          <View style={{ width: 24 }} />
         </View>
@@ -664,6 +718,12 @@ export default function HouseApartmentSaleForm() {
                requiredAmount={selectedPlan ? 
                {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
               /> 
+            {isLoadingDraft && (
+              <View style={styles.loadingOverlay}>
+               <ActivityIndicator size="large" color={colors.blue} />
+               <Text style={styles.loadingText}>Loading draft...</Text>
+              </View>
+            )}
         </KeyboardAwareScrollView>
        </View>
       );
@@ -868,4 +928,22 @@ container: {
     color: colors.bg,
     fontWeight: '600',
   },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.darkGray,
+    fontFamily: 'WorkSans_600SemiBold'
+  }
 });

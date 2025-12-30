@@ -6,6 +6,7 @@ import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import { AntDesign } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useAuth } from '@/app/context/AuthContext';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -28,6 +29,7 @@ import { UserProfile } from '@/app/types/home.types';
 
 
 export default function HomeScreen() {
+  const { refreshUserProfile } = useAuth();
   const [selectedPropertyKey, setSelectedPropertyKey] = useState<string>(''); 
   const [selectedVehicleKey, setSelectedVehicleKey] = useState<string>(''); 
   const [isLocationModalVisible, setIsLocationModalVisible] = useState<boolean>(false);
@@ -169,6 +171,8 @@ export default function HomeScreen() {
          // Refresh profile 
          const profileRes = await apiClient.get('/api/profile');
          setProfile(profileRes.data);
+
+         await refreshUserProfile();
       }
      } catch (err: any) {
       console.error('Role switch error:', err);

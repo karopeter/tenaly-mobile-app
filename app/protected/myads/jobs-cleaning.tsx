@@ -70,7 +70,8 @@ export default function PostJobCleaningForm() {
     const [businessModalVisible, setBusinessModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [savingDraft, setSavingDraft] = useState(false);
-
+    const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+    const [isDraftMode, setIsDraftMode] = useState(false);
 
     // Dropdown modal state 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -133,6 +134,64 @@ export default function PostJobCleaningForm() {
     useEffect(() => {
       fetchUserProfile();
     }, []);
+
+   useEffect(() => {
+      const fetchDraftData = async () => {
+        const draftMode = params.isDraft === 'true';
+        const draftCarAdId = params.carAdId;
+
+        if (!draftMode || !draftCarAdId) {
+          return;
+        }
+
+        setIsDraftMode(true);
+        setIsLoadingDraft(true);
+
+        try {
+         if (!apiClient) return;
+
+         // Fetch Job Draft 
+         const jobResponse = await apiClient.get(`/api/jobs/draft/${draftCarAdId}`);
+         const jobAd = jobResponse.data.jobAd;
+
+         // Pre-fill form data 
+         setFormData({
+          jobTitle: jobAd.jobTitle || '',
+          companyEmployerName: jobAd.companyEmployerName || '',
+          location: jobAd.location || '',
+          jobType: jobAd.jobType || '',
+          experienceLevel: jobAd.experienceLevel || '',
+          yearOfExperience: jobAd.yearOfExperience || '',
+          genderPreference: jobAd.genderPreference || '',
+          applicationDeadline: jobAd.applicationDeadline || '',
+          skils: jobAd.skils || '',
+          responsibilities: jobAd.responsibilities || '',
+          jobLocationType: jobAd.jobLocationType || '',
+          requirements: jobAd.requirements || '',
+          pricingType: jobAd.pricingType || '',
+          salaryRange: jobAd.salaryRange || '',
+          negotiation: jobAd.negotiation || '',
+          description: jobAd.description || '',
+         });
+
+         // Set Business if available 
+         if (jobAd.businessCategory) {
+          setSelectectBusiness({
+            _id: jobAd.businessCategory._id || jobAd.businessCategory,
+            businessName: jobAd.businessCategory.businessName || 'Selected Business'
+          });
+         }
+
+         showSuccessToast('Draft loaded! Complete your ad details.');
+        } catch (error: any) {
+         showErrorToast('Failed to load draft');
+        } finally {
+          setIsLoadingDraft(false);
+        }
+      };
+
+      fetchDraftData();
+    }, [params.carAdId, params.isDraft]);
 
    const fetchUserProfile = async () => {
         try {
@@ -393,7 +452,9 @@ const handleSubmit = async () => {
         <TouchableOpacity onPress={() => router.back()}>
            <AntDesign name="arrow-left" size={24} color={colors.darkGray} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Post a Job Ad</Text>
+        <Text style={styles.headerTitle}>
+          {isDraftMode ? 'Complete Post a Job Ad' : 'Post a Job Ad'}
+        </Text>
       </View>
      </View>
 
@@ -647,6 +708,12 @@ const handleSubmit = async () => {
       requiredAmount={selectedPlan ? 
         {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
      />  
+     {isLoadingDraft && (
+       <View style={styles.loadingOverlay}>
+        <ActivityIndicator size="large" color={colors.blue} />
+        <Text style={styles.loadingText}>Loading draft...</Text>
+       </View>
+     )}
      </KeyboardAwareScrollView>
     </View>
   );
@@ -794,5 +861,23 @@ termsText: {
 },
 termsLink: {
   color: colors.blue,
+},
+loadingOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
+},
+loadingText: {
+  marginTop: 12,
+  fontSize: 16,
+  fontWeight: '600',
+  color: colors.darkGray,
+  fontFamily: 'WorkSans_600SemiBold',
 },
 });

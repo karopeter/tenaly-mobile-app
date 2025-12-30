@@ -143,7 +143,11 @@ const pickImage = async () => {
          'tricycle': '/protected/myads/vehicle-details',
       };
        if (vehicleRoutes[adCategory.toLowerCase()]) {
-        console.log('📍 Redirecting to vehicle details');
+        const targetRoute = vehicleRoutes[adCategory.toLowerCase()];
+          console.log('🚗 VEHICLE ROUTE DETECTED');
+      console.log('📍 Target Route:', targetRoute);
+      console.log('📦 Params:', { carAdId, category: adCategory });
+      console.log('=================================');
           router.push({
              pathname: vehicleRoutes[adCategory.toLowerCase()] as any,
              params: {
@@ -311,8 +315,6 @@ const pickImage = async () => {
         };
 
         const routePath = categoryRoutes[adCategory] || '/protected/myads/property-details';
-
-        console.log('📍 Redirecting to:', routePath);
 
         router.push({
           pathname: routePath as any,

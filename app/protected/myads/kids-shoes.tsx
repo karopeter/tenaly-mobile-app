@@ -70,7 +70,8 @@ export default function PostKidShoeForm() {
     const [businessModalVisible, setBusinessModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [savingDraft, setSavingDraft] = useState(false);
-
+    const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+    const [isDraftMode, setIsDraftMode] = useState(false);
 
     // Dropdown modal state 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -125,6 +126,54 @@ export default function PostKidShoeForm() {
     useEffect(() => {
       fetchUserProfile();
     }, []);
+
+    useEffect(() => {
+      const fetchDraftData = async () => {
+        const draftMode = params.isDraft === 'true';
+        const draftCarAdId = params.carAdId;
+
+        if (!draftMode || !draftCarAdId) {
+          return;
+        }
+
+        setIsDraftMode(false);
+        setIsLoadingDraft(false);
+
+        try {
+         if (!apiClient) return;
+
+         const kidResponse = await apiClient.get(`/api/kids/draft/${draftCarAdId}`);
+         const kidAd = kidResponse.data.kidAd;
+
+         setFormData({
+          title: kidAd.title || '',
+          condition: kidAd.condition || '',
+          size: kidAd.size || '',
+          gender: kidAd.gender || '',
+          ageGroup: kidAd.ageGroup || '',
+          color: kidAd.color || '',
+          amount: kidAd.amount || '',
+          negotiation: kidAd.negotiation || '',
+          description: kidAd.description || '',
+         });
+
+         if (kidAd.businessCategory) {
+           setSelectectBusiness({
+            _id: kidAd.businessCategory._id || kidAd.businessCategory,
+            businessName: kidAd.businessCategory.businessName || 'Selected Business'
+           });
+         }
+
+         showSuccessToast('Draft loaded! Complete your ad details.');
+        } catch (error: any) {
+         showErrorToast('Failed to load draft');
+        } finally {
+          setIsLoadingDraft(false);
+        }
+      };
+
+      fetchDraftData();
+    }, [params.carAdId, params.isDraft]);
 
    const fetchUserProfile = async () => {
         try {

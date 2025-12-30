@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 export default function CustomerReviews() {
     return (
       <View style={styles.container}>
-        <Text>Customer Reviews</Text>
+        <Text style={{ textAlign: 'center'}}>Customer Reviews</Text>
       </View>
     );
 }
@@ -13,5 +13,6 @@ export default function CustomerReviews() {
 const styles = StyleSheet.create({
     container: {
        flex: 1,
+       justifyContent: 'center'
     }
 })

@@ -953,31 +953,6 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
           </TouchableOpacity>
         </View>
 
-    
-        {/* <View style={styles.switchWrapper}>
-          <View style={styles.switchContainer}>
-            <Text style={[
-            styles.switchLabel,
-            { color: userRole === 'buyer' ? colors.darkGray : colors.border}
-            ]}>
-              I am buying
-            </Text>
-            <Switch
-              value={userRole === 'seller'}
-              onValueChange={handleRoleSwitch}
-              trackColor={{ false: '#D1D5D8', true: colors.blue}}
-              thumbColor={colors.bg}
-              disabled={isSwitchingRole}
-            />
-            <Text style={[
-               styles.switchLabel,
-               { color: userRole === 'seller' ? colors.darkGray : colors.border } 
-            ]}>
-              I am selling
-            </Text>
-          </View>
-        </View> */}
-
         {/* Ads List */}
         {userRole === 'seller' ? (
           businessId ? (
@@ -1340,7 +1315,194 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                       <TouchableOpacity 
                       style={styles.modalOption}
                        onPress={() => {
-                        console.log("Complete draft clicked");
+                        setModalVisible(false);
+
+                        const carAdId = selectedAd?.carAd?._id;
+                        const adCategory = selectedAd?.carAd?.category;
+
+                        if (!carAdId) {
+                          showErrorToast('Draft ID not found');
+                          return;
+                        }
+
+                        console.log('📝 Completing draft:', { carAdId, category: adCategory });
+
+                        const categoryRoutes: Record<string, string> = {
+                          // Beauty Categories 
+                         'Skin Care': '/protected/myads/beauty-skin',
+                         'Hair Care': '/protected/myads/beauty-hair',
+                         'Makeup & Cosmetics': '/protected/myads/beauty-makeup',
+                         'Fragrances (Perfume & Body Spray)': '/protected/myads/beauty-fragrance',
+                         'Bath & Body': '/protected/myads/beauty-bath',
+                         'Nail Care': '/protected/myads/beauty-nailcare',
+                         'Beauty Tools & Accessories': '/protected/myads/beauty-accessorie',
+                         'Personal Grooming Devices': '/protected/myads/beauty-grooming',
+                         'Oral Care': '/protected/myads/beauty-oral',
+                         "Men's Grooming": '/protected/myads/beauty-men',
+
+                        // Vehicle categories 
+                         'car': '/protected/myads/vehicle-details',
+                         'bus': '/protected/myads/vehicle-details',
+                        'tricycle': '/protected/myads/vehicle-details',
+
+                        // Property categories 
+                        'Commercial Property For Rent': '/protected/myads/commercial-property-rent',
+                       'Commercial Property For Sale': '/protected/myads/commercial-property-sale',
+                       'House and Apartment Property For Rent': '/protected/myads/house-apartment-rent',
+                       'House and Apartment Property For Sale': '/protected/myads/house-apartment-sale',
+                       'Land and Plot For Rent': '/protected/myads/land-plot-rent',
+                       'Land and Plot For Sale': '/protected/myads/land-plot-sale',
+                       'Short Let Property': '/protected/myads/short-let-property',
+                       'Event Center And Venues': '/protected/myads/event-center-venues',
+
+                       // Agriculture Category 
+                       'Fresh Produce (fruits, vegetables, grains)': '/protected/myads/agriculture-product',
+                      'Livestock (poultry, goats, cattle, pigs, etc.)': '/protected/myads/agriculture-livestock',
+                      'Seeds & Seedlings': '/protected/myads/agriculture-seeds',
+                      'Animal Feed': '/protected/myads/agriculture-feed',
+                      'Fertilizers': '/protected/myads/agriculture-fertilizer',
+                      'Farm Tools & Equipment': '/protected/myads/agriculture-farm',
+                      'Agro Chemicals (pesticides, herbicides)': '/protected/myads/agriculture-agro',
+                      'Farm Services (plowing, irrigation, consultancy)': '/protected/myads/agriculture-service',
+
+                      // Animal & Pet Categories 
+                      'Dogs': '/protected/myads/pets-dog',
+                      'Cats': '/protected/myads/pets-cat',
+                      'Birds': '/protected/myads/pets-bird',
+                      'Fish & Aquarium': '/protected/myads/pets-fish',
+                      'Small Pets (rabbits, hamsters, guinea pigs)': '/protected/myads/pets-hamster',
+                      'Pet Accessories': '/protected/myads/pets-accessorie',
+                      'Pet Food': '/protected/myads/pets-food',
+
+                      // Available for Hire Categorie 
+                      'Hire Tech & IT': '/protected/myads/hire-tech',
+                      'Lessons & Trainings': '/protected/myads/hire-lessons',
+                      'Hire Cleaners': '/protected/myads/hire-cleaners',
+                      'Repair & Maintain': '/protected/myads/hire-repairs',
+                      'Painting & Wall Finishing': '/protected/myads/hire-painting',
+                      'Hire Plumbing': '/protected/myads/hire-plumbing',
+                      'Hire Electrical Wiring & Installation': '/protected/myads/hire-eletrical',
+                      'Hire Furniture Assembly': '/protected/myads/hire-furniture-assembly',
+                      'Hire Beauty & Wellness': '/protected/myads/hire-beautywellness',
+                      'Hire Creative & Media': '/protected/myads/hire-media',
+                      'Hire Event Planning for Hire': '/protected/myads/hire-event',
+                      'Hire DJ Services': '/protected/myads/hire-djservices',
+                      'Hire MC / Host Services': '/protected/hire-mchostservices',
+
+                       // Construction categories 
+                      'Building Material': '/protected/myads/construction-material',
+                      'Electrical Equipment & Tools': '/protected/myads/construction-eletrical',
+                      'Plumbing Material & Fittings': '/protected/myads/construction-plumbing',
+                      'Paints & Finishes': '/protected/myads/construction-paint',
+                      'Hand Tools': '/protected/myads/construction-hand',
+                      'Safety Equipment & Workwear': '/protected/myads/construction-safety',
+                      'Repair & Maintenance Services': '/protected/myads/construction-repair',
+                      'Construction Equipment': '/protected/myads/construction-equipment',
+                      'Roofing Materials': '/protected/myads/construction-roofing',
+                      'Flooring & Tiles': '/protected/myads/construction-flooring',
+
+                      // Equipment categories 
+                      'Industrial Machines': '/protected/myads/equipment-machine',
+                      'Construction Equipments': '/protected/myads/equipment-construction',
+                      'Power Tools': '/protected/myads/equipment-tool',
+                      'Manufacturing Equipment': '/protected/myads/equipment-manufacturing',
+                      'Medical & Laboratory Equipment': '/protected/myads/equipment-medical',
+                      'Kitchen & Restaurant Equipment': '/protected/myads/equipment-kitchen',
+                      'Printing & Packaging Machines': '/protected/myads/equipment-printing',
+                      'Agricultural Machinery': '/protected/myads/equipment-agriculture',
+                      'Cleaning & Laundry Equipment': '/protected/myads/equipment-cleaning',
+                      'Office Equipment': '/protected/myads/equipment-office',
+
+                      // Kids categories 
+                      'Baby Clothes': '/protected/myads/kids-baby-clothes',
+                      'Kids Clothes': '/protected/myads/kids-clothes',
+                      'Shoes': '/protected/myads/kids-shoes',
+                      'Toys & Games': '/protected/myads/kids-toy',
+                      'Baby Gear (strollers, car seats, carriers)': '/protected/myads/kids-gear',
+                      'Feeding (bottles, high chairs, breast pumps)': '/protected/myads/kids-feeding',
+                      'Furniture (cribs, cots, wardrobes)': '/protected/myads/kids-furnitures',
+                      'Health & Safety (monitors, baby gates)': '/protected/myads/kids-health',
+                      'School Supplies (bags, books, stationery)': '/protected/myads/kids-school',
+
+                      // Fashion Categories 
+                      'Clothing': '/protected/myads/fashion-clothing',
+                      'Footwear': '/protected/myads/fashion-footwear',
+                      'Bags': '/protected/myads/fashion-bags',
+                      'Jewellery': '/protected/myads/fashion-jewellery',
+                      'Watches': '/protected/myads/fashion-watch',
+                      'Accessories': '/protected/myads/fashion-accessories',
+                      'Eyewear (Glasses & Sunglasses)': '/protected/myads/fashion-eyewear',
+                      'Wedding & Event Wear': '/protected/myads/fashion-wedding',
+
+                      // Gadget Categories 
+                      'Mobile Phones': '/protected/myads/gadget-phones',
+                      'Tablets': '/protected/myads/gadget-tablets',
+                      'Smartwatches': '/protected/myads/gadget-smartwatches',
+                      'Phone Accessories': '/protected/myads/gadget-accessories',
+                      'Tablet Accessories': '/protected/myads/gadget-tabac',
+                      'Power Banks': '/protected/myads/gadget-powerbank',
+                      'Chargers & Cables': '/protected/myads/gadget-chargers',
+                      'Screen Protectors': '/protected/myads/gadget-screen',
+                      'Pouch': '/protected/myads/gadget-pouch',
+                      'Covers': '/protected/myads/gadget-cover',
+                      'Earphones / Headsets': '/protected/myads/gadget-earphone',
+
+                      // Household categories 
+                     'Furniture': '/protected/myads/household-furniture',
+                     'Home Appliances': '/protected/myads/household-appliance',
+                     'Kitchen Appliances': '/protected/myads/household-kitchen',
+                     'Home Decor': '/protected/myads/household-homedecor',
+                     'Lighting': '/protected/myads/household-lighting',
+                     'Bedding & Linen': '/protected/myads/household-bedding',
+                     'Curtains & Blinds': '/protected/myads/household-curtain',
+                     'Kitchenware & Cookware': '/protected/myads/household-kitchenware',
+                     'Cleaning Equipment': '/protected/myads/household-cleaning',
+                     'Bathroom Accessories': '/protected/myads/household-bathroom',
+                     'Garden & Outdoor': '/protected/myads/household-garden',
+                     'Others': '/protected/myads/household-other',
+
+                     // Job Categories 
+                     'Tech & IT': '/protected/myads/jobs-tech',
+                     'Lessons & Training': '/protected/myads/jobs-lessons',
+                     'Cleaning': '/protected/myads/jobs-cleaning',
+                     'Repairs & Maintenance': '/protected/myads/jobs-repair-maintenance',
+                     'Painting & Well Finishing': '/protected/myads/jobs-painting',
+                     'Plumbing': '/protected/myads/jobs-plumbing',
+                     'Electrical Wiring & Installation': '/protected/myads/jobs-eletrical',
+                     'Furniture Assembly': '/protected/myads/jobs-furniture',
+                     'Beauty & Wellness': '/protected/myads/jobs-beauty',
+                     'Creative & Media': '/protected/myads/jobs-creative',
+                     'Event Planning & Coordination': '/protected/myads/jobs-event-planning',
+                     'Dj Services': '/protected/myads/jobs-dj-services',
+                    'MC / Host Services': '/protected/myads/jobs-mc-services',
+
+                     // Laptop and computer categories 
+                     'Laptops': '/protected/myads/laptops-details',
+                     'Desktop Computers': '/protected/myads/laptops-desktop',
+                     'Computer Accessories': '/protected/myads/computer-accessories',
+                     'Monitors': '/protected/myads/laptops-monitor',
+                     'Printers & Scanners': '/protected/myads/laptops-printer',
+                     'Networking Equipment': '/protected/myads/laptops-networking',
+                     'Storage Devices': '/protected/myads/laptops-storage',
+                     'Software': '/protected/myads/laptops-software',
+                     'Others': '/protected/myads/laptops-others',
+                     };
+
+                        const formPath = categoryRoutes[adCategory];
+
+                        if (formPath) {
+                          router.push({
+                            pathname: formPath as any,
+                            params: {
+                              carAdId: carAdId,
+                              category: adCategory,
+                              isDraft: 'true'
+                            }
+                          });
+                        } else {
+                          showErrorToast(`Form not found for category: ${adCategory}`);
+                          console.log('❌ Missing route for category:', adCategory);
+                        }
                        }}
                       >
                        <AntDesign name="form" size={20} color={colors.darkGray} />

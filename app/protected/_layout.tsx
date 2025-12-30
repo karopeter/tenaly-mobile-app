@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -12,7 +12,12 @@ export default function ProtectedLayout() {
   const router = useRouter();
   const { user } = useAuth();
   const userRole = user?.role || 'buyer';
-
+  
+  const [, forceUpdate] = useState({});
+  
+  useEffect(() => {
+    forceUpdate({});
+  }, [user?.role]);
  
   const allNavItems = [
     {
@@ -61,24 +66,21 @@ export default function ProtectedLayout() {
      route: '/protected/settings'
     }
   ];
-
+  
   const navItems = allNavItems.filter(item => {
-    if (userRole === 'buyer' && (item.label === 'My Ads' || item.label === 'wallet')) {
+    if (userRole === 'buyer' && (item.label === 'My Ads' || item.label === 'Wallet')) {
       return false;
     }
     return true;
   });
-
+  
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-
       <View style={{ flex: 1, paddingBottom: 20 }}>
         <Slot />
       </View>
-
       <View className="h-[1px] bg-[#F8F8F8] w-full" />
-
       {/* Bottom Nav Bar */}
       <View 
          style={{
@@ -88,7 +90,6 @@ export default function ProtectedLayout() {
         {navItems.map((item, index) => {
           const currentRoute = segments[1]; 
           const isActive = currentRoute === item.route?.split('/').pop();
-
           return (
             <TouchableOpacity
               key={index}

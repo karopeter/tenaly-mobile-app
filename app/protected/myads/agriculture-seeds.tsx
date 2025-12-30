@@ -203,6 +203,8 @@ export default function AgricultureSeedForm() {
   const [businessModalVisible, setBusinessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+   const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+    const [isDraftMode, setIsDraftMode] = useState(false);
 
   // Dropdown modal state
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -326,6 +328,74 @@ export default function AgricultureSeedForm() {
   useEffect(() => {
     fetchUserProfile();
   }, []);
+
+  useEffect(() => {
+  const fetchDraftData = async () => {
+    const draftMode = params.isDraft === 'true';
+    const draftCarAdId = params.carAdId;
+
+    if (!draftMode || !draftCarAdId) {
+      return;
+    }
+
+    setIsDraftMode(true);
+    setIsLoadingDraft(true);
+
+    try {
+      if (!apiClient) return;
+      
+      console.log('📥 Fetching agriculture draft for carAdId:', draftCarAdId);
+      
+      const agricultureResponse = await apiClient.get(`/api/agriculture/draft/${draftCarAdId}`);
+      const agricultureAd = agricultureResponse.data.agricultureAd;
+      
+      console.log('✅ Agriculture draft loaded:', agricultureAd);
+      
+      const transformedBulkPrices = (agricultureAd.bulkPrice || []).map((bp: any) => ({
+        quantity: bp.quantity || '',
+        unit: bp.unit || '',
+        amountPerUnit: bp.amountPerUnit?.toString() || ''
+      }));
+      
+      // Pre-fill form data
+      setFormData({
+        title: agricultureAd.title || '',
+        agricultureType: agricultureAd.agricultureType || '',
+        condition: agricultureAd.condition || '',
+        unit: agricultureAd.unit || '',
+        bulkPrices: transformedBulkPrices,  
+        feedType: agricultureAd.feedType || '',
+        brand: agricultureAd.brand || '',
+        negotiation: agricultureAd.negotiation || '',
+        formulationType: agricultureAd.formulationType || '',
+        serviceMode: agricultureAd.serviceMode || '',
+        experienceLevel: agricultureAd.experienceLevel || '',
+        availability: agricultureAd.availability || '',
+        amount: agricultureAd.amount?.toString() || '',
+        description: agricultureAd.description || '',
+      });
+      
+      // Set business if available
+      if (agricultureAd.businessCategory) {
+        setSelectedBusiness({
+          _id: agricultureAd.businessCategory._id || agricultureAd.businessCategory,
+          businessName: agricultureAd.businessCategory.businessName || 'Selected Business'
+        });
+      }
+      
+      console.log('✅ Bulk prices loaded:', transformedBulkPrices.length, 'items');
+      showSuccessToast('Draft loaded! Complete your ad details.');
+      
+    } catch (error: any) {
+      console.error('❌ Failed to load agriculture draft:', error);
+      showErrorToast('Failed to load draft');
+    } finally {
+      setIsLoadingDraft(false);
+    }
+  };
+  
+  fetchDraftData();
+}, [params.carAdId, params.isDraft]);
 
   const fetchUserProfile = async () => {
     try {
@@ -615,7 +685,9 @@ export default function AgricultureSeedForm() {
       <TouchableOpacity onPress={() => router.back()}>
         <AntDesign name="arrow-left" size={24} color={colors.darkGray} />
       </TouchableOpacity>
-      <Text style={styles.headerTitle}>Post Seeds & Seedlings Ad</Text>
+      <Text style={styles.headerTitle}>
+        {isDraftMode ? 'Complete  Seeds & Seedlings Ad' : 'Post Seeds & Seedlings Ad'}
+      </Text>
     </View>
     </View>
 
@@ -836,6 +908,12 @@ export default function AgricultureSeedForm() {
           requiredAmount={selectedPlan ? 
             {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
         />
+        {isLoadingDraft && (
+          <View style={styles.loadingOverlay}>
+           <ActivityIndicator size="large" color={colors.blue} />
+           <Text style={styles.loadingText}>Loading draft...</Text>
+          </View>
+        )}
     </KeyboardAwareScrollView>
    </View>
   );
@@ -1097,4 +1175,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'WorkSans_600SemiBold',
   },
+  loadingOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
+},
+loadingText: {
+  marginTop: 12,
+  fontSize: 16,
+  fontWeight: '600',
+  color: colors.darkGray,
+  fontFamily: 'WorkSans_600SemiBold',
+},
 });

@@ -70,8 +70,10 @@ export default function PostFashionAccessoriesForm() {
     const [businessModalVisible, setBusinessModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [savingDraft, setSavingDraft] = useState(false);
+    const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+    const [isDraftMode, setIsDraftMode] = useState(false);
 
-
+ 
     // Dropdown modal state 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [dropdownTitle, setDropdownTitle] = useState('');
@@ -150,6 +152,57 @@ export default function PostFashionAccessoriesForm() {
     useEffect(() => {
       fetchUserProfile();
     }, []);
+
+    useEffect(() => {
+      const fetchDraftData = async () => {
+        const draftMode = params.isDraft === 'true';
+        const draftCarAdId = params.carAdId;
+
+        if (!draftMode || !draftCarAdId) {
+          return;
+        }
+
+        setIsDraftMode(true);
+        setIsLoadingDraft(true);
+
+        try {
+         if (!apiClient) return;
+
+         // Fetch Fashion Draft 
+         const fashionResponse = await apiClient.get(`/api/fashion/draft/${draftCarAdId}`);
+         const fashionAd = fashionResponse.data.fashionAd;
+
+         setFormData({
+          fashionTitle: fashionAd.fashionTitle || '',
+          fashionType: fashionAd.fashionType || '',
+          condition: fashionAd.condition || '',
+          fashionBrand: fashionAd.fashionBrand || '',
+          gender: fashionAd.gender || '',
+          fashionColor: fashionAd.fashionColor || '',
+          fashionMaterial: fashionAd.fashionMaterial || '',
+          amount: fashionAd.amount || '',
+          negotiation: fashionAd.negotiation || '',
+          description: fashionAd.description || '',
+         });
+
+         // Set If business is available 
+         if (fashionAd.businessCategory) {
+          setSelectectBusiness({
+            _id: fashionAd.businessCategory._id || fashionAd.businessCategory,
+            businessName: fashionAd.businessCategory.businessName || 'Selected Business'
+          });
+         }
+
+         showSuccessToast('Draft loaded! Complete your ad details.');
+        } catch (error: any) { 
+          showErrorToast('Failed to load draft');
+        } finally {
+          setIsLoadingDraft(false);
+        }
+      };
+
+      fetchDraftData();
+    }, [params.carAdId, params.isDraft]);
 
    const fetchUserProfile = async () => {
         try {
@@ -398,7 +451,9 @@ const handleSubmit = async () => {
         <TouchableOpacity onPress={() => router.back()}>
            <AntDesign name="arrow-left" size={24} color={colors.darkGray} />
         </TouchableOpacity>
-      <Text style={styles.headerTitle}>Post Accessories Ad</Text>
+      <Text style={styles.headerTitle}>
+        {isDraftMode ? 'Complete Post Accessories Ad' : 'Post Accessories Ad'}
+      </Text>
       </View>
      </View>
 
@@ -593,7 +648,12 @@ const handleSubmit = async () => {
       walletBalance={walletBalance}
       requiredAmount={selectedPlan ? 
         {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
-     />  
+     /> 
+     {isLoadingDraft && (
+      <View style={styles.loadingOverlay}>
+       <Text style={styles.loadingText}>Loading draft...</Text>
+      </View>
+     )} 
      </KeyboardAwareScrollView>
     </View>
   );
@@ -741,5 +801,23 @@ termsText: {
 },
 termsLink: {
   color: colors.blue,
+},
+loadingOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
+},
+loadingText: {
+  marginTop: 12,
+  fontSize: 16,
+  fontWeight: '600',
+  color: colors.darkGray,
+  fontFamily: 'WorkSans_600SemiBold',
 },
 });

@@ -72,6 +72,8 @@ export default function VehicleDetailsForm() {
     const [businessModalVisible, setBusinessModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [savingDraft, setSavingDraft] = useState(false);
+    const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+    const [isDraftMode, setIsDraftMode] = useState(false);
 
     // Dropdown modal state 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -156,6 +158,73 @@ export default function VehicleDetailsForm() {
   useEffect(() => {
      fetchUserProfile();
   }, []);
+
+  useEffect(() => {
+    const fetchDraftData = async () => {
+      const draftMode = params.isDraft === 'true';
+      const draftCarAdId = params.carAdId;
+
+      if (!draftMode || !draftCarAdId) {
+        return;
+      }
+      
+      setIsDraftMode(true);
+      setIsLoadingDraft(true);
+
+      try {
+       if (!apiClient) return;
+
+       // Fetch Vehicle Draft 
+       const vehicleResponse = await apiClient.get(`/api/vehicles/draft/${draftCarAdId}`);
+       const vehicleAd = vehicleResponse.data.vehicleAd;
+
+       // Pre-fill form data 
+       setFormData({
+        vehicleType: vehicleAd.vehicleType || '',
+        model: vehicleAd.model || '',
+        year: vehicleAd.year || '',
+        trim: vehicleAd.trim || '',
+        color: vehicleAd.color || '',
+        interiorColor: vehicleAd.interiorColor || '',
+        transmission: vehicleAd.transmission || '',
+        vinChassisNumber: vehicleAd.vinChassisNumber || '',
+        carRegistered: vehicleAd.carRegistered || '',
+        exchangePossible: vehicleAd.exchangePossible || '',
+        carType: vehicleAd.carType || '',
+        carBody: vehicleAd.carBody || '',
+        fuel: vehicleAd.fuel || '',
+        seat: vehicleAd.seat || '',
+        driveTrain: vehicleAd.driveTrain || '',
+        numberOfCylinders: vehicleAd.numberOfCylinders || '',
+        engineSizes: vehicleAd.engineSizes || '',
+        horsePower: vehicleAd.horePower || '',
+        carKeyFeatures: vehicleAd.carKeyFeatures || '',
+        carCondition: vehicleAd.carCondition || '',
+        mileage: vehicleAd.mileage || '',
+        amount: vehicleAd.amount || '',
+        negotiation: vehicleAd.negotiation || '',
+        description: vehicleAd.description || '',
+       });
+
+       // Set Business if available 
+       if (vehicleAd.businessCategory) {
+        setSelectedBusiness({
+          _id: vehicleAd.businessCategory._id || vehicleAd.businessCategory,
+          businessName: vehicleAd.businessCategory.businessName || 'Selected Business'
+        });
+        
+       }
+
+       showSuccessToast('Draft loaded! Complete your ad details.');
+      } catch (error: any) {
+        showErrorToast('Failed to load draft');
+      } finally {
+        setIsLoadingDraft(false);
+      }
+    };
+
+    fetchDraftData();
+  }, [params.carAdId, params.isDraft]);
 
   const fetchUserProfile = async () => {
      try {
@@ -389,7 +458,9 @@ export default function VehicleDetailsForm() {
           <TouchableOpacity onPress={() => router.back()}>
           <AntDesign name="arrow-left" size={24} color={colors.darkGray} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Post an Ad</Text>
+        <Text style={styles.headerTitle}>
+          {isDraftMode ? 'Complete Vehicle Ad' : 'Post Vehicle Ad'}
+        </Text>
         </View>
         <View style={{ width: 24 }} />
       </View>
@@ -665,6 +736,12 @@ export default function VehicleDetailsForm() {
          requiredAmount={selectedPlan ? 
          {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
       />
+      {isLoadingDraft && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.blue} />
+          <Text style={styles.loadingText}>Loading draft...</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -845,5 +922,23 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.darkGray,
     fontFamily: 'WorkSans_500Medium', 
+  },
+  loadingOverlay: {
+    position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
+  },
+  loadingText: {
+    marginTop: 12,
+  fontSize: 16,
+  fontWeight: '600',
+  color: colors.darkGray,
+  fontFamily: 'WorkSans_600SemiBold',
   }
 });

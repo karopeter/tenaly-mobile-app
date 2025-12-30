@@ -24,7 +24,6 @@ import PostAdDropdown from '@/app/reusables/PostAdDropdown';
 import PostAdInput from '@/app/reusables/PostAdInput';
 import PostAdTextArea from '@/app/reusables/PostAdTextArea';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRoute } from '@react-navigation/native';
 
 interface Business {
     _id: string;
@@ -71,6 +70,8 @@ export default function PostBeautyNailForm() {
     const [businessModalVisible, setBusinessModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [savingDraft, setSavingDraft] = useState(false);
+    const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+    const [isDraftMode, setIsDraftMode] = useState(false);
 
     // Dropdown modal state 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -132,6 +133,53 @@ export default function PostBeautyNailForm() {
    useEffect(() => {
     fetchUserProfile()
    }, []);
+
+   useEffect(() => {
+     const fetchDraftData = async () => {
+       const draftMode = params.isDraft === 'true';
+       const draftCarAdId = params.carAdId;
+
+       if (!draftMode || !draftCarAdId) {
+        return;
+       }
+
+       setIsDraftMode(true);
+       setIsLoadingDraft(true);
+
+       try {
+        if (!apiClient) return;
+
+        // fetch beauty draft 
+        const beautyResponse = await apiClient.get(`/api/beauty/draft/${draftCarAdId}`);
+        const beautyAd = beautyResponse.data.beautyAd;
+
+        setFormData({
+          beautyTitle: beautyAd.beautyTitle || '',
+          beautyType: beautyAd.beautyType || '',
+          condition: beautyAd.condition || '',
+          beautyBrand: beautyAd.beautyBrand || '',
+          amount: beautyAd.amount || '',
+          negotiation: beautyAd || '',
+          description: beautyAd || '',
+        });
+
+        // Set Business if available 
+        if (beautyAd.businessCategory) {
+          setSelectectBusiness({
+            _id: beautyAd.businessCategory._id || beautyAd.businessCategory,
+            businessName: beautyAd.businessCategory.businessName || 'Selected Business'
+          });
+        }
+
+        showSuccessToast('Draft loaded! Complete your ad details.');
+       } catch (error: any) {
+         console.error('❌ Failed to load draft:', error);
+         showErrorToast('Failed to load draft');
+       } finally {
+        setIsLoadingDraft(false);
+       }
+     }
+   })
 
     const fetchUserProfile = async () => {
     try {
@@ -345,6 +393,8 @@ const startPaymentPolling = (reference: string) => {
         amount: formData.amount,
         negotiation: formData.negotiation,
         description: formData.description,
+        businessCategory: selectedBusiness._id,
+        carAdId: carAdId || params.carAdId || undefined,
         plan: userHighestPlan || selectedPlan || "free",
         isDraft: true
       };
@@ -377,7 +427,10 @@ const startPaymentPolling = (reference: string) => {
          <TouchableOpacity onPress={() => router.back()}>
            <AntDesign name="arrow-left" size={24} color={colors.darkGray} />
          </TouchableOpacity>
-         <Text style={styles.headerTitle}>Post Nailcare Ad</Text>
+         {/* <Text style={styles.headerTitle}>Post Nailcare Ad</Text> */}
+         <Text style={styles.headerTitle}>
+          {isDraftMode ? 'Complete Nailcare Ad' : 'Post Nailcare Ad'}
+         </Text>
          </View>
       </View>
       
@@ -545,8 +598,12 @@ const startPaymentPolling = (reference: string) => {
            requiredAmount={selectedPlan ? 
             {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
          />
-        <View>
-        </View>
+        {isLoadingDraft && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color={colors.blue} />
+            <Text style={styles.loadingText}>Loading draft...</Text>
+          </View>
+        )}
       </KeyboardAwareScrollView>
     </View>
   )
@@ -694,5 +751,23 @@ termsText: {
 },
 termsLink: {
   color: colors.blue,
+},
+loadingOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
+},
+loadingText: {
+  marginTop: 12,
+  fontSize: 16,
+  fontWeight: '600',
+  color: colors.darkGray,
+  fontFamily: 'WorkSans_600SemiBold',
 },
 });

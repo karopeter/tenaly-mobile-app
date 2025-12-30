@@ -70,6 +70,8 @@ export default function PostLaptopOthersForm() {
     const [businessModalVisible, setBusinessModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [savingDraft, setSavingDraft] = useState(false);
+    const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+    const [isDraftMode, setIsDraftMode] = useState(false);
 
 
     // Dropdown modal state 
@@ -133,6 +135,64 @@ export default function PostLaptopOthersForm() {
     useEffect(() => {
       fetchUserProfile();
     }, []);
+
+    useEffect(() => {
+      const fetchDraftData = async () => {
+        const draftMode = params.isDraft === 'true';
+        const draftCarAdId = params.carAdId;
+
+        if (!draftMode || !draftCarAdId) {
+          return;
+        }
+
+        setIsDraftMode(true);
+        setIsLoadingDraft(true);
+        
+
+        try {
+         if (!apiClient) return;
+
+         // Fetch laptop draft 
+         const laptopResponse = await apiClient.get(`/api/laptops/draft/${draftCarAdId}`);
+         const laptopAd = laptopResponse.data.laptopAd;
+
+         // Pre-fill form data 
+         setFormData({
+          laptopTitle: laptopAd.laptopTitle || '',
+          condition: laptopAd.condition || '',
+          laptopBrand: laptopAd.laptopBrand || '',
+          laptopProcessor: laptopAd.laptopProcessor || '',
+          laptopRam: laptopAd.laptopRam || '',
+          laptopStorage: laptopAd.laptopStorage || '',
+          laptopOperating: laptopAd.laptopOperating || '',
+          laptopScreenSize: laptopAd.laptopScreenSize || '',
+          laptopBatteryHealth: laptopAd.laptopBatteryHealth || '',
+          laptopColor: laptopAd.laptopColor || '',
+          laptopAccessories: laptopAd.laptopAccessories || '',
+          warranty: laptopAd.warranty || '',
+          amount: laptopAd.amount || '',
+          negotiation: laptopAd.negotiation || '',
+          description: laptopAd.description || '',
+         });
+
+         // Set business if available 
+         if (laptopAd.businessCategory) {
+            setSelectectBusiness({
+              _id: laptopAd.businessCategory._id || laptopAd.businessCategory,
+               businessName: laptopAd.businessCategory.businessName || 'Selected Business'
+            });
+         }
+
+         showSuccessToast('Draft loaded! Complete your ad details.');
+        } catch (error: any) {
+         showErrorToast('Failed to load draft');
+        } finally {
+          setIsLoadingDraft(false);
+        }
+      };
+
+      fetchDraftData();
+    }, [params.carAdId, params.isDraft]);
 
    const fetchUserProfile = async () => {
         try {
@@ -389,7 +449,9 @@ const handleSubmit = async () => {
         <TouchableOpacity onPress={() => router.back()}>
            <AntDesign name="arrow-left" size={24} color={colors.darkGray} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Post Laptop Ad</Text>
+        <Text style={styles.headerTitle}>
+          {isDraftMode ? 'Complete Post Laptop Ad' : 'Post Laptop Ad'}
+        </Text>
       </View>
      </View>
 
@@ -633,6 +695,12 @@ const handleSubmit = async () => {
       requiredAmount={selectedPlan ? 
         {basic: 15000, premium: 30000, vip: 45000, enterprise: 100000}[selectedPlan] || 0 : 0}
      />  
+     {isLoadingDraft && (
+  <View style={styles.loadingOverlay}>
+    <ActivityIndicator size="large" color={colors.blue} />
+    <Text style={styles.loadingText}>Loading draft...</Text>
+  </View>
+)}
      </KeyboardAwareScrollView>
     </View>
   );
@@ -780,5 +848,23 @@ termsText: {
 },
 termsLink: {
   color: colors.blue,
+},
+loadingOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
+},
+loadingText: {
+  marginTop: 12,
+  fontSize: 16,
+  fontWeight: '600',
+  color: colors.darkGray,
+  fontFamily: 'WorkSans_600SemiBold',
 },
 });

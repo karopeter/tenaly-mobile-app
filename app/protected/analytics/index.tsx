@@ -134,17 +134,20 @@ export default function Analytics() {
          contentContainerStyle={styles.scrollContent}
        >
         {/* Time Range Selector */}
-        <View style={styles.timeRangeContainer}>
+        <View style={styles.metricsHeaderRow}>
+          <Text style={styles.metricsTitle}>Key Metrics</Text>
+
+          <View style={{ position: 'relative'}}>
           <TouchableOpacity
-           style={styles.timeRangeButton}
-           onPress={() => setShowDropdown(!showDropdown)}
+            style={styles.timeRangeButton}
+            onPress={() => setShowDropdown(!showDropdown)}
           >
-          <Text style={styles.timeRangeText}>{getSelectedLabel()}</Text>
-          <Ionicons
-            name={showDropdown ? 'chevron-up' : 'chevron-down'}
-            size={20}
-            color={colors.darkGray}
-          />
+           <Text style={styles.timeRangeText}>{getSelectedLabel()}</Text>
+           <Ionicons
+             name={showDropdown ? 'chevron-up' : 'chevron-down'}
+             size={20}
+             color={colors.darkGray}
+            />
           </TouchableOpacity>
 
           {showDropdown && (
@@ -152,25 +155,27 @@ export default function Analytics() {
               {timeRangeOptions.map((option) => (
                 <TouchableOpacity
                   key={option.value}
+                  style={styles.dropdownItem}
                   onPress={() => {
-                     setTimeRange(option.value);
-                     setShowDropdown(false);
-                  }}
-                >
-                 <Text
-                   style={[
-                    styles.dropdownItemText,
-                    timeRange === option.value && styles.dropdownItemTextActive
-                   ]}>
-                   {option.label}
-                 </Text>
-                 {timeRange === option.value && (
-                  <Ionicons name='checkmark' size={20} color={colors.blue} />
-                 )}
-                </TouchableOpacity>
+                    setTimeRange(option.value);
+                    setShowDropdown(false);
+                  }}>
+              <Text
+                style={[
+                  styles.dropdownItemText,
+                  timeRange === option.value && styles.dropdownItemTextActive,
+                ]}>
+                {option.label}
+               </Text>
+
+               {timeRange === option.value && (
+                 <Ionicons name="checkmark" size={20} color={colors.blue} />
+               )}
+              </TouchableOpacity>
               ))}
             </View>
           )}
+          </View>
         </View>
 
         {/* Key Metrics */}
@@ -356,7 +361,7 @@ function MetricCard({
   return (
     <View style={styles.metricCard}>
      <View style={styles.metricHeader}>
-      <Ionicons name={icon} size={24} color={color} />
+      {/* <Ionicons name={icon} size={24} color={color} /> */}
       <Text style={styles.metricLabel}>{label}</Text>
      </View>
      <Text style={styles.metricValue}>{value.toLocaleString()}</Text>
@@ -394,13 +399,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#EDEDED',
   },
   backButton: {
-    padding: 4,
+   marginRight: 15,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    fontFamily: 'WorkSans_600SemiBold',
-    color: colors.darkGray,
+   fontSize: 18,
+   fontWeight: '600',
+   color: colors.darkGray,
+   fontFamily: 'WorkSans_600SemiBold',
+   flex: 1,
   },
   scrollView: {
     flex: 1,
@@ -431,15 +437,29 @@ const styles = StyleSheet.create({
     fontFamily: 'WorkSans_500Medium',
     color: colors.darkGray,
   },
+  metricsHeaderRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: 20,
+  paddingTop: 20,
+  paddingBottom: 12,
+},
+
+metricsTitle: {
+  fontSize: 18,
+  fontFamily: 'WorkSans_600SemiBold',
+  color: colors.darkGray,
+},
   dropdown: {
     position: 'absolute',
     top: 64,
     left: 20,
     right: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    backgroundColor: colors.bg,
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#EDEDED',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -476,11 +496,8 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#EDEDED',
   },
   metricHeader: {
     flexDirection: 'row',
@@ -489,14 +506,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   metricLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'WorkSans_500Medium',
-    color: colors.darkGray,
+    color: '#767676',
+    fontWeight: '500'
   },
   metricValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    fontFamily: 'WorkSans_700Bold',
+    fontSize: 18,
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium',
     color: colors.darkGray,
     marginBottom: 4,
   },

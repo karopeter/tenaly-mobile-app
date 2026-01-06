@@ -48,23 +48,40 @@ const Login = () => {
   ];
 
     // Google Auth Setup
-  const redirectUri = makeRedirectUri({
-    native: 'https://auth.expo.io/@karopeter/tenaly-mobile',
-  });
+  // const redirectUri = makeRedirectUri({
+  //   native: 'https://auth.expo.io/@karopeter/tenaly-mobile',
+  // });
+
+//  const redirectUri = makeRedirectUri();
+//  console.log('Redirect URI:', redirectUri);
+const redirectUri = 'https://auth.expo.io/@karopeter531/tenaly-mobile';
+console.log('Redirect URI:', redirectUri);
+
+const [request, response, promptAsync] = Google.useAuthRequest(
+  {
+    iosClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
+    androidClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
+    webClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
+    scopes: ['profile', 'email'],
+  },
+  { redirectUri }
+);
 
   //const redirectUri = makeRedirectUri({ useProxy: true });
 
 
+// for production testing 
+  //   const [request, response, promptAsync] = Google.useAuthRequest(
+  //   {
+  //      androidClientId: '1002797729859-3a0ldqk5j14ugthoga4esjinnh4u3g00.apps.googleusercontent.com',
+  //      iosClientId: '1002797729859-s2nujipbjpve2eg857leinnoe33aisqo.apps.googleusercontent.com',
+  //     webClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
+  //     scopes: ['profile', 'email'],
+  //   },
+  //   { redirectUri }
+  // );
 
-    const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-       androidClientId: '1002797729859-3a0ldqk5j14ugthoga4esjinnh4u3g00.apps.googleusercontent.com',
-       iosClientId: '1002797729859-s2nujipbjpve2eg857leinnoe33aisqo.apps.googleusercontent.com',
-      webClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
-      scopes: ['profile', 'email'],
-    },
-    { redirectUri }
-  );
+  // for expo Go Testing 
 
    // const redirectUri = promptAsync({ useProxy: true });
 

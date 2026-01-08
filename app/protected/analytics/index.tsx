@@ -10,7 +10,7 @@ import {
   Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LineChart } from 'react-native-chart-kit';
+import { BarChart } from 'react-native-gifted-charts';
 import { useRouter } from 'expo-router';
 import apiClient from '@/app/utils/apiClient';
 import { showErrorToast } from '@/app/utils/toast';
@@ -65,49 +65,41 @@ export default function Analytics() {
      return timeRangeOptions.find(opt => opt.value === timeRange)?.label || '30 Days';
    };
 
-   const formatChartData = () => {
-     if (!data?.viewsByDay ||  data.viewsByDay.length === 0) {
-       return {
-        labels: ['No Data'],
-        datasets: [
-          {
-           data: [0],
-           color: (opacity = 1) => `rgba(16, 49, 170, ${opacity})`,
-           strokeWidth: 2
-          },
-        ],
-       };
-     }
+  const formatChartData = () => {
+    if (!data?.viewsByDay || data.viewsByDay.length === 0) {
+      return [];
+    }
 
-     const sortedData = [...data.viewsByDay].sort((a, b) => 
-       new Date(a._id).getTime() - new Date(b._id).getTime()
+    const sortedData = [...data.viewsByDay].sort((a, b) => 
+      new Date(a._id).getTime() - new Date(b._id).getTime()
     );
 
-    const labels = sortedData.map(item => {
+    const chartData: any[] = [];
+    
+    sortedData.forEach((item) => {
       const date = new Date(item._id);
-      return `${date.getMonth() + 1}/${date.getDate()}`;
+      const label = `${date.getMonth() + 1}/${date.getDate()}`;
+      
+      chartData.push(
+        {
+          value: item.impressions || 0,
+          label: label,
+          frontColor: '#6B93F6',
+          spacing: 2,
+        },
+        {
+          value: item.productViews || 0,
+          frontColor: '#4CAF50',
+        },
+        {
+          value: item.profileViews || 0,
+          frontColor: '#FF9800',
+        }
+      );
     });
 
-    const productViewsData = sortedData.map(item => item.productViews || 0);
-    const profileViewsData = sortedData.map(item => item.profileViews || 0);
-
-    return {
-      labels: labels.length > 7 ? labels.filter((_, i) => i % 2 === 0) : labels,
-      datasets: [
-        {
-         data: productViewsData,
-         color: (opacity = 1) => `rgba(0, 168, 223), ${opacity}`,
-         strokeWidth: 2,
-        },
-        {
-          data: profileViewsData,
-          color: (opacity = 1) => `rgba(16, 49, 170, ${opacity})`,
-          strokeWidth: 2,
-        },
-      ],
-      legend: ['Ad Views', 'Profile Views'],
-    };
-   };
+    return chartData;
+  };
 
    if (loading) {
     return (
@@ -218,52 +210,45 @@ export default function Analytics() {
         {/* Performance Trends Charts */}
         <View style={styles.chartContainer}>
          <Text style={styles.sectionTitle}>Performance Trends</Text>
-         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <LineChart
+         <View style={styles.chartWrapper}>
+           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <BarChart
             data={formatChartData()}
-            width={SCREEN_WIDTH > 600 ? SCREEN_WIDTH - 60 : Math.max(SCREEN_WIDTH - 40, data?.viewsByDay.length ? data.viewsByDay.length * 50 : SCREEN_WIDTH - 40)}
+            barWidth={22}
+            spacing={24}
+            xAxisThickness={0}
+            yAxisThickness={0}
+            yAxisTextStyle={{ color: '#828282', fontSize: 12 }}
+            noOfSections={4}
+            maxValue={Math.max(...(data?.viewsByDay || []).flatMap(item => [
+              item.impressions || 0,
+              item.productViews || 0,
+              item.profileViews || 0
+            ])) + 10}
+            isAnimated
+            animationDuration={800}
             height={220}
-            chartConfig={{
-              backgroundColor: '#FFFFFF',
-              backgroundGradientFrom: '#FFFFFF',
-              backgroundGradientTo: '#FFFFFF',
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(16, 49, 170, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(130, 130, 130, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-              propsForDots: {
-                r: '4',
-                strokeWidth: '2',
-                stroke: '#FFFFFF',
-              },
-              propsForBackgroundLines: {
-                strokeDasharray: '',
-                stroke: '#E0E0E0',
-                strokeWidth: 1,
-              }
-            }}
-            bezier
-            style={styles.chart}
-            withInnerLines={true}
-            withOuterLines={true}
-            withVerticalLines={false}
-            withHorizontalLines={true}
-            withDots={true}
-            withShadow={false}
+            showVerticalLines={false}
+            hideRules={false}
+            rulesType='solid'
+            rulesColor="#E5E5E5"
           />
          </ScrollView>
+         </View>
 
          {/* Chart Legend */}
          <View style={styles.chartLegend}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#00A8DF'}]} />
-            <Text style={styles.legendText}>Ad Views</Text>
+            <View style={[styles.legendDot, { backgroundColor: '#6B93F6'}]} />
+            <Text style={styles.legendText}>Impressions</Text>
           </View>
           <View style={styles.legendItem}>
-           <View style={[styles.legendDot, { backgroundColor: '#1031AA'}]} />
-           <Text style={styles.legendText}>Profile Views</Text>
+           <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
+           <Text style={styles.legendText}>Ad Views</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
+            <Text style={styles.legendText}>Profile Views</Text>
           </View>
          </View>
         </View>
@@ -361,7 +346,6 @@ function MetricCard({
   return (
     <View style={styles.metricCard}>
      <View style={styles.metricHeader}>
-      {/* <Ionicons name={icon} size={24} color={color} /> */}
       <Text style={styles.metricLabel}>{label}</Text>
      </View>
      <Text style={styles.metricValue}>{value.toLocaleString()}</Text>
@@ -414,6 +398,17 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 30,
   },
+  chartWrapper: {
+  backgroundColor: '#FFFFFF',
+  borderRadius: 12,
+  padding: 16,
+  marginTop: 8,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.05,
+  shadowRadius: 4,
+  elevation: 2,
+},
   timeRangeContainer: {
     paddingHorizontal: 20,
     paddingTop: 20,

@@ -379,6 +379,7 @@ export default function VehicleDetailsForm() {
     if (userHasPaidPlan) {
       console.log('User has existing plan:', userHighestPlan);
       showSuccessToast('Using your existing plan...');
+      setTimeout(() => router.push('/protected/myads'), 1500);
       submitAd('free', false);
     } else {
       // New user - show  boost modal 

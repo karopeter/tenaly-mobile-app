@@ -30,4 +30,5 @@ export interface ViewByDay {
     _id: string;
     productViews: number;
     profileViews: number;
+    impressions: number;
 }

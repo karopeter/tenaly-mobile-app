@@ -415,6 +415,7 @@ const router = useRouter();
     if (userHasPaidPlan) {
       console.log('User has existing plan:', userHighestPlan);
       showSuccessToast('Using your existing plan...');
+      setTimeout(() => router.push('/protected/myads'), 1500);
       submitAd('free', false);
     } else {
       setShowBoostModal(true);

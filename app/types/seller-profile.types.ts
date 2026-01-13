@@ -2,6 +2,7 @@ export interface SellerProfile {
   _id: string;
   fullName: string;
   phoneNumber: string;
+  userId: string;
   isGoogleUser: boolean;
   image: string | null;
   role: string;

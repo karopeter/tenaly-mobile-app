@@ -18,8 +18,9 @@ import ConversationItem from '@/app/reusables/conversationItem';
 import MessageBubble from '@/app/components/MessageBubble';
 import SearchBar from '@/app/components/SearchBar';
 import socketServices from '@/app/services/socketServices';
+import userService from '@/app/services/userService';
 import messageServices from '@/app/services/messageServices';
-import fileUploadService from '@/app/services/fileUploadService';
+import { useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/app/context/AuthContext';
 import { Conversation, Message, User, ScreenType, FileAttachment } from '@/app/types/message';
 import { colors } from '@/app/constants/theme';
@@ -34,6 +35,13 @@ export default function MessageScreen() {
   const [loading, setLoading] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const scrollViewRef = useRef<ScrollView>(null);
+  const params = useLocalSearchParams<{
+    sellerId?: string;
+    productId: string;
+    productTitle?: string;
+    productImage?: string;
+    previewMessage?: string;
+  }>();
   
   // Get user and token from AuthContext
   const { user: currentUser, token, isInitialized } = useAuth();
@@ -42,12 +50,106 @@ export default function MessageScreen() {
     // Only initialize if auth is ready and user is logged in
     if (isInitialized && currentUser && token) {
       initializeApp();
+
+      // Auto-open conversation if params provided 
+      if (params.sellerId) {
+        handleDirectMessage();
+      }
     }
     
     return () => {
       socketServices.disconnect();
     }
-  }, [isInitialized, currentUser, token]);
+  }, [isInitialized, currentUser, token, params.sellerId]);
+
+ const handleDirectMessage = async () => {
+  if (!params.sellerId) {
+    console.error('No sellerId in params:', params);
+    showErrorToast('Seller information missing');
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    console.log('Creating Conversation with sellerId:', params.sellerId);
+
+    // Fetch the seller's profile data
+    let sellerData = null;
+    try {
+      const sellerResponse = await userService.getUserProfile(params.sellerId);
+      
+      if (sellerResponse?.user) {
+        sellerData = {
+          _id: sellerResponse.user._id,
+          fullName: sellerResponse.user.fullName,
+          email: sellerResponse.user.email,
+          phoneNumber: sellerResponse.user.phoneNumber,
+          role: sellerResponse.user.role,
+          image: sellerResponse.user.image,
+          isVerified: sellerResponse.user.isVerified,
+        };
+      }
+    } catch (error) {
+      console.log('Could not fetch seller profile, using fallback:', error);
+      // Fallback to basic data if profile fetch fails
+      sellerData = {
+        _id: params.sellerId,
+        fullName: 'Seller',
+      };
+    }
+
+    // Get or create conversation with seller 
+    const conversationResponse = await messageServices.getOrCreateConversation(
+      params.sellerId
+    );
+
+    if (conversationResponse?.conversation) {
+      const conversation = {
+        ...conversationResponse.conversation,
+        otherUser: sellerData || {
+          _id: params.sellerId,
+          fullName: 'Seller'
+        }
+      };
+
+      setSelectedChat(conversation);
+      setCurrentScreen('chat');
+
+      // Join socket room 
+      socketServices.joinRoom(conversation._id);
+
+      // Send preview message with product details if provided 
+      if (params.previewMessage && params.productId) {
+        const messageData = {
+          conversationId: conversation._id,
+          text: params.previewMessage,
+          from: currentUser?.id,
+          to: params.sellerId,
+          productId: params.productId,
+          productTitle: params.productTitle,
+          productImageUrl: params.productImage
+        };
+
+        socketServices.sendMessage(messageData);
+      }
+
+      // Load existing messages 
+      const messagesResponse = await messageServices.getConversationMessages(
+        conversation._id 
+      );
+      if (messagesResponse?.messages) {
+        setMessages(messagesResponse.messages);
+      }
+    }
+  } catch (error: any) {
+    console.error('Error opening direct message:', error);
+    console.error('Error details:', error.response?.data);
+    showErrorToast(error.response?.data?.message || 'Failed to open conversation');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const initializeApp = async () => {
      try {

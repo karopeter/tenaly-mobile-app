@@ -321,8 +321,20 @@ const SignUp: React.FC = () => {
             <Text 
               style={styles.agreeText}
               className="text-[#868686] text-center text-[12px] font-[400]">
-               By Signing up, you agree to all Terms Of Service and Privacy 
-               Policy
+               By Signing up, you agree to all{' '}
+               <Text 
+                style={styles.linkText}
+                onPress={() => console.log('Terms and services page routing')}
+               >
+                Terms of Service 
+               </Text>
+               {' '}and{' '}
+               <Text
+                 style={styles.linkText}
+                 onPress={() => console.log('Privacy Page routing')}
+               >
+                Privacy Policy
+               </Text>
               </Text>
           </View>
 
@@ -413,6 +425,12 @@ const styles = StyleSheet.create({
   },
   accountText: {
     fontFamily: 'WorkSans_400Regular'
+  },
+  linkText: {
+    color: colors.blue,
+    fontWeight: '500',
+    fontFamily: 'WorkSans_500Medium',
+    textDecorationLine: 'underline'
   }
 })
 

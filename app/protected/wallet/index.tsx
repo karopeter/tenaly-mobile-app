@@ -630,7 +630,7 @@ const handleDownloadReceipt = async (transaction: Transaction) => {
           onPress={() => setShowTopUpModal(true)}
         >
           <Text style={styles.addMoneyText}>
-            {hasTransactions ? 'Update Money' : 'Add money'}
+            {hasTransactions ? 'Update Amount' : 'Add money'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -819,14 +819,22 @@ const styles = StyleSheet.create({
   },
   transactionItem: {
     flexDirection: 'row',
+    backgroundColor: colors.bg,
     borderRadius: 12,
     marginBottom: 12,
+    padding: 12,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    ...Platform.select({
+      ios: {
+       shadowColor: '#000',
+       shadowOffset: { width: 0, height: 2 },
+       shadowOpacity: 0.05,
+       shadowRadius: 3,
+      },
+      android: {
+      elevation: 2,
+      }
+    })
   },
   transactionIcon: {
     width: 40,

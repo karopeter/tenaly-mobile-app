@@ -25,7 +25,7 @@ class MessageService {
      showErrorToast('API client not initialized.');
      return;
     }
-    const response = await apiClient.get(`/api/profile/users/${userId}`);
+    const response = await apiClient.get(`/api/profile/user/${userId}`);
     return response.data;
   }
 

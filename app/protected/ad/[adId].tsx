@@ -9,8 +9,13 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
-  Linking
+  Linking,
+  Share,
+  Platform
 } from 'react-native';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
+//import RNShare from 'react-native-share';
 import { AntDesign, Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { colors } from '@/app/constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -194,6 +199,178 @@ const fetchSellerData = async (sellerId: string) => {
 
   return [];
 };
+
+const handleShare = async () => {
+  if (!ad) return;
+
+  try {
+    const productName = ad.petAd ? 
+      ad.petAd.petType : 
+      ad.agricultureAd ? 
+      ad.agricultureAd.title : 
+      ad.gadgetAd ? 
+      ad.gadgetAd.gadgetTitle : 
+      ad.hireAd ? 
+      ad.hireAd.jobType :
+      ad.equipmentAd ? 
+      ad.equipmentAd.equipmentTitle :
+      ad.fashionAd ?
+      `${ad.fashionAd.fashionTitle} ${ad.fashionAd.fashionType} ${ad.fashionAd.fashionColor}` :
+      ad.jobAd ?
+      `${ad.jobAd.jobTitle} ${ad.jobAd.jobType} ${ad.jobAd.skils}` :
+      ad.constructionAd ?
+       ad.constructionAd.constructionTitle :
+      ad.householdAd ?
+      `${ad.householdAd.householdTitle} ${ad.householdAd.householdType} ${ad.householdAd.householdBrand}` :
+      ad.laptopAd ? 
+      `${ad.laptopAd.laptopTitle} ${ad.laptopAd.laptopType} ${ad.laptopAd.laptopBrand}` :
+      ad.beautyAd ? 
+      `${ad.beautyAd.beautyTitle} ${ad.beautyAd.beautyType} ${ad.beautyAd.beautyBrand}` :
+      ad.serviceAd ? 
+       `${ad.serviceAd.serviceTitle} ${ad.serviceAd.serviceDuration} ${ad.serviceAd.serviceAvailability}` :
+      ad.kidsAd ? 
+       `${ad.kidsAd.title} ${ad.kidsAd.condition} ${ad.kidsAd.ageGroup}` :
+      ad.vehicleAd ? 
+      `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}` : 
+      ad.propertyAd?.propertyName || 'Product';
+
+    const price = formatPrice(
+      Number(
+        ad.petAd?.amount || 
+        ad.agricultureAd?.amount || 
+        ad.gadgetAd?.amount || 
+        ad.hireAd?.salaryRange || 
+        ad.equipmentAd?.amount || 
+        ad.fashionAd?.amount || 
+        ad.jobAd?.salaryRange || 
+        ad.constructionAd?.amount || 
+        ad.householdAd?.amount || 
+        ad.laptopAd?.amount || 
+        ad.beautyAd?.amount || 
+        ad.serviceAd?.amount || 
+        ad.kidsAd?.amount ||  
+        ad.vehicleAd?.amount || 
+        ad?.propertyAd?.amount ||
+        0 
+      )
+    );
+
+    const productImage = images[0];
+    const webLink = `https://tenaly.vercel.app/product/${adId}`;
+    const playStoreLink = 'https://play.google.com/store/apps/details?id=com.tenaly';
+
+    const message = `🔥 ${productName}\n💰 ${price}\n📍 ${ad.propertyAd?.propertyAddress || ad.carAd.location}\n\n👉 View on Tenaly: ${webLink}\n\n📱 Get the app: ${playStoreLink}`;
+
+    // Try sharing with image using expo-sharing
+    if (productImage) {
+      try {
+        const fileUri = FileSystem.cacheDirectory + `${adId}.jpg`;
+        await FileSystem.downloadAsync(productImage, fileUri);
+
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(fileUri, {
+            mimeType: 'image/jpeg',
+            dialogTitle: `${productName} - ${price}`,
+          });
+          return; // Exit if image share succeeds
+        }
+      } catch (imageError) {
+        console.log('Image sharing failed, falling back to text:', imageError);
+        // Continue to text-only share below
+      }
+    }
+
+    // Fallback: Share text only
+    await Share.share({
+      message: message,
+      title: `Check out ${productName} on Tenaly`
+    });
+
+  } catch (error: any) {
+    if (error.message !== 'User did not share') {
+      console.error("Error sharing:", error);
+      showErrorToast('Failed to share product');
+    }
+  }
+};
+
+// const handleShare = async () => {
+//   if (!ad) return;
+
+//   try {
+//    const productName = ad.petAd ? 
+//       ad.petAd.petType : 
+//       ad.agricultureAd ? 
+//       ad.agricultureAd.title : 
+//       ad.gadgetAd ? 
+//       ad.gadgetAd.gadgetTitle : 
+//       ad.hireAd ? 
+//       ad.hireAd.jobType :
+//       ad.equipmentAd ? 
+//       ad.equipmentAd.equipmentTitle :
+//       ad.fashionAd ?
+//       `${ad.fashionAd.fashionTitle} ${ad.fashionAd.fashionType} ${ad.fashionAd.fashionColor}` :
+//       ad.jobAd ?
+//       `${ad.jobAd.jobTitle} ${ad.jobAd.jobType} ${ad.jobAd.skils}` :
+//       ad.constructionAd ?
+//        ad.constructionAd.constructionTitle :
+//       ad.householdAd ?
+//       `${ad.householdAd.householdTitle} ${ad.householdAd.householdType} ${ad.householdAd.householdBrand}` :
+//       ad.laptopAd ? 
+//       `${ad.laptopAd.laptopTitle} ${ad.laptopAd.laptopType} ${ad.laptopAd.laptopBrand}` :
+//       ad.beautyAd ? 
+//       `${ad.beautyAd.beautyTitle} ${ad.beautyAd.beautyType} ${ad.beautyAd.beautyBrand}` :
+//       ad.serviceAd ? 
+//        `${ad.serviceAd.serviceTitle} ${ad.serviceAd.serviceDuration} ${ad.serviceAd.serviceAvailability}` :
+//       ad.kidsAd ? 
+//        `${ad.kidsAd.title} ${ad.kidsAd.condition} ${ad.kidsAd.ageGroup}` :
+//       ad.vehicleAd ? 
+//       `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}` : 
+//       ad.propertyAd?.propertyName || 'Product';
+
+//       const price = formatPrice(
+//         Number(
+//            ad.petAd?.amount || 
+//         ad.agricultureAd?.amount || 
+//         ad.gadgetAd?.amount || 
+//         ad.hireAd?.salaryRange || 
+//         ad.equipmentAd?.amount || 
+//         ad.fashionAd?.amount || 
+//         ad.jobAd?.salaryRange || 
+//         ad.constructionAd?.amount || 
+//         ad.householdAd?.amount || 
+//         ad.laptopAd?.amount || 
+//         ad.beautyAd?.amount || 
+//         ad.serviceAd?.amount || 
+//         ad.kidsAd?.amount ||  
+//         ad.vehicleAd?.amount || 
+//         ad?.propertyAd?.amount ||
+//         0 
+//         )
+//       );
+
+//     const productImage = [0];
+//     const deepLink = `tenaly://product/${adId}`;
+//     const webLink = `https://tenaly.vercel.app/product/${adId}`;
+//     const appStoreLink = 'https://apps.google.com/app/tenaly';
+//     const playStoreLink = 'https://play.google.com/store/app/details?id=com.tenaly';
+
+
+
+//       //const message = `Check out this ${productName} on Tenaly for  ${price}!\n\nLocation: ${ad.propertyAd?.propertyAddress || ad.carAd.location}`;
+//      const message = `🔥 ${productName}\n💰 ${price}\n📍 ${ad.propertyAd?.propertyAddress || ad.carAd.location}\n\n👉 View on Tenaly:\n${webLink}\n\n📱 Download Tenaly:\niOS: ${appStoreLink}\nAndroid: ${playStoreLink}`;
+
+//       await Share.share({
+//         message: message,
+//         url: productImage,
+//         title: `Check out ${productName} on Tenaly`
+//       });
+//   } catch (error) {
+//       console.error("Error sharing:", error);
+//       showErrorToast('Failed to share product');
+//   }
+// }
 
   // Get details based on ad type
   const getAdDetails = () => {
@@ -536,26 +713,42 @@ if (ad.propertyAd) {
     }).format(amount);
   };
 
-  const handlePhoneCall = async (phoneNumber: string) => {
-    if (!phoneNumber || phoneNumber === "Loading...") {
-      showErrorToast("Phone number not available");
-      return;
+ const handlePhoneCall = async (phoneNumber: string) => {
+  if (!phoneNumber || phoneNumber === "Loading...") {
+    showErrorToast("Phone number not available");
+    return;
+  }
+
+   try {
+    // Clean and format phone number 
+    let cleanNumber = phoneNumber.trim().replace(/[^\d+]/g, '');
+
+    // Ensure proper format for both iOS and Andriod 
+    if (!cleanNumber.startsWith('+')) {
+      cleanNumber = cleanNumber.startsWith('0')
+        ? cleanNumber.substring(1)
+        : cleanNumber;
+      cleanNumber = `+234${cleanNumber}`;
     }
 
-    try {
-      const phoneUrl = `tel:${phoneNumber}`;
-      const canOpen = await Linking.canOpenURL(phoneUrl);
-      
-      if (canOpen) {
-        await Linking.openURL(phoneUrl);
-      } else {
-        showErrorToast("Unable to make phone call");
-      }
-    } catch (error) {
-      console.error("Error making phone call:", error);
-      showErrorToast("Failed to initiate call");
+    const phoneUrl = Platform.OS === 'ios'
+      ? `telprompt:${cleanNumber}`
+      : `tel:${cleanNumber}`;
+    
+    const canOpen = await Linking.canOpenURL(phoneUrl);
+
+    if (canOpen) {
+      await Linking.openURL(phoneUrl);
+    } else {
+      // Fallback for Andriod 
+      const fallbackUrl = `tel:${cleanNumber}`;
+      await Linking.openURL(fallbackUrl);
     }
-  };
+   } catch (error) {
+     console.error("Error making phone call:", error);
+     showErrorToast("Unable to make call. Please try again.");
+   }
+ }
 
 
   const renderContent = () => {
@@ -955,7 +1148,7 @@ if (ad.propertyAd) {
                 />
               )}
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleShare}>
               <Image
                 source={require('../../../assets/images/shareIcon.png')}
                 style={styles.bookIcon}
@@ -1150,35 +1343,83 @@ if (ad.propertyAd) {
       {/* Footer */}
       <View style={styles.footer}>
         <TouchableOpacity
-          onPress={async () => {
-            if (seller?.phoneNumber) {
-              const phoneNumber = seller.phoneNumber.startsWith('+')
-                ? seller.phoneNumber
-                : `+234${seller.phoneNumber.replace(/^0/, '')}`;
+         onPress={async () => {
+           if (seller?.phoneNumber) {
+            // Format phone number properly 
+            let phoneNumber = seller.phoneNumber.trim();
 
-              const message = `Hello ${seller.fullName}, I'm interested in your ad on Tenaly`;
-              const encodedMessage = encodeURIComponent(message);
-              const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
-              const whatsappBusinessUrl = `whatsapp-business://send?phone=${phoneNumber}&text=${encodedMessage}`;
+            // Remove any non-numeric characters except +
+            phoneNumber = phoneNumber.replace(/[^\d+]/g, '');
 
-              try {
-               // Check if WhatsApp is available 
-               const supported = await Linking.canOpenURL(whatsappUrl);
-
-               if (supported) {
-                await Linking.openURL(whatsappBusinessUrl);
-               } else {
-                // Fall back to browser version if neither is installed 
-                const webUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-                await Linking.openURL(webUrl);
-               }
-              } catch (error: any) {
-               showErrorToast("Unable to open WhatsApp. Please make sure it's installed.", error);
-              }
-            } else {
-              showErrorToast('Seller phone number not available');
+            // Add country code if missing 
+            if (!phoneNumber.startsWith('+')) {
+              phoneNumber = phoneNumber.startsWith('0')
+                ? `+234${phoneNumber.substring(1)}`
+                : `+234${phoneNumber}`;
             }
-          }}
+
+            const productName = ad.petAd ? 
+               ad.petAd.petType :
+               ad.agricultureAd ?
+               ad.agricultureAd.title :
+               ad.gadgetAd ? 
+               ad.gadgetAd.gadgetTitle :
+               ad.hireAd ?
+               ad.hireAd.hireTitle :
+               ad.equipmentAd ? 
+               ad.equipmentAd.equipmentTitle :
+               ad.fashionAd ?
+               ad.fashionAd.fashionTitle :
+               ad.jobAd ? 
+               ad.jobAd.jobTitle :
+               ad.constructionAd ? 
+               ad.constructionAd.constructionTitle :
+               ad.householdAd ? 
+               ad.householdAd.householdTitle :
+               ad.laptopAd ?
+               ad.laptopAd.laptopTitle :
+               ad.beautyAd ?
+               ad.beautyAd.beautyTitle :
+               ad.serviceAd ? 
+               ad.serviceAd.serviceTitle :
+               ad.kidsAd ?
+               ad.kidsAd.title :
+               ad.vehicleAd ? 
+              `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}` :
+               ad.propertyAd?.propertyName || 'Product';
+            const message = `Hello, I'm interested in your "${productName}" listing on Tenaly`;
+            const encodedMessage = encodeURIComponent(message);
+
+            // Try multiple WhatApp URLs
+            const whatsappUrls = [
+              `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`,
+              `https://wa.me/${phoneNumber}?text=${encodedMessage}`,
+              `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`
+            ];
+
+            try {
+            // Try WhatsApp app first 
+            const canOpenWhatsApp = await Linking.canOpenURL(whatsappUrls[0]);
+
+            if (canOpenWhatsApp) {
+              await Linking.openURL(whatsappUrls[0]);
+            } else  {
+              // Fallback to web version 
+              await Linking.openURL(whatsappUrls[1]);
+            }
+            } catch (error) {
+             console.error('WhatApp error:', error);
+             // Fallback - open in browser 
+             try {
+              await Linking.openURL(whatsappUrls[2]);
+             } catch (finalError) {
+               showErrorToast('Unable to open WhatsApp. Please install WhatsApp or try again.', finalError);
+             }
+            }
+           } else {
+            showErrorToast('Seller contact information not available');
+           }
+         }}
         >
           <LinearGradient
             colors={['#00A8DF', '#1031AA']}
@@ -1205,7 +1446,72 @@ if (ad.propertyAd) {
               {seller?.phoneNumber}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.messageButton}>
+          <TouchableOpacity 
+          style={styles.messageButton}
+           onPress={async () => {
+             if (!seller || !ad) {
+              showErrorToast('Seller information not available');
+              return;
+             }
+
+             try {
+              const productName = ad.petAd ? 
+                ad.petAd.petType : 
+                ad.agricultureAd ? 
+                ad.agricultureAd.title : 
+                ad.gadgetAd ? 
+                ad.gadgetAd.gadgetTitle : 
+                ad.beautyAd ? 
+                ad.beautyAd.beautyTitle :
+                ad.equipmentAd ?
+                ad.equipmentAd.equipmentTitle :
+                ad.householdAd ?
+                ad.householdAd.householdTitle : 
+                ad.hireAd ? 
+                ad.hireAd.hireTitle :
+                ad.constructionAd ? 
+                ad.constructionAd.constructionTitle :
+                ad.kidsAd ?
+                ad.kidsAd.title : 
+                ad.laptopAd ?
+                ad.laptopAd.laptopTitle : 
+                ad.fashionAd ?
+                ad.fashionAd.fashionTitle :
+                ad.serviceAd ?
+                ad.serviceAd.serviceTitle :
+                ad.vehicleAd ? 
+                  `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model}` : 
+                  ad.propertyAd?.propertyName || 'Product';
+                  
+               const productImage = images[0];
+
+               const sellerId = seller.userId || ad.business?.userId;
+
+               if (!sellerId) {
+                showErrorToast('Seller ID not available');
+                console.log('Missing sellerId - seller:', seller, 'business:', ad.business);
+                return;
+               }
+
+               console.log('Opening message with sellerId:', sellerId);
+
+               // Navigate to message screen with product context 
+               router.push({
+                pathname: '/protected/message',
+                params: {
+                  sellerId: sellerId,
+                  productId: adId,
+                  productTitle: productName,
+                  productImage: productImage || '',
+                  previewMessage: `Hi I'm interested in your ${productName}`
+                }
+               });
+             } catch (error) {
+              console.error('Error opening message:', error);
+              showErrorToast('Unable to open messages');
+             }
+           }}
+          >
             <Feather name="mail" size={18} color={colors.darkGray} />
             <Text style={styles.messageButtonText}>Message Seller</Text>
           </TouchableOpacity>

@@ -9,7 +9,6 @@ import {
  TouchableOpacity,
  RefreshControl,
  Modal,
- Switch,
  ScrollView
  } from 'react-native';
  import { SafeAreaView } from 'react-native-safe-area-context';
@@ -890,6 +889,16 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
               </View>
             </View>
           </View>
+
+          {/* Rejected Ads */}
+          {ad.status === 'rejected' && ad.rejectionReason && (
+            <View style={styles.rejectionReasonContainer}>
+              <Text style={styles.rejectionReasonLabel}>Reason:</Text>
+              <Text style={styles.rejectionReasonText} numberOfLines={2}>
+                {ad.rejectionReason}
+              </Text>
+            </View>
+          )}
        </View>
      </View>
     );
@@ -1165,7 +1174,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                      style={[styles.tab, activeTab === 'beauty' && styles.activeTab]}
                      onPress={() => setActiveTab('beauty')}
                     >
-                     <Text>
+                     <Text style={[styles.tabText, activeTab === 'beauty' && styles.activeTabText]}>
                       Beauty ({beautyAds.length})
                      </Text>
                     </TouchableOpacity>
@@ -1959,6 +1968,28 @@ businessName: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
+  },
+  rejectionReasonContainer: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#FEE2E2',
+    borderRadius: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: '#C80D0D'
+  },
+  rejectionReasonLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#CB0D0D',
+    fontFamily: 'WorkSans_600SemiBold',
+    marginBottom: 4,
+  },
+  rejectionReasonText: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#7F1D1D',
+    fontFamily: 'WorkSans_400Regular',
+    lineHeight: 16,
   },
   soldText: {
     fontSize: 12,

@@ -78,8 +78,13 @@ export default function Analytics() {
     
     sortedData.forEach((item) => {
       const date = new Date(item._id);
-      const label = `${date.getMonth() + 1}/${date.getDate()}`;
-      
+      // date formatting based on timeRange 
+      const label = timeRange === '7'
+        ? date.toLocaleDateString('en-US', { weekday: 'short' })
+        : timeRange === '90'
+        ? date.toLocaleDateString('en-US', { month: 'short' })
+        : `${date.getMonth() + 1}/${date.getDate()}`;
+
       chartData.push(
         {
           value: item.impressions || 0,
@@ -211,23 +216,32 @@ export default function Analytics() {
         <View style={styles.chartContainer}>
          <Text style={styles.sectionTitle}>Performance Trends</Text>
          <View style={styles.chartWrapper}>
-           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+           <ScrollView 
+             horizontal 
+             showsHorizontalScrollIndicator={false}
+             contentContainerStyle={{ paddingRight: 20 }}
+             >
           <BarChart
             data={formatChartData()}
-            barWidth={22}
-            spacing={24}
+            barWidth={18}
+            spacing={20}
+            initialSpacing={10}
             xAxisThickness={0}
             yAxisThickness={0}
-            yAxisTextStyle={{ color: '#828282', fontSize: 12 }}
+            yAxisTextStyle={{ color: '#828282', fontSize: 11 }}
             noOfSections={4}
-            maxValue={Math.max(...(data?.viewsByDay || []).flatMap(item => [
-              item.impressions || 0,
-              item.productViews || 0,
-              item.profileViews || 0
-            ])) + 10}
+           maxValue={Math.max(
+             ...(data?.viewsByDay || []).flatMap(item => [
+               item.impressions || 0,
+               item.productViews || 0,
+               item.profileViews || 0
+             ]),
+             10
+           )}
             isAnimated
             animationDuration={800}
-            height={220}
+            height={200}
+            width={Math.max(formatChartData().length * 25, SCREEN_WIDTH - 40)} // Dynamic Width 
             showVerticalLines={false}
             hideRules={false}
             rulesType='solid'
@@ -259,10 +273,10 @@ export default function Analytics() {
 
          {/* Table Header */}
          <View style={styles.tableHeader}>
-            <Text style={[styles.tableHeaderText, { flex: 2 }]}>Ad</Text>
-            <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>Impressions</Text>
-            <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center'}]}>Ad Views</Text>
-            <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>Ending Date</Text>
+            <Text style={[styles.tableHeaderText, { flex: 2.5, textAlign: 'left' }]}>Ad</Text>
+            <Text style={[styles.tableHeaderText, { flex: 0.8, textAlign: 'center' }]}>Views</Text>
+            <Text style={[styles.tableHeaderText, { flex: 0.8, textAlign: 'center'}]}>Unique</Text>
+            <Text style={[styles.tableHeaderText, { flex: 0.8, textAlign: 'center' }]}>Date</Text>
          </View>
 
          {/* Table Row */}
@@ -448,18 +462,19 @@ metricsTitle: {
 },
   dropdown: {
     position: 'absolute',
-    top: 64,
-    left: 20,
-    right: 20,
+    top: 48,
+   // left: 20,
+    right: 0,
+    minWidth: 140,
     backgroundColor: colors.bg,
-    borderRadius: 4,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
     zIndex: 1001,
   },
   dropdownItem: {
@@ -566,34 +581,37 @@ metricsTitle: {
     paddingHorizontal: 12,
     borderRadius: 8,
     marginBottom: 8,
+    alignItems: 'center'
   },
   tableHeaderText: {
     fontSize: 12,
     fontWeight: '600',
     fontFamily: 'WorkSans_600SemiBold',
-    color: '#525252',
+    color: colors.darkGray,
   },
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    backgroundColor: colors.bg,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     borderRadius: 8,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: '#EDEDED',
+    minHeight: 64,
   },
   adInfo: {
-    flex: 2,
+    flex: 2.5,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+    paddingRight: 8,
   },
   adImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 24,
     backgroundColor: '#F5F5F5',
   },
   adImagePlaceholder: {
@@ -602,13 +620,15 @@ metricsTitle: {
   },
   adDetails: {
     flex: 1,
+    paddingRight: 4,
   },
   adTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
     fontFamily: 'WorkSans_500Medium',
     color: colors.darkGray,
     marginBottom: 2,
+    //numberOfLines: 1,
   },
   adType: {
     fontSize: 11,
@@ -617,9 +637,11 @@ metricsTitle: {
     textTransform: 'capitalize',
   },
   tableCell: {
-    fontSize: 13,
+    flex: 0.8,
+    fontSize: 12,
     fontFamily: 'WorkSans_500Medium',
     color: colors.darkGray,
+    textAlign: 'center'
   },
   emptyState: {
     alignItems: 'center',

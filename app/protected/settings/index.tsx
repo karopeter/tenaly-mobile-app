@@ -15,6 +15,8 @@ import { useAuth } from "../../context/AuthContext";
 import { showErrorToast } from '@/app/utils/toast';
 import { colors } from '@/app/constants/theme';
 
+const TIER_VERIFICATION = require("../../../assets/images/tier-img.png");
+
 const menuItems = [
   { title: "Profile", icon: <Ionicons name="person-outline" size={20} color="#525252" />, route: "/protected/profile" },
   { title: "Analytics", icon: <MaterialIcons name="analytics" size={20} color="#525252" />, route: "/protected/analytics" },
@@ -24,6 +26,7 @@ const menuItems = [
   // { title: "Help", icon: <Ionicons name="help-circle-outline" size={20} color="#525252" />, route: "/protected/help" },
   { title: "Frequently Asked Questions", icon: <MaterialIcons name="question-answer" size={20} color="#525252" />, route: "/protected/faq" },
   { title: "About", icon: <Entypo name="globe" size={20} color="#525252" />, route: "/protected/about" },
+  { title: "Tier Verification", icon: <Image source={TIER_VERIFICATION} style={{ width: 20, height: 20, }} />, route: "/protected/tier-verification"},
   { title: "Become Verified", icon: <MaterialIcons name="verified" size={20} color="#1031AA" />, route: "/protected/become-verified" },
 ];
 

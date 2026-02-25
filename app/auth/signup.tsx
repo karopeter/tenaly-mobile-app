@@ -29,7 +29,9 @@ import {
    import { useAuth } from '../context/AuthContext';
    import { colors } from '../constants/theme';
 
-   WebBrowser.maybeCompleteAuthSession();  // Required for web 
+
+
+   WebBrowser.maybeCompleteAuthSession();  
 
   const { width } = Dimensions.get('window');
 
@@ -52,17 +54,12 @@ const SignUp: React.FC = () => {
    });
 
    // Google Auth Setup 
-   const [request, response, promptAsync] = Google.useAuthRequest({
-       androidClientId: '1002797729859-3a0ldqk5j14ugthoga4esjinnh4u3g00.apps.googleusercontent.com',
-     iosClientId: '1002797729859-s2nujipbjpve2eg857leinnoe33aisqo.apps.googleusercontent.com',
-     webClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
-     scopes: ['profile', 'email'],
-     selectAccount: true,
-   },
-   {
-    redirectUri,
-   }
-  );
+    const [request, response, promptAsync] = Google.useAuthRequest({
+    // Use your EXISTING client IDs (these look correct)
+    androidClientId: '1002797729859-3a0ldqk5j14ugthoga4esjinnh4u3g00.apps.googleusercontent.com',
+    iosClientId: '1002797729859-s2nujipbjpve2eg857leinnoe33aisqo.apps.googleusercontent.com',
+    webClientId: '1002797729859-jg7b10igsava81902i8ltnjilee676v0.apps.googleusercontent.com',
+  });
 
    // Handle Google response with better error handling
    useEffect(() => {
@@ -81,26 +78,27 @@ const SignUp: React.FC = () => {
      }
    }, [response]);
 
-   const handleGoogleAuth = async (googleToken: string) => {
-     setLoading(true);
-     try {
-       if (!apiClient) {
+    const handleGoogleAuth = async (googleIdToken: string) => {
+    setLoading(true);
+    try {
+      if (!apiClient) {
         showErrorToast('API client is not initialized. Please try again later.');
         return;
-       }
+      }
 
-       const res = await apiClient.post('/api/auth/google', {
-        token: googleToken,
-       });
+      // ✅ Send the ID token directly to your Firebase endpoint
+      const res = await apiClient.post('/api/auth/firebase-google', {
+        token: googleIdToken,  // This is the Google ID token from Expo
+      });
 
       const { data }: { data: AuthResponse } = res;
-
-       await signIn(data);
-      showSuccessToast('Google sign-up successful! Please complete your profile.');
+      await signIn(data);
+      
+      showSuccessToast('Google sign-up successful!');
      
-      // Redirect based on role 
+      // Redirect based on profile completion
       if (data.isNewGoogleUser || !data.profileComplete) {
-       // router.push('/auth/complete-profile')
+        router.push('/auth/complete-profile');
       } else {
         if (data.user.role === 'seller') {
           router.replace('/protected/settings');
@@ -108,7 +106,7 @@ const SignUp: React.FC = () => {
           router.replace('/protected/home');
         }
       }
-     } catch(err: any) {
+    } catch(err: any) {
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -116,28 +114,29 @@ const SignUp: React.FC = () => {
 
       console.error('Google Signup error:', errorMessage);
       showErrorToast(errorMessage);
-     } finally {
+    } finally {
       setLoading(false);
-     }
-   }
+    }
+  };
 
-   // Google Sign In Handler
-   const handleGoogleSignIn = async () => {
-     try {
-       if (!request) {
-         showErrorToast('Google authentication is not ready. Please try again.');
-         return;
-       }
-       
-       setLoading(true);
-       await promptAsync();
-       // The useEffect will handle the response
-     } catch (error) {
-       console.error('Error initiating Google sign in:', error);
-       showErrorToast('Failed to start Google authentication.');
-       setLoading(false);
-     }
-   };
+  const handleGoogleSignIn = async () => {
+    try {
+      if (!request) {
+        showErrorToast('Google authentication is not ready. Please try again.');
+        return;
+      }
+      
+      setLoading(true);
+      await promptAsync();
+      // The useEffect will handle the response
+    } catch (error) {
+      console.error('Error initiating Google sign in:', error);
+      showErrorToast('Failed to start Google authentication.');
+      setLoading(false);
+    }
+  };
+
+
 
  const handleSignUp = async (values: any) => {
   if (!apiClient) {

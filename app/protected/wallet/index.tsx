@@ -22,25 +22,8 @@ import { colors } from '@/app/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Linking from 'expo-linking';
 import * as Print from 'expo-print';
+import { Transaction, WalletData } from '@/app/types/wallet.types';
 import * as Sharing from 'expo-sharing';
-
-
-
-interface Transaction {
-  _id: string;
-  amount: number;
-  transactionType: 'credit' | 'debit';
-  status: 'pending' | 'success' | 'failed';
-  reference: string;
-  description: string;
-  paymentDate: string;
-  createdAt: Date;
-}
-
-interface WalletData {
-  walletBalance: number;
-  walletTransactions: Transaction[];
-}
 
 
 export default function WalletScreen() {
@@ -71,9 +54,13 @@ export default function WalletScreen() {
       setLoading(true);
       const response = await apiClient.get('/api/profile');
       if (response?.data) {
+        // Sort transactions by date (most recent first)
+        const sortedTransactions = (response.data.walletTransactions || []).sort((a, b) => 
+          new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
+        );
         setWalletData({
           walletBalance: response.data.walletBalance || 0,
-          walletTransactions: response.data.walletTransactions || [],
+          walletTransactions: sortedTransactions, // sorted array 
         });
       }
     } catch (error) {
@@ -136,13 +123,13 @@ export default function WalletScreen() {
             showErrorToast("API client is not initialized");
             return;
           }
-          console.log(`Polling attempt ${attempts}/${maxAttempts} for reference:`, reference);
+         // console.log(`Polling attempt ${attempts}/${maxAttempts} for reference:`, reference);
           
           const verifyResponse = await apiClient.get(
             `/api/wallet/top/verify/${reference}`
           );
           
-          console.log("Poll response:", verifyResponse.data);
+          //console.log("Poll response:", verifyResponse.data);
           
           if (verifyResponse?.data?.status === 200 || verifyResponse?.status === 200) {
             if (pollIntervalRef.current) {
@@ -150,7 +137,6 @@ export default function WalletScreen() {
               pollIntervalRef.current = null;
             }
             
-            console.log("Payment verified successfully!");
             showSuccessToast("Wallet topped up successfully!");
             setTopUpAmount('');
             setPaymentReference('');
@@ -159,8 +145,7 @@ export default function WalletScreen() {
               fetchWalletData();
             }, 500);
             
-          } else if (verifyResponse?.data?.message?.toLowerCase().includes('not found') || 
-                     verifyResponse?.data?.message?.toLowerCase().includes('failed')) {
+          } else if (verifyResponse?.data?.message?.toLowerCase().includes('not found') ||  verifyResponse?.data?.message?.toLowerCase().includes('failed')) {
   
             if (pollIntervalRef.current) {
               clearInterval(pollIntervalRef.current);

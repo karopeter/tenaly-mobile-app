@@ -542,46 +542,60 @@ const premiumAds = ads.filter(item => {
 
         {/* Role Switch Toggle */ }
         <View
-          className='flex-row items-start justify-start mt-5'
-          style={{
-           height: 32,
-           paddingHorizontal: 16,
-           gap: 12,
-          }}
-        >
-          <Text style={[
-            styles.roleToggleText,
-            userRole === 'buyer' && styles.roleToggleTextActive
-          ]}>
-            I am buying
-          </Text>
+  className='flex-row items-center justify-start mt-5'
+  style={{
+    height: 32,
+    paddingHorizontal: 16,
+    gap: 12,
+  }}
+>
+  <Text style={[
+    styles.roleToggleText,
+    userRole === 'buyer' && styles.roleToggleTextActive
+  ]}>
+    I am buying
+  </Text>
 
-          <View style={styles.switchContainer}>
-            <LinearGradient
-              colors={['#00A8DF', '#1031AA']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.switchGradient}
-            >
-            <Switch 
-              value={userRole === 'seller'}
-              onValueChange={(value) => handleRoleSwitch(value ? 'seller' : 'buyer')}
-              disabled={switchingRole}
-              trackColor={{ false: 'transparent', true: 'transparent' }}
-              thumbColor={colors.bg}
-              ios_backgroundColor="transparent"
-              style={styles.switch}
-            />
-            </LinearGradient>
-          </View>
+  <View style={styles.switchContainer}>
+    {userRole === 'seller' ? (
+      <LinearGradient
+        colors={['#00A8DF', '#1031AA']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.switchGradient}
+      >
+        <Switch
+          value={true}
+          onValueChange={(value) => handleRoleSwitch(value ? 'seller' : 'buyer')}
+          disabled={switchingRole}
+          trackColor={{ false: 'transparent', true: 'transparent' }}
+          thumbColor={colors.bg}
+          ios_backgroundColor="transparent"
+          style={styles.switch}
+        />
+      </LinearGradient>
+    ) : (
+      <View style={styles.switchGradientPlain}>
+        <Switch
+          value={false}
+          onValueChange={(value) => handleRoleSwitch(value ? 'seller' : 'buyer')}
+          disabled={switchingRole}
+          trackColor={{ false: 'transparent', true: 'transparent' }}
+          thumbColor={'#fff'}
+          ios_backgroundColor="transparent"
+          style={styles.switch}
+        />
+      </View>
+    )}
+  </View>
 
-          <Text style={[
-            styles.roleToggleText,
-            userRole === 'seller' && styles.roleToggleTextActive 
-          ]}>
-            I am selling 
-          </Text>
-         </View>
+  <Text style={[
+    styles.roleToggleText,
+    userRole === 'seller' && styles.roleToggleTextActive
+  ]}>
+    I am selling
+  </Text>
+</View>
         </View>
 
           {/* Search */}
@@ -793,18 +807,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   switchContainer: {
-    borderRadius: 16,
-    overflow: 'hidden'
-  },
-  switchGradient: {
-    borderRadius: 16,
-    padding: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  switch: {
-   transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }]
-  },
+  borderRadius: 16,
+  overflow: 'hidden',
+  alignSelf: 'center',
+},
+switchGradient: {
+  borderRadius: 16,
+  padding: 2,
+  justifyContent: 'center',
+  alignItems: 'center',
+  alignSelf: 'center',
+},
+switchGradientPlain: {
+  borderRadius: 16,
+  padding: 2,
+  justifyContent: 'center',
+  alignItems: 'center',
+  alignSelf: 'center',
+  backgroundColor: '#fff',
+},
+switch: {
+  transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }]
+},
   roleToggleText: {
     fontSize: 14,
     fontWeight: '500',

@@ -53,6 +53,7 @@ export interface TierStatusResponse {
   tier2: TierVerification | null;
   tier3: TierVerification | null;
   currentLevel: number;
+  tier4Unlocked: boolean;
 }
 
 export interface SubmitTier1Data {

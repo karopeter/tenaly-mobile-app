@@ -48,6 +48,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isVerified: userData.isVerified || false,
       hasSubmittedVerification: userData.hasSubmittedVerification || false,
       verificationStatus: userData.verificationStatus || { personal: null, business: null },
+      tierLevel: userData.tierLevel || 0,
+      tierStatus: userData.tierStatus || {},
+      tier4Unlocked: userData.tierStatus?.tier4Unlocked || false, 
     };
 
     setUser(simplifiedUser);
@@ -91,15 +94,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (data: AuthResponse) => {
-    await AsyncStorage.setItem('auth_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-    setIsVerified(data.user.isVerified || false);
-    setHasSubmittedVerification(data.user.hasSubmittedVerification || false);
-
-    // CHeck if profile needs completion
-    setNeedsProfileCompletion(!data.user.role);
+     await AsyncStorage.setItem("auth_token", data.token);
+     setToken(data.token);
+     setUser(data.user);
+     setIsVerified(data.user.isVerified || false);
+     setHasSubmittedVerification(data.user.hasSubmittedVerification || false);
+     setNeedsProfileCompletion(!data.user.role);
   };
+
+  // const signIn = async (data: AuthResponse) => {
+  //   await AsyncStorage.setItem('auth_token', data.token);
+  //   setToken(data.token);
+  //   setUser(data.user);
+  //   setIsVerified(data.user.isVerified || false);
+  //   setHasSubmittedVerification(data.user.hasSubmittedVerification || false);
+
+
+  //   setNeedsProfileCompletion(!data.user.role);
+  // };
 
   const signOut = async () => {
      await AsyncStorage.removeItem('auth_token');

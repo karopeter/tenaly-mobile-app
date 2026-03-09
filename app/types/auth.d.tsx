@@ -33,4 +33,11 @@ export interface AuthUser {
    personal: 'verified' | 'pending' | 'rejected' | null;
    business: 'verified' | 'pending' | 'rejected' | null;
  };
+ tierLevel?: number;
+ tierStatus?: {
+  tier1: boolean;
+  tier2: boolean;
+  tier3: boolean;
+  tier4: boolean;
+ }
 }

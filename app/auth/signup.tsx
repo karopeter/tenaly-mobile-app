@@ -20,6 +20,7 @@ import {
   import DividerWithText from '../components/DividerLine/DividerWithText';
    import { signUpSchema } from '../utils/validation';
    import apiClient from '../utils/apiClient';
+   import BusinessOnboardingModal from '../reusables/BusinessOnboardingModal';
    import { Dropdown } from '../components/Dropdown/dropdown';
    import AsyncStorage from '@react-native-async-storage/async-storage';
    import { AuthResponse } from '../types/auth.d';
@@ -41,6 +42,7 @@ const SignUp: React.FC = () => {
      const [showPassword, setShowPassword] = useState<boolean>(false);
      const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
      const [loading, setLoading] = useState<boolean>(false);
+     const [showBusinessModal, setShowBusinessModal] = useState<boolean>(false);
 
    // Dropdown options 
    const roleOptions = [
@@ -101,7 +103,8 @@ const SignUp: React.FC = () => {
         router.push('/auth/complete-profile');
       } else {
         if (data.user.role === 'seller') {
-          router.replace('/protected/settings');
+          setShowBusinessModal(true);
+         // router.replace('/protected/settings');
         } else {
           router.replace('/protected/home');
         }
@@ -157,11 +160,13 @@ const SignUp: React.FC = () => {
     const { data }: { data: AuthResponse } = response;
 
     await AsyncStorage.setItem('auth_token', data.token);
+    await signIn(data);
     showSuccessToast("Signup successful! 🎉 Welcome to Tenaly!");
     
     // Redirect based on role 
     if (data.user.role === 'seller') {
-      router.replace('/protected/settings');
+      setShowBusinessModal(true);
+      //router.replace('/protected/settings');
     } else {
       router.replace('/protected/home');
     }
@@ -267,10 +272,11 @@ const SignUp: React.FC = () => {
 
             <Input 
               label="Phone Number"
-              placeholder="+234 | Enter your phone number"
+              placeholder="Enter your phone number"
               value={values.phoneNumber}
               onChangeText={handleChange('phoneNumber')}
               onBlur={() => handleBlur('phoneNumber')}
+              keyboardType="phone-pad"
               error={errors.phoneNumber}
               touched={touched.phoneNumber}
             />
@@ -395,6 +401,18 @@ const SignUp: React.FC = () => {
                </View>
             </View>
         </ScrollView>
+
+        <BusinessOnboardingModal
+           visible={showBusinessModal}
+           onSkip={() => {
+            setShowBusinessModal(false);
+            router.replace('/protected/settings');
+           }}
+           onContinue={() => {
+             setShowBusinessModal(false);
+             router.replace('/protected/profile/AddBusiness');
+           }}
+        />
       </KeyboardAvoidingView>
     );
 }

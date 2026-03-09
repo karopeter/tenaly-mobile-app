@@ -263,6 +263,10 @@ export default function Bookmarked() {
           <View style={styles.locationRow}>
              <Image 
                 source={require('../../../assets/images/location.png')}
+                style={{
+                  width: 16,
+                  height: 16,
+                }}
              />
             <Text style={styles.locationText} numberOfLines={1}>
               {item.carAd.location}

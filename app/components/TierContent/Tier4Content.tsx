@@ -5,10 +5,11 @@ import { colors } from '@/app/constants/theme';
 
 interface Tier4ContentProps {
   currentLevel: number;
+  tier4Unlocked: boolean;
 }
 
-const Tier4Content: React.FC<Tier4ContentProps> = ({ currentLevel }) => {
-  const isUnlocked = currentLevel >= 3;
+const Tier4Content: React.FC<Tier4ContentProps> = ({ currentLevel, tier4Unlocked }) => {
+  const isUnlocked = tier4Unlocked;
 
   return (
     <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>

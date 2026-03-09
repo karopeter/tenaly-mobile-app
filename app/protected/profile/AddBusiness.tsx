@@ -363,6 +363,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     elevation: 1,
+    backgroundColor: colors.bgTheme
   },
   addressHeader: {
     flexDirection: 'row',

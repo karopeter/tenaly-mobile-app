@@ -1,4 +1,4 @@
-import React  from "react";
+import React, { useEffect, useState }  from "react";
 import {  
  View,
  Text,
@@ -24,12 +24,23 @@ import {
 
  const TierVerification: React.FC = () => {
     const router = useRouter();
+    const [showTier4Modal, setShowTier4Modal] = useState(false);
     const { selectedTier } = useTierStore();
 
     const { data: tierStatus, isLoading: isLoadingTier } = useTierStatus();
     const { data: businesses = [], isLoading: isLoadingBusinesses } = useBusinesses();
 
     const loading = isLoadingTier || isLoadingBusinesses;
+
+    const tier4Unlocked = tierStatus?.tier4Unlocked || false;
+
+    useEffect(() => {
+      if (tierStatus?.tier4Unlocked) {
+        setShowTier4Modal(true);
+      }
+    }, [tierStatus?.tier4Unlocked]);
+
+    // Add Modal Jsx (modal with Tier 4 Badge,  crown, "Congratulations" text, Download + Share buttons coming soon)
 
       // Loading state
       if (loading) {
@@ -65,7 +76,7 @@ import {
                  />
               );
             case 4:
-             return <Tier4Content currentLevel={currentLevel} />;
+             return <Tier4Content currentLevel={currentLevel} tier4Unlocked={tier4Unlocked} />;
             default: 
              return null;
         }

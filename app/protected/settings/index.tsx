@@ -27,7 +27,7 @@ const menuItems = [
   { title: "Frequently Asked Questions", icon: <MaterialIcons name="question-answer" size={20} color="#525252" />, route: "/protected/faq" },
   { title: "About", icon: <Entypo name="globe" size={20} color="#525252" />, route: "/protected/about" },
   { title: "Tier Verification", icon: <Image source={TIER_VERIFICATION} style={{ width: 20, height: 20, }} />, route: "/protected/tier-verification"},
-  { title: "Become Verified", icon: <MaterialIcons name="verified" size={20} color="#1031AA" />, route: "/protected/become-verified" },
+ // { title: "Become Verified", icon: <MaterialIcons name="verified" size={20} color="#1031AA" />, route: "/protected/become-verified" },
 ];
 
 const PLACEHOLDER_IMAGE = require('../../../assets/images/profile-circle.png');
@@ -85,10 +85,9 @@ export default function SettingsScreen() {
   const isPremium = planType !== 'free' && planType !== null;
 
   const filteredMenuItems = menuItems.filter(item => {
-    // Hide "Analytics" for buyers 
-    if (userRole === 'buyer' && item.title === 'Analytics') {
-      return false;
-    }
+    if (userRole === 'buyer' && item.title === 'Analytics') return false;
+    if (userRole === 'buyer' && item.title === 'Premium Service') return false;
+    if (userRole === 'seller' && item.title === 'Bookmarked') return false;
     return true;
   });
 

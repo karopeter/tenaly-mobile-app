@@ -6,7 +6,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Dimensions,
   StatusBar,
   ActivityIndicator,
   Linking,
@@ -16,7 +15,7 @@ import {
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 //import RNShare from 'react-native-share';
-import { AntDesign, Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Feather, FontAwesome } from '@expo/vector-icons';
 import { colors } from '@/app/constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,8 +25,6 @@ import { CombinedAd } from '@/app/types/marketplace';
 import { showErrorToast, showSuccessToast } from '@/app/utils/toast';
 import ReportModal from '@/app/reusables/ReportModal';
 import { SellerProfile } from '../../types/seller-profile.types';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 
 
@@ -159,12 +156,14 @@ const fetchSellerData = async (sellerId: string) => {
 
   useEffect(() => {
     fetchAdData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adId]);
 
   useEffect(() => {
     if (ad) {
        checkBookmarkStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ad, adId]);
 
   // Get appropriate images based on ad type
@@ -295,82 +294,6 @@ const handleShare = async () => {
   }
 };
 
-// const handleShare = async () => {
-//   if (!ad) return;
-
-//   try {
-//    const productName = ad.petAd ? 
-//       ad.petAd.petType : 
-//       ad.agricultureAd ? 
-//       ad.agricultureAd.title : 
-//       ad.gadgetAd ? 
-//       ad.gadgetAd.gadgetTitle : 
-//       ad.hireAd ? 
-//       ad.hireAd.jobType :
-//       ad.equipmentAd ? 
-//       ad.equipmentAd.equipmentTitle :
-//       ad.fashionAd ?
-//       `${ad.fashionAd.fashionTitle} ${ad.fashionAd.fashionType} ${ad.fashionAd.fashionColor}` :
-//       ad.jobAd ?
-//       `${ad.jobAd.jobTitle} ${ad.jobAd.jobType} ${ad.jobAd.skils}` :
-//       ad.constructionAd ?
-//        ad.constructionAd.constructionTitle :
-//       ad.householdAd ?
-//       `${ad.householdAd.householdTitle} ${ad.householdAd.householdType} ${ad.householdAd.householdBrand}` :
-//       ad.laptopAd ? 
-//       `${ad.laptopAd.laptopTitle} ${ad.laptopAd.laptopType} ${ad.laptopAd.laptopBrand}` :
-//       ad.beautyAd ? 
-//       `${ad.beautyAd.beautyTitle} ${ad.beautyAd.beautyType} ${ad.beautyAd.beautyBrand}` :
-//       ad.serviceAd ? 
-//        `${ad.serviceAd.serviceTitle} ${ad.serviceAd.serviceDuration} ${ad.serviceAd.serviceAvailability}` :
-//       ad.kidsAd ? 
-//        `${ad.kidsAd.title} ${ad.kidsAd.condition} ${ad.kidsAd.ageGroup}` :
-//       ad.vehicleAd ? 
-//       `${ad.vehicleAd.vehicleType} ${ad.vehicleAd.model} ${ad.vehicleAd.year}` : 
-//       ad.propertyAd?.propertyName || 'Product';
-
-//       const price = formatPrice(
-//         Number(
-//            ad.petAd?.amount || 
-//         ad.agricultureAd?.amount || 
-//         ad.gadgetAd?.amount || 
-//         ad.hireAd?.salaryRange || 
-//         ad.equipmentAd?.amount || 
-//         ad.fashionAd?.amount || 
-//         ad.jobAd?.salaryRange || 
-//         ad.constructionAd?.amount || 
-//         ad.householdAd?.amount || 
-//         ad.laptopAd?.amount || 
-//         ad.beautyAd?.amount || 
-//         ad.serviceAd?.amount || 
-//         ad.kidsAd?.amount ||  
-//         ad.vehicleAd?.amount || 
-//         ad?.propertyAd?.amount ||
-//         0 
-//         )
-//       );
-
-//     const productImage = [0];
-//     const deepLink = `tenaly://product/${adId}`;
-//     const webLink = `https://tenaly.vercel.app/product/${adId}`;
-//     const appStoreLink = 'https://apps.google.com/app/tenaly';
-//     const playStoreLink = 'https://play.google.com/store/app/details?id=com.tenaly';
-
-
-
-//       //const message = `Check out this ${productName} on Tenaly for  ${price}!\n\nLocation: ${ad.propertyAd?.propertyAddress || ad.carAd.location}`;
-//      const message = `🔥 ${productName}\n💰 ${price}\n📍 ${ad.propertyAd?.propertyAddress || ad.carAd.location}\n\n👉 View on Tenaly:\n${webLink}\n\n📱 Download Tenaly:\niOS: ${appStoreLink}\nAndroid: ${playStoreLink}`;
-
-//       await Share.share({
-//         message: message,
-//         url: productImage,
-//         title: `Check out ${productName} on Tenaly`
-//       });
-//   } catch (error) {
-//       console.error("Error sharing:", error);
-//       showErrorToast('Failed to share product');
-//   }
-// }
 
   // Get details based on ad type
   const getAdDetails = () => {
@@ -981,15 +904,15 @@ if (ad.propertyAd) {
     return (
       <View key={address._id}>
         <View style={styles.addressItem}>
-          <AntDesign 
-            name="environment" 
-            size={24} 
-            color="#525252"
-            style={{ 
+           <Image 
+            source={require('../../../assets/images/location.png')} 
+            style={{
+              width: 11.67,
+              height: 16.67,
               marginRight: 8, 
               marginTop: 7 
             }}
-          /> 
+            />
           <View style={styles.addressTextContainer}>
             <Text style={styles.addressTitle}>
               {ad.business.location} 
@@ -1026,7 +949,13 @@ if (ad.propertyAd) {
          <View style={styles.deliveryWrapper}>
           <View style={styles.deliveryBadge}>
             <View style={styles.iconCircle}>
-              <MaterialIcons name="local-shipping" size={16} color="#1031AA" />
+              <Image 
+                source={require('../../../assets/images/truck-fast.png')}
+                style={{
+                  width: 16,
+                  height: 16
+                }}
+              />
             </View>
             <View style={{ flex: 1 }}>
             <Text style={styles.deliveryBadgeTitle}>
@@ -1207,7 +1136,13 @@ if (ad.propertyAd) {
               </Text>
             </View>
             <View style={styles.viewsContainer}>
-              <Feather name="eye" size={16} color="#9CA3AF" />
+              <Image 
+               source={require('../../../assets/images/view-icon.png')} 
+               style={{
+                width: 16,
+                height: 16
+               }}
+               />
               <Text style={styles.viewsText}>
                 {ad.petAd?.viewCount || 
                   ad.agricultureAd?.viewCount || 
@@ -1682,18 +1617,14 @@ deliveryBadge: {
   flexDirection: 'row',
   alignItems: 'center',
   borderWidth: 1,
-  borderColor: '#E6E9FF',     
-  backgroundColor: '#F6F8FF', 
+  borderColor: '#DFDFF9',     
+  backgroundColor: '#F7F7FF', 
   paddingVertical: 10,
   paddingHorizontal: 12,
   borderRadius: 10,
 },
 
 iconCircle: {
-  width: 34,
-  height: 34,
-  borderRadius: 10,
-  backgroundColor: '#EEF5FF', 
   alignItems: 'center',
   justifyContent: 'center',
   marginRight: 10,

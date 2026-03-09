@@ -20,7 +20,7 @@ const COLORS = { primary: "#FFFFFF", white: "#fff", gray: "#CDCDD7", blue: "#555
 const slides = [
   {
     id: '1',
-    image: require('../assets/images/board1.png'),
+    image: require('../assets/images/onboard.png'),
     title: 'Buy and Sell with Confidence',
     subtitle: "Whether you're listing products or making purchases, Tenaly gives you a seamless and secure marketplace experience-built for ease, speed and trust",
   },
@@ -208,11 +208,11 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
    title: {
     color: colors.darkGray,
-    fontSize: 22,
+    fontSize: 24,
     marginTop: 2,
     fontWeight: 'bold',
     textAlign: 'center',
-    fontFamily: 'WorkSans_500Medium'
+    fontFamily: 'WorkSans_700Bold'
    },
    subTitle: {
     color: colors.lightGrey,

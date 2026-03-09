@@ -8,11 +8,14 @@ import {
  import { SafeAreaView } from 'react-native-safe-area-context';
  import { useRouter } from 'expo-router';
  import { Ionicons, AntDesign  } from '@expo/vector-icons';
+ import { useAuth } from '@/app/context/AuthContext';
  import { colors } from '@/app/constants/theme';
 
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const isBuyer = user?.role === 'buyer';
 
     return (
      <SafeAreaView style={styles.safeArea}>
@@ -38,13 +41,15 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={20} color="#888" />
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {!isBuyer && (
+           <TouchableOpacity
            style={styles.item}
            onPress={() => router.push('/protected/profile/business-profile')}
          >
            <Text style={styles.itemText}>Business Profile</Text>
            <Ionicons name="chevron-forward" size={20} color="#888" />
         </TouchableOpacity>
+        )}
       </View>
      </ScrollView>
      </SafeAreaView>

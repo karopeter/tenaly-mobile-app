@@ -24,7 +24,7 @@ import { Ad } from '@/app/types/ad.types';
 
 
 const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [vehicleAds, setVehicleAds] = useState<Ad[]>([]);
   const [propertyAds, setPropertyAds] = useState<Ad[]>([]);
   const [agricultureAds, setAgricultureAds] = useState<Ad[]>([]);
@@ -43,7 +43,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [userRole, setUserRole] = useState<'buyer' | 'seller'>(user?.role || 'buyer');
+  const [userRole, setUserRole] = useState<'buyer' | 'seller'>((user?.role as 'buyer'));
   const [isSwitchingRole, setIsSwitchingRole] = useState(false);
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [selectedBusinessIndex, setSelectedBusinessIndex] = useState(0);
@@ -53,7 +53,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
   
   useEffect(() => {
     if (user?.role) {
-        setUserRole(user.role);
+     setUserRole(user.role as 'buyer' | 'seller');
     }
   }, [user?.role]);
 
@@ -65,6 +65,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     if (userRole === 'seller' && businessId) {
         fetchAllAds();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userRole, businessId]);
 
   const fetchBusinessCategory = async () => {
@@ -174,6 +175,26 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
       setJobAds(jobResponse.data.data || []);
       setHireAds(hireResponse.data.data || []);
       setBeautyAds(beautyReasponse.data.data || []);
+
+const tabsWithData: Array<typeof activeTab> = [];
+if (vehicleResponse.data.data?.length) tabsWithData.push('vehicle');
+if (propertyResponse.data.data?.length) tabsWithData.push('property');
+if (agricultureResponse.data.data?.length) tabsWithData.push('agriculture');
+if (equipmentResponse.data.data?.length) tabsWithData.push('equipment');
+if (gadgetResponse.data.data?.length) tabsWithData.push('gadget');
+if (laptopResponse.data.data?.length) tabsWithData.push('laptop');
+if (fashionResponse.data.data?.length) tabsWithData.push('fashion');
+if (householdResponse.data.data?.length) tabsWithData.push('household');
+if (constructionResponse.data.data?.length) tabsWithData.push('construction');
+if (petResponse.data.data?.length) tabsWithData.push('pet');
+if (kidResponse.data.data?.length) tabsWithData.push('kid');
+if (jobResponse.data.data?.length) tabsWithData.push('job');
+if (hireResponse.data.data?.length) tabsWithData.push('hire');
+if (beautyReasponse.data.data?.length) tabsWithData.push('beauty');
+
+if (tabsWithData.length > 0) {
+  setActiveTab(tabsWithData[0]);
+}
     } catch (error: any) {
       console.error("Error fetching ads:", error);
       showErrorToast("Failed to fetch ads");
@@ -186,45 +207,13 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     setRefreshing(true);
     await fetchAllAds();
     setRefreshing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessId]);
-
-  const handleRoleSwitch = async (value: boolean) => {
-    if (!apiClient) {
-        showErrorToast('API client not initialized');
-        return;
-    }
-
-    const newRole = value ? 'seller' : 'buyer';
-    setIsSwitchingRole(true);
-
-    try {
-     const response = await apiClient.patch('/api/profile/switch-role', {
-       role: newRole,
-     });
-
-     if (response.data.role) {
-        setUserRole(newRole);
-
-        if (newRole === 'seller' && businessId) {
-           await fetchAllAds();
-        }
-
-        // show success message 
-        showSuccessToast(`Switched to ${newRole} mode`);
-     }
-    } catch (error: any) {
-      console.error("Error switching role:", error);
-      showErrorToast("Failed to switch role");
-      setUserRole(userRole);
-    } finally {
-        setIsSwitchingRole(false);
-    }
-  };
 
   const handleBusinessSwitch = (index: number) => {
     setSelectedBusinessIndex(index);
     setBusinessId(businesses[index]._id);
-    // Fetch ads for the newly selected business 
+    setActiveTab('vehicle');
     fetchAllAds();
   };
 
@@ -433,12 +422,6 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     };
 
 
-  const handleEditAd = (ad: Ad) => {
-    setModalVisible(false);
-    // Navigate to edit screen 
-    console.log('Edit ad:', ad.adId);
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved': return '#238E15';
@@ -571,7 +554,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
     
     const adType = isVehicleAd ? 'vehicle' : 'property';
     const description = ad.description || '';
-    const location = item.carAd?.location || 'Location not specified';
+  //  const location = item.carAd?.location || 'Location not specified';
 
     return (
      <View style={styles.adCard}>
@@ -619,6 +602,10 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
             <View style={styles.locationContainer}>
                 <Image 
                   source={require('../../../assets/images/location.png')}
+                  style={{
+                    width: 11.67,
+                    height: 16.67,
+                  }}
                 />
                 <Text style={styles.locationText}>{item.carAd.location}</Text>
             </View>
@@ -954,7 +941,19 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Ads</Text>
-          <TouchableOpacity onPress={() => router.push('/protected/myads/post-ad')} style={styles.postButton}>
+          <TouchableOpacity
+            onPress={() => {
+              const tierStatus = user?.tierStatus;
+              const hasRequiredTiers = tierStatus?.tier1 && tierStatus.tier2 && tierStatus?.tier3;
+
+              if (!hasRequiredTiers) {
+                showSuccessToast('Please submit your Tier verification to post an ad');
+                router.push('/protected/tier-verification');
+              } else {
+                router.push('/protected/myads/post-ad');
+              }
+            }}
+            style={styles.postButton}>
             <View style={styles.postButtonInner}>
                 <Image source={require("../../../assets/images/add-circle3.png")} style={styles.postButtonIcon} />
                   <Text style={styles.postButtonText}>Post an Ad</Text>
@@ -971,6 +970,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
              <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
+              style={{ maxHeight: 60 }}
               contentContainerStyle={styles.businessContainer}>
             {businesses.map((business, index) => (
               <TouchableOpacity
@@ -1180,7 +1180,6 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                     </TouchableOpacity>
                   )}
                 </ScrollView>
-                
                 )}
 
               <FlatList
@@ -1258,11 +1257,13 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
               style={styles.modalOption}
               onPress={() => selectedAd && handleViewDetails(selectedAd)}
             >
-             <AntDesign
-              name="eye"
-              size={20}
-              color={colors.darkGray}
-             />
+            <Image 
+              source={require('../../../assets/images/view-icon.png')}
+               style={{ 
+                 width: 24,
+                 height: 24
+               }}
+              />
              <Text style={styles.modalOptionText}>View details</Text>
             </TouchableOpacity>
 
@@ -1278,7 +1279,13 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                 }
               }}
             >
-                <AntDesign name="picture" size={20} color={colors.darkGray} />
+                <Image 
+                  source={require('../../../assets/images/delete-icon.png')}
+                  style={{
+                    width: 24,
+                    height: 24,
+                  }}
+                />
                 <Text style={styles.modalOptionText}>Delete Images Only</Text>
             </TouchableOpacity>
 
@@ -1514,7 +1521,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                         }
                        }}
                       >
-                       <AntDesign name="form" size={20} color={colors.darkGray} />
+                       <AntDesign name="form" size={24} color={colors.darkGray} />
                        <Text style={styles.modalOptionText}>Complete Draft</Text>
                       </TouchableOpacity>
 
@@ -1536,7 +1543,13 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                          }
                        }}
                       >
-                       <AntDesign name="delete" size={20} color="#CB0D0D" />
+                       <Image 
+                        source={require('../../../assets/images/delete-icon.png')} 
+                         style={{
+                          width: 24,
+                          height: 24,
+                         }}
+                        />
                        <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
                       </TouchableOpacity>
                     </>
@@ -1572,7 +1585,13 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                          }
                        }}
                     >
-                   <AntDesign name="delete" size={20} color={colors.red} />
+                    <Image 
+                        source={require('../../../assets/images/delete-icon.png')} 
+                         style={{
+                          width: 24,
+                          height: 24,
+                         }}
+                        />
                    <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
                    </TouchableOpacity>
                     </>
@@ -1600,7 +1619,13 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                          }
                        }}
                     >
-                   <AntDesign name="delete" size={20} color={colors.red} />
+                    <Image 
+                        source={require('../../../assets/images/delete-icon.png')} 
+                         style={{
+                          width: 24,
+                          height: 24,
+                         }}
+                        />
                    <Text style={[styles.modalOptionText, styles.deleteText]}>Delete</Text>
                    </TouchableOpacity>
                   );
@@ -1622,7 +1647,7 @@ const MyAds: React.FC<MyAdsProps> = ({loading: initialLoading }) => {
                     showErrorToast('Ad ID not found');
                   }
                  }}>
-                 <AntDesign name="check-circle" size={20} color={colors.blue} />
+                 <AntDesign name="check-circle" size={20} color="#238E15" />
                   <Text style={styles.modalOptionText}>
                    {activeTab === 'job' ? 'Mark as Closed' : 'Mark as Sold'}
                  </Text>
@@ -1737,7 +1762,8 @@ const styles = StyleSheet.create({
   
 businessHeader: {
   alignItems: 'center',
-  marginVertical: 10,
+  marginTop: 10,
+  marginBottom: 4,
 },
 
 businessScrollWrapper: {
@@ -1786,10 +1812,10 @@ businessName: {
     fontFamily: 'WorkSans_500Medium',
   },
   tabContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    gap: 12,
+   flexDirection: 'row',
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  gap: 12, 
   },
   tab: {
     paddingVertical: 10,
@@ -1819,7 +1845,9 @@ businessName: {
     fontFamily: 'WorkSans_600SemiBold',
   },
   listContainer: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 16,
     flexGrow: 1,
   },
   adCard: {

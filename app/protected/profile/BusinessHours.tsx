@@ -711,6 +711,8 @@ const styles = StyleSheet.create({
   locationIcon: {
     marginRight: 8,
     marginTop: 4,
+    width: 16,
+    height: 16
   },
    addressText: {
      fontSize: 14,
